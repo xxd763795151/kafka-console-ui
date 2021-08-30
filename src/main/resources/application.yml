@@ -1,0 +1,11 @@
+server:
+  port: 7766
+
+kafka:
+  config:
+    bootstrap-server: 'localhost:9092'
+    request-timeout-ms: 60000
+    security-protocol: SASL_PLAINTEXT
+    sasl-mechanism: SCRAM-SHA-256
+    sasl-jaas-config: org.apache.kafka.common.security.scram.ScramLoginModule required username="admin" password="admin";
+
