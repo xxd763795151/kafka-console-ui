@@ -3,11 +3,11 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 // eslint-disable-next-line no-unused-vars
-import {Button} from "ant-design-vue";
-import 'ant-design-vue/dist/antd.css';
+import Antd from "ant-design-vue";
+import "ant-design-vue/dist/antd.css";
 
 Vue.config.productionTip = false;
-Vue.use(Button)
+Vue.use(Antd);
 
 new Vue({
   router,

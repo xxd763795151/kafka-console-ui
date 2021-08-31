@@ -1,12 +1,15 @@
 <template>
   <div id="app">
     <div id="nav">
-      <a-button>button</a-button>
-
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/" class="pad-l-r">主页</router-link>
+      |<router-link to="/acl" class="pad-l-r">Acl</router-link>
+      <!--      |<router-link-->
+      <!--        to="/topic"-->
+      <!--        class="pad-l-r"-->
+      <!--        >主题</router-link-->
+      <!--      >-->
     </div>
-    <router-view />
+    <router-view class="content" />
   </div>
 </template>
 
@@ -19,8 +22,17 @@
   color: #2c3e50;
 }
 
+#app {
+  width: 100%;
+  height: 100%;
+}
+
 #nav {
-  padding: 30px;
+  background-color: #9fe0e0;
+  font-size: large;
+  padding-top: 1%;
+  padding-bottom: 1%;
+  margin-bottom: 1%;
 }
 
 #nav a {
@@ -29,6 +41,18 @@
 }
 
 #nav a.router-link-exact-active {
-  color: #42b983;
+  color: #61c126;
+}
+
+.pad-l-r {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.content {
+  padding-left: 2%;
+  padding-right: 2%;
+  height: 90%;
+  width: 100%;
 }
 </style>
