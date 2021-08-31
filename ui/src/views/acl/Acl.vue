@@ -43,6 +43,7 @@ export default {
       innerData,
     };
   },
+  methods: {},
 };
 
 const columns = [
@@ -61,8 +62,12 @@ for (let i = 0; i < 30; ++i) {
   data.push({
     key: i,
     username: "amdin",
-    topicList: ["test_topic1", "test_topic2", "test_topic3"].join(', '),
-    groupList: ["test_topic1_consumer", "test_topic2_consumer", "test_topic3_consumer"].join(', '),
+    topicList: ["test_topic1", "test_topic2", "test_topic3"].join(", "),
+    groupList: [
+      "test_topic1_consumer",
+      "test_topic2_consumer",
+      "test_topic3_consumer",
+    ].join(", "),
   });
 }
 
