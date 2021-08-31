@@ -2,10 +2,12 @@ package com.xuxd.kafka.console.service.impl;
 
 import com.xuxd.kafka.console.beans.AclEntry;
 import com.xuxd.kafka.console.beans.CounterList;
+import com.xuxd.kafka.console.beans.CounterMap;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.service.AclService;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import kafka.console.KafkaAclConsole;
@@ -49,9 +51,17 @@ public class AclServiceImpl implements AclService {
     }
 
     @Override public ResponseData getAclList() {
-        List<AclBinding> aclBindingList = aclConsole.getAclList();
+        List<AclBinding> aclBindingList = aclConsole.getAclList(null);
 
         return ResponseData.create().data(new CounterList<>(aclBindingList.stream().map(x -> AclEntry.valueOf(x)).collect(Collectors.toList()))).success();
+    }
+
+    @Override public ResponseData getAclList(AclEntry entry) {
+        List<AclBinding> aclBindingList = entry.isNull() ? aclConsole.getAclList(null) : aclConsole.getAclList(entry);
+        List<AclEntry> entryList = aclBindingList.stream().map(x -> AclEntry.valueOf(x)).collect(Collectors.toList());
+        Map<String, List<AclEntry>> entryMap = entryList.stream().collect(Collectors.groupingBy(AclEntry::getPrincipal));
+
+        return ResponseData.create().data(new CounterMap<>(entryMap)).success();
     }
 
     @Override public ResponseData deleteAcl(AclEntry entry) {

@@ -20,6 +20,8 @@ public interface AclService {
 
     ResponseData getAclList();
 
+    ResponseData getAclList(AclEntry entry);
+
     ResponseData deleteAcl(AclEntry entry);
 
     ResponseData addAcl(AclEntry entry);

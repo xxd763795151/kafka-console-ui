@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.beans;
 
+import java.util.Objects;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.acl.AccessControlEntry;
@@ -49,6 +50,11 @@ public class AclEntry {
         return entry;
     }
 
+    public boolean isNull() {
+        return Objects.isNull(resourceType) && Objects.isNull(name) && Objects.isNull(patternType) && Objects.isNull(principal)
+            && Objects.isNull(host) && Objects.isNull(operation) && Objects.isNull(permissionType);
+    }
+
     public AclBinding toAclBinding() {
         ResourceType resourceType = StringUtils.isBlank(this.resourceType) ? ResourceType.UNKNOWN : ResourceType.valueOf(this.resourceType);
         String resourceName = StringUtils.isBlank(this.name) ? ResourcePattern.WILDCARD_RESOURCE : this.name;
@@ -62,12 +68,12 @@ public class AclEntry {
     }
 
     public AclBindingFilter toAclBindingFilter() {
-        ResourceType resourceType = StringUtils.isBlank(this.resourceType) ? ResourceType.UNKNOWN : ResourceType.valueOf(this.resourceType);
+        ResourceType resourceType = StringUtils.isBlank(this.resourceType) ? ResourceType.UNKNOWN : ResourceType.valueOf(this.resourceType.toUpperCase());
         String resourceName = StringUtils.isBlank(this.name) ? ResourcePattern.WILDCARD_RESOURCE : this.name;
         PatternType patternType = StringUtils.isBlank(this.patternType) ? PatternType.LITERAL : PatternType.valueOf(this.patternType);
         String principal = StringUtils.isNotBlank(this.principal) ? new KafkaPrincipal(KafkaPrincipal.USER_TYPE, this.principal).toString() : KafkaPrincipal.ANONYMOUS.toString();
         String host = StringUtils.isBlank(this.host) ? ResourcePattern.WILDCARD_RESOURCE : this.host;
-        AclOperation operation = StringUtils.isBlank(this.operation) ? AclOperation.UNKNOWN : AclOperation.valueOf(this.operation);
+        AclOperation operation = StringUtils.isBlank(this.operation) ? AclOperation.UNKNOWN : AclOperation.valueOf(this.operation.toUpperCase());
         AclPermissionType permissionType = StringUtils.isBlank(this.permissionType) ? AclPermissionType.ALLOW : AclPermissionType.valueOf(this.permissionType);
 
         AclBindingFilter filter = new AclBindingFilter(new ResourcePatternFilter(resourceType, resourceName, patternType),

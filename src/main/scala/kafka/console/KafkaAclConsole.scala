@@ -6,8 +6,10 @@ import java.util.{Collections, List}
 
 import com.xuxd.kafka.console.beans.AclEntry
 import com.xuxd.kafka.console.config.KafkaConfig
+import org.apache.commons.lang3.StringUtils
 import org.apache.kafka.common.acl._
 import org.apache.kafka.common.resource.{ResourcePattern, ResourcePatternFilter, ResourceType}
+import org.apache.kafka.common.security.auth.KafkaPrincipal
 
 import scala.jdk.CollectionConverters.SetHasAsJava
 
@@ -19,8 +21,36 @@ import scala.jdk.CollectionConverters.SetHasAsJava
  * */
 class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig) with Logging {
 
-    def getAclList(): List[AclBinding] = {
-        withAdminClient(adminClient => adminClient.describeAcls(AclBindingFilter.ANY).values().get()).asInstanceOf[List[AclBinding]]
+    def getAclList(entry: AclEntry): List[AclBinding] = {
+
+        if (entry == null) {
+            withAdminClient(adminClient => adminClient.describeAcls(AclBindingFilter.ANY).values().get()).asInstanceOf[List[AclBinding]]
+        } else {
+            entry.isNull match {
+                case true => withAdminClient(adminClient => adminClient.describeAcls(AclBindingFilter.ANY).values().get()).asInstanceOf[List[AclBinding]]
+                case false => {
+                    val f = entry.toAclBindingFilter
+                    var resourceType: ResourceType = ResourceType.ANY
+                    if (f.patternFilter().resourceType() != ResourceType.UNKNOWN) {
+                        resourceType = f.patternFilter().resourceType()
+                    }
+
+                    var name: String = null
+                    if (f.patternFilter().name() != ResourcePattern.WILDCARD_RESOURCE) {
+                        name = f.patternFilter().name()
+                    }
+
+                    var principal: String = null
+                    if ( StringUtils.isNotBlank(entry.getPrincipal) && !KafkaPrincipal.ANONYMOUS.toString.equalsIgnoreCase(f.entryFilter().principal())) {
+                        principal = f.entryFilter().principal();
+                    }
+                    val filter = new AclBindingFilter(new ResourcePatternFilter(resourceType, name, f.patternFilter().patternType()),
+                        new AccessControlEntryFilter(principal, f.entryFilter().host(), AclOperation.ANY, AclPermissionType.ANY))
+                    log.info(filter.toString)
+                    withAdminClient(adminClient => adminClient.describeAcls(filter).values().get()).asInstanceOf[List[AclBinding]]
+                }
+            }
+        }
     }
 
     def addAcl(acls: List[AclBinding]): Boolean = {

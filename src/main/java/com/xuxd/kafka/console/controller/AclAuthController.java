@@ -4,6 +4,7 @@ import com.xuxd.kafka.console.beans.AclEntry;
 import com.xuxd.kafka.console.beans.dto.ConsumerAuthDTO;
 import com.xuxd.kafka.console.beans.dto.DeleteAclDTO;
 import com.xuxd.kafka.console.beans.dto.ProducerAuthDTO;
+import com.xuxd.kafka.console.beans.dto.QueryAclDTO;
 import com.xuxd.kafka.console.service.AclService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,6 +30,11 @@ public class AclAuthController {
     @GetMapping
     public Object getAclList() {
         return aclService.getAclList();
+    }
+
+    @PostMapping("/list")
+    public Object getAclList(@RequestBody QueryAclDTO param) {
+        return aclService.getAclList(param.toEntry());
     }
 
     @PostMapping
