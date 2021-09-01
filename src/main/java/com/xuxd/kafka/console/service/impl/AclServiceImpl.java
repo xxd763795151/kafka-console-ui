@@ -6,6 +6,7 @@ import com.xuxd.kafka.console.beans.CounterMap;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.service.AclService;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import kafka.console.KafkaAclConsole;
 import kafka.console.KafkaConfigConsole;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.acl.AclBinding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,7 +37,7 @@ public class AclServiceImpl implements AclService {
 
     @Override public ResponseData<Set<String>> getUserList() {
         try {
-            return ResponseData.create(Set.class).data(configConsole.getUserList()).success();
+            return ResponseData.create(Set.class).data(configConsole.getUserList(null)).success();
         } catch (Exception e) {
             log.error("getUserList error.", e);
             return ResponseData.create().failed();
@@ -60,8 +62,21 @@ public class AclServiceImpl implements AclService {
         List<AclBinding> aclBindingList = entry.isNull() ? aclConsole.getAclList(null) : aclConsole.getAclList(entry);
         List<AclEntry> entryList = aclBindingList.stream().map(x -> AclEntry.valueOf(x)).collect(Collectors.toList());
         Map<String, List<AclEntry>> entryMap = entryList.stream().collect(Collectors.groupingBy(AclEntry::getPrincipal));
+        Map<String, Map<String, List<AclEntry>>> resultMap = new HashMap<>();
+        entryMap.forEach((k, v) -> {
+            Map<String, List<AclEntry>> map = v.stream().collect(Collectors.groupingBy(e -> e.getResourceType() + "#" + e.getName()));
+            resultMap.put(k, map);
+        });
+        if (entry.isNull() || StringUtils.isNotBlank(entry.getPrincipal())) {
+            Set<String> userList = configConsole.getUserList(StringUtils.isNotBlank(entry.getPrincipal()) ? Collections.singletonList(entry.getPrincipal()) : null);
+            userList.forEach(u -> {
+                if (!resultMap.containsKey(u)) {
+                    resultMap.put(u, Collections.emptyMap());
+                }
+            });
+        }
 
-        return ResponseData.create().data(new CounterMap<>(entryMap)).success();
+        return ResponseData.create().data(new CounterMap<>(resultMap)).success();
     }
 
     @Override public ResponseData deleteAcl(AclEntry entry) {

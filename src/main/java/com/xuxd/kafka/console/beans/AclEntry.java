@@ -1,7 +1,6 @@
 package com.xuxd.kafka.console.beans;
 
 import java.util.Objects;
-import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.acl.AccessControlEntry;
 import org.apache.kafka.common.acl.AccessControlEntryFilter;
@@ -21,7 +20,6 @@ import org.apache.kafka.common.security.auth.KafkaPrincipal;
  * @author xuxd
  * @date 2021-08-28 20:17:27
  **/
-@Data
 public class AclEntry {
 
     private String resourceType;
@@ -99,5 +97,73 @@ public class AclEntry {
         entry.setOperation(this.operation);
         entry.setPermissionType(this.permissionType);
         return entry;
+    }
+
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPatternType() {
+        return patternType;
+    }
+
+    public void setPatternType(String patternType) {
+        this.patternType = patternType;
+    }
+
+    public String getPrincipal() {
+        return principal;
+    }
+
+    public void setPrincipal(String principal) {
+        this.principal = principal;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public String getOperation() {
+        return operation;
+    }
+
+    public void setOperation(String operation) {
+        this.operation = operation;
+    }
+
+    public String getPermissionType() {
+        return permissionType;
+    }
+
+    public void setPermissionType(String permissionType) {
+        this.permissionType = permissionType;
+    }
+
+    @Override public String toString() {
+        return "AclEntry{" +
+            "resourceType='" + resourceType + '\'' +
+            ", name='" + name + '\'' +
+            ", patternType='" + patternType + '\'' +
+            ", principal='" + principal + '\'' +
+            ", host='" + host + '\'' +
+            ", operation='" + operation + '\'' +
+            ", permissionType='" + permissionType + '\'' +
+            '}';
     }
 }

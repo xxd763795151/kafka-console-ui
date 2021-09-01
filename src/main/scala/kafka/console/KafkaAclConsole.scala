@@ -41,7 +41,7 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
                     }
 
                     var principal: String = null
-                    if ( StringUtils.isNotBlank(entry.getPrincipal) && !KafkaPrincipal.ANONYMOUS.toString.equalsIgnoreCase(f.entryFilter().principal())) {
+                    if (StringUtils.isNotBlank(entry.getPrincipal()) && !KafkaPrincipal.ANONYMOUS.toString.equalsIgnoreCase(f.entryFilter().principal())) {
                         principal = f.entryFilter().principal();
                     }
                     val filter = new AclBindingFilter(new ResourcePatternFilter(resourceType, name, f.patternFilter().patternType()),

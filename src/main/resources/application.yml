@@ -1,5 +1,7 @@
 server:
   port: 7766
+  servlet:
+    context-path: /kafka-console
 
 kafka:
   config:

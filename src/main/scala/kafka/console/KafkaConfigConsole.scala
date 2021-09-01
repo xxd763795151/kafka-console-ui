@@ -17,9 +17,9 @@ class KafkaConfigConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
 
     private val defaultIterations = 4096
 
-    def getUserList(): Set[String] = {
+    def getUserList(users: util.List[String]): Set[String] = {
         withAdminClient({
-            adminClient => adminClient.describeUserScramCredentials().all().get().keySet()
+            adminClient => adminClient.describeUserScramCredentials(users).all().get().keySet()
         }).asInstanceOf[Set[String]]
     }
 
