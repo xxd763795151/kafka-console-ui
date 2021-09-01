@@ -5,7 +5,7 @@ import java.util.Set
 import java.util.concurrent.TimeUnit
 
 import com.xuxd.kafka.console.config.KafkaConfig
-import org.apache.kafka.clients.admin.{ScramCredentialInfo, ScramMechanism, UserScramCredentialDeletion, UserScramCredentialUpsertion}
+import org.apache.kafka.clients.admin._
 
 /**
  * kafka-console-ui.
@@ -21,6 +21,12 @@ class KafkaConfigConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
         withAdminClient({
             adminClient => adminClient.describeUserScramCredentials(users).all().get().keySet()
         }).asInstanceOf[Set[String]]
+    }
+
+    def getUserDetailList(users: util.List[String]): util.Map[String, UserScramCredentialsDescription] = {
+        withAdminClient({
+            adminClient => adminClient.describeUserScramCredentials(users).all().get()
+        }).asInstanceOf[util.Map[String, UserScramCredentialsDescription]]
     }
 
     def addOrUpdateUser(name: String, pass: String): Boolean = {

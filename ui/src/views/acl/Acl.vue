@@ -45,8 +45,22 @@
           </a-row>
         </a-form>
       </div>
+      <div class="operation-row-button">
+        <a-button type="primary" @click="updateUser">新增/更新用户</a-button>
+        <UpdateUser
+          :visible="showUpdateUser"
+          @updateDialogData="closeUpdateUserDialog"
+        ></UpdateUser>
+      </div>
       <a-table :columns="columns" :data-source="data" bordered>
-        <a slot="operation" slot-scope="{}">删除</a>
+        <a slot="operation" slot-scope="{}">
+          <a-button class="operation-btn">删除</a-button>
+          <a-button class="operation-btn">授予生产权限</a-button>
+          <a-button class="operation-btn">收回生产权限</a-button>
+          <a-button class="operation-btn">授予消费权限</a-button>
+          <a-button class="operation-btn">收回消费权限</a-button>
+          <a-button class="operation-btn">增加权限</a-button>
+        </a>
         <!--        <a-table-->
         <!--          slot="expandedRowRender"-->
         <!--          slot-scope="{}"-->
@@ -79,9 +93,11 @@
 <script>
 import request from "@/utils/request";
 import notification from "ant-design-vue/es/notification";
+import UpdateUser from "@/views/acl/UpdateUser";
 
 export default {
   name: "Acl",
+  components: { UpdateUser },
   data() {
     return {
       queryParam: {},
@@ -90,6 +106,7 @@ export default {
       innerColumns,
       innerData,
       form: this.$form.createForm(this, { name: "advanced_search" }),
+      showUpdateUser: false,
     };
   },
   methods: {
@@ -107,12 +124,23 @@ export default {
           queryParam.resourceType = "GROUP";
           queryParam.resourceName = values.groupId;
         }
+        Object.assign(this.queryParam, queryParam);
         getAclList(this.data, queryParam);
       });
     },
 
     handleReset() {
       this.form.resetFields();
+    },
+
+    updateUser() {
+      this.showUpdateUser = true;
+    },
+    closeUpdateUserDialog(data) {
+      this.showUpdateUser = data.show;
+      if (data.ok) {
+        getAclList(this.data, this.queryParam);
+      }
     },
   },
   created() {
@@ -231,5 +259,13 @@ for (let i = 0; i < 3; ++i) {
 
 .input-w {
   width: 400px;
+}
+
+.operation-row-button {
+  height: 4%;
+  text-align: left;
+}
+.operation-btn {
+  margin-right: 1%;
 }
 </style>

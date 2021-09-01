@@ -15,6 +15,7 @@ import kafka.console.KafkaAclConsole;
 import kafka.console.KafkaConfigConsole;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.admin.UserScramCredentialsDescription;
 import org.apache.kafka.common.acl.AclBinding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,10 +69,11 @@ public class AclServiceImpl implements AclService {
             resultMap.put(k, map);
         });
         if (entry.isNull() || StringUtils.isNotBlank(entry.getPrincipal())) {
-            Set<String> userList = configConsole.getUserList(StringUtils.isNotBlank(entry.getPrincipal()) ? Collections.singletonList(entry.getPrincipal()) : null);
-            userList.forEach(u -> {
-                if (!resultMap.containsKey(u)) {
-                    resultMap.put(u, Collections.emptyMap());
+            Map<String, UserScramCredentialsDescription> detailList = configConsole.getUserDetailList(StringUtils.isNotBlank(entry.getPrincipal()) ? Collections.singletonList(entry.getPrincipal()) : null);
+
+            detailList.values().forEach(u -> {
+                if (!resultMap.containsKey(u.name()) && !u.credentialInfos().isEmpty()) {
+                    resultMap.put(u.name(), Collections.emptyMap());
                 }
             });
         }
