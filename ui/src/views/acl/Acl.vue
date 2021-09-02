@@ -66,8 +66,14 @@
             href="javascript:;"
             class="operation-btn"
             @click="onAddProducerAuth(record)"
-            >授予生产权限</a
-          >
+            >授予生产权限
+            <AddProducerAuth
+              :visible="openAddProducerAuthDialog"
+              :record="selectRow"
+              @addProducerAuthDialog="closeAddProducerAuthDialog"
+            ></AddProducerAuth>
+          </a>
+
           <a href="javascript:;" class="operation-btn">收回生产权限</a>
           <a href="javascript:;" class="operation-btn">授予消费权限</a>
           <a href="javascript:;" class="operation-btn">收回消费权限</a>
@@ -107,10 +113,11 @@ import request from "@/utils/request";
 import notification from "ant-design-vue/es/notification";
 import UpdateUser from "@/views/acl/UpdateUser";
 import { KafkaAclApi } from "@/utils/api";
+import AddProducerAuth from "@/views/acl/AddProducerAuth";
 
 export default {
   name: "Acl",
-  components: { UpdateUser },
+  components: { UpdateUser, AddProducerAuth },
   data() {
     return {
       queryParam: {},
@@ -118,9 +125,11 @@ export default {
       columns,
       innerColumns,
       innerData,
+      selectRow: {},
       form: this.$form.createForm(this, { name: "advanced_search" }),
       showUpdateUser: false,
       deleteUserConfirm: false,
+      openAddProducerAuthDialog: false,
     };
   },
   methods: {
@@ -171,13 +180,18 @@ export default {
       });
     },
     onAddProducerAuth(row) {
+      this.openAddProducerAuthDialog = true;
       const rowData = {};
       Object.assign(rowData, row);
+      this.selectRow = rowData;
       console.log("onAddProducerAuth user:", rowData);
     },
     cancel(e) {
       console.log(e);
       this.$message.error("Click on No");
+    },
+    closeAddProducerAuthDialog() {
+      this.openAddProducerAuthDialog = false;
     },
   },
   created() {

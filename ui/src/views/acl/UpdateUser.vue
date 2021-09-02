@@ -47,6 +47,8 @@
 <script>
 import request from "@/utils/request";
 import notification from "ant-design-vue/es/notification";
+import { KafkaAclApi } from "@/utils/api";
+
 export default {
   name: "UpdateUser",
   props: {
@@ -64,7 +66,6 @@ export default {
       ModalText: "Content of the modal",
       confirmLoading: false,
       show: this.visible,
-      userForm: {},
     };
   },
   watch: {
@@ -79,12 +80,13 @@ export default {
         if (err) {
           return;
         }
+        this.confirmLoading = true;
         request({
-          url: api.addKafkaUser.url,
-          method: api.addKafkaUser.method,
+          url: KafkaAclApi.addKafkaUser.url,
+          method: KafkaAclApi.addKafkaUser.method,
           data: { username: values.username, password: values.password },
         }).then((res) => {
-          console.log(res);
+          this.confirmLoading = false;
           if (res.code == 0) {
             notification.success({
               message: res.msg,
@@ -102,13 +104,6 @@ export default {
     handleCancel() {
       this.$emit("updateUserDialogData", { ok: false, show: false });
     },
-  },
-};
-
-const api = {
-  addKafkaUser: {
-    url: "/user",
-    method: "post",
   },
 };
 </script>
