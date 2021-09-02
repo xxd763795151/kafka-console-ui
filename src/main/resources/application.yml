@@ -5,9 +5,17 @@ server:
 
 kafka:
   config:
+    # kafka broker地址，多个以逗号分隔
     bootstrap-server: 'localhost:9092'
     request-timeout-ms: 60000
     security-protocol: SASL_PLAINTEXT
     sasl-mechanism: SCRAM-SHA-256
-    sasl-jaas-config: org.apache.kafka.common.security.scram.ScramLoginModule required username="admin" password="admin";
+    # 超级管理员用户名，在broker上已经配置为超级管理员
+    admin-username: admin
+    # 超级管理员密码
+    admin-password: admin
+    # 启动自动创建配置的超级管理员用户
+    admin-create: true
+    zookeeper-addr: localhost:2181
+    sasl-jaas-config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${kafka.config.admin-username}" password="${kafka.config.admin-password}";
 

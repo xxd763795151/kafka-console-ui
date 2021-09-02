@@ -4,6 +4,7 @@ import com.xuxd.kafka.console.beans.AclEntry;
 import com.xuxd.kafka.console.beans.CounterList;
 import com.xuxd.kafka.console.beans.CounterMap;
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.config.KafkaConfig;
 import com.xuxd.kafka.console.service.AclService;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.UserScramCredentialsDescription;
 import org.apache.kafka.common.acl.AclBinding;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +30,16 @@ import org.springframework.stereotype.Service;
  **/
 @Slf4j
 @Service
-public class AclServiceImpl implements AclService {
+public class AclServiceImpl implements AclService, SmartInitializingSingleton {
 
     @Autowired
     private KafkaConfigConsole configConsole;
 
     @Autowired
     private KafkaAclConsole aclConsole;
+
+    @Autowired
+    private KafkaConfig kafkaConfig;
 
     @Override public ResponseData<Set<String>> getUserList() {
         try {
@@ -46,10 +51,12 @@ public class AclServiceImpl implements AclService {
     }
 
     @Override public ResponseData addOrUpdateUser(String name, String pass) {
+        log.info("add or update user, username: {}, password: {}", name, pass);
         return configConsole.addOrUpdateUser(name, pass) ? ResponseData.create().success() : ResponseData.create().failed();
     }
 
     @Override public ResponseData deleteUser(String name) {
+        log.info("delete user: {}", name);
         return configConsole.deleteUser(name) ? ResponseData.create().success() : ResponseData.create().failed();
     }
 
@@ -107,5 +114,16 @@ public class AclServiceImpl implements AclService {
 
     @Override public ResponseData deleteUserAcl(AclEntry entry) {
         return aclConsole.deleteUserAcl(entry) ? ResponseData.create().success() : ResponseData.create().failed();
+    }
+
+    @Override public void afterSingletonsInstantiated() {
+        if (kafkaConfig.isAdminCreate()) {
+            log.info("Start create admin user, username: {}, password: {}", kafkaConfig.getAdminUsername(), kafkaConfig.getAdminPassword());
+            boolean done = configConsole.addOrUpdateUserWithZK(kafkaConfig.getAdminUsername(), kafkaConfig.getAdminPassword());
+            if (!done) {
+                log.error("Create admin failed.");
+                throw new IllegalStateException();
+            }
+        }
     }
 }

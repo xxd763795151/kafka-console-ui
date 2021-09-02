@@ -54,12 +54,18 @@
       </div>
       <a-table :columns="columns" :data-source="data" bordered>
         <a slot="operation" slot-scope="{}">
-          <a-button class="operation-btn">删除</a-button>
-          <a-button class="operation-btn">授予生产权限</a-button>
-          <a-button class="operation-btn">收回生产权限</a-button>
-          <a-button class="operation-btn">授予消费权限</a-button>
-          <a-button class="operation-btn">收回消费权限</a-button>
-          <a-button class="operation-btn">增加权限</a-button>
+          <a slot="operation" href="javascript:;" class="operation-btn" @click="onDeleteUser">删除</a>
+          <a slot="operation" href="javascript:;" class="operation-btn">授予生产权限</a>
+          <a slot="operation" href="javascript:;" class="operation-btn">收回生产权限</a>
+          <a slot="operation" href="javascript:;" class="operation-btn">授予消费权限</a>
+          <a slot="operation" href="javascript:;" class="operation-btn">收回消费权限</a>
+          <a slot="operation" href="javascript:;" class="operation-btn">增加权限</a>
+<!--          <a-button class="operation-btn">删除</a-button>-->
+<!--          <a-button class="operation-btn">授予生产权限</a-button>-->
+<!--          <a-button class="operation-btn">收回生产权限</a-button>-->
+<!--          <a-button class="operation-btn">授予消费权限</a-button>-->
+<!--          <a-button class="operation-btn">收回消费权限</a-button>-->
+<!--          <a-button class="operation-btn">增加权限</a-button>-->
         </a>
         <!--        <a-table-->
         <!--          slot="expandedRowRender"-->
@@ -142,6 +148,9 @@ export default {
         getAclList(this.data, this.queryParam);
       }
     },
+    onDeleteUser(row) {
+      console.log("delete user:", row)
+    }
   },
   created() {
     getAclList(this.data, this.queryParam);
