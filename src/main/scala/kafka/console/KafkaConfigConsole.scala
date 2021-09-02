@@ -74,18 +74,18 @@ class KafkaConfigConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
         }
     }
 
-    def deleteUser(name: String): Boolean = {
+    def deleteUser(name: String): (Boolean, String) = {
         withAdminClient(adminClient => {
             try {
                 adminClient.alterUserScramCredentials(util.Arrays.asList(
                     new UserScramCredentialDeletion(name, ScramMechanism.fromMechanismName(config.getSaslMechanism))))
                     .all().get(3000, TimeUnit.MILLISECONDS)
-                true
+                (true, null)
             } catch {
                 case ex: Exception => log.error("deleteUser error", ex)
-                    false
+                    (false, ex.getMessage)
             }
 
-        }).asInstanceOf[Boolean]
+        }).asInstanceOf[(Boolean, String)]
     }
 }

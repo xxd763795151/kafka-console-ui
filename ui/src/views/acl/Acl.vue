@@ -37,7 +37,7 @@
             </a-col>
 
             <a-col :span="24" :style="{ textAlign: 'right' }">
-              <a-button type="primary" html-type="submit"> 搜索 </a-button>
+              <a-button type="primary" html-type="submit"> 搜索</a-button>
               <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
                 重置
               </a-button>
@@ -49,23 +49,29 @@
         <a-button type="primary" @click="updateUser">新增/更新用户</a-button>
         <UpdateUser
           :visible="showUpdateUser"
-          @updateDialogData="closeUpdateUserDialog"
+          @updateUserDialogData="closeUpdateUserDialog"
         ></UpdateUser>
       </div>
       <a-table :columns="columns" :data-source="data" bordered>
-        <a slot="operation" slot-scope="{}">
-          <a slot="operation" href="javascript:;" class="operation-btn" @click="onDeleteUser">删除</a>
-          <a slot="operation" href="javascript:;" class="operation-btn">授予生产权限</a>
-          <a slot="operation" href="javascript:;" class="operation-btn">收回生产权限</a>
-          <a slot="operation" href="javascript:;" class="operation-btn">授予消费权限</a>
-          <a slot="operation" href="javascript:;" class="operation-btn">收回消费权限</a>
-          <a slot="operation" href="javascript:;" class="operation-btn">增加权限</a>
-<!--          <a-button class="operation-btn">删除</a-button>-->
-<!--          <a-button class="operation-btn">授予生产权限</a-button>-->
-<!--          <a-button class="operation-btn">收回生产权限</a-button>-->
-<!--          <a-button class="operation-btn">授予消费权限</a-button>-->
-<!--          <a-button class="operation-btn">收回消费权限</a-button>-->
-<!--          <a-button class="operation-btn">增加权限</a-button>-->
+        <a slot="operation" slot-scope="record">
+          <a-popconfirm
+            :title="'删除用户: ' + record.username + '及相关权限？'"
+            ok-text="确认"
+            cancel-text="取消"
+            @confirm="onDeleteUser(record)"
+          >
+            <a href="javascript:;" class="operation-btn">删除</a>
+          </a-popconfirm>
+          <a
+            href="javascript:;"
+            class="operation-btn"
+            @click="onAddProducerAuth(record)"
+            >授予生产权限</a
+          >
+          <a href="javascript:;" class="operation-btn">收回生产权限</a>
+          <a href="javascript:;" class="operation-btn">授予消费权限</a>
+          <a href="javascript:;" class="operation-btn">收回消费权限</a>
+          <a href="javascript:;" class="operation-btn">增加权限</a>
         </a>
         <!--        <a-table-->
         <!--          slot="expandedRowRender"-->
@@ -100,6 +106,7 @@
 import request from "@/utils/request";
 import notification from "ant-design-vue/es/notification";
 import UpdateUser from "@/views/acl/UpdateUser";
+import { KafkaAclApi } from "@/utils/api";
 
 export default {
   name: "Acl",
@@ -113,6 +120,7 @@ export default {
       innerData,
       form: this.$form.createForm(this, { name: "advanced_search" }),
       showUpdateUser: false,
+      deleteUserConfirm: false,
     };
   },
   methods: {
@@ -149,25 +157,38 @@ export default {
       }
     },
     onDeleteUser(row) {
-      console.log("delete user:", row)
-    }
+      request({
+        url: KafkaAclApi.deleteKafkaUser.url,
+        method: KafkaAclApi.deleteKafkaUser.method,
+        data: { username: row.username },
+      }).then((res) => {
+        getAclList(this.data, this.queryParam);
+        if (res.code == 0) {
+          this.$message.success(res.msg);
+        } else {
+          this.$message.error(res.msg);
+        }
+      });
+    },
+    onAddProducerAuth(row) {
+      const rowData = {};
+      Object.assign(rowData, row);
+      console.log("onAddProducerAuth user:", rowData);
+    },
+    cancel(e) {
+      console.log(e);
+      this.$message.error("Click on No");
+    },
   },
   created() {
     getAclList(this.data, this.queryParam);
   },
 };
 
-const api = {
-  getAclList: {
-    url: "/acl/list",
-    method: "post",
-  },
-};
-
 function getAclList(data, requestParameters) {
   request({
-    url: api.getAclList.url,
-    method: api.getAclList.method,
+    url: KafkaAclApi.getAclList.url,
+    method: KafkaAclApi.getAclList.method,
     data: requestParameters,
   }).then((response) => {
     data.splice(0, data.length);
@@ -274,6 +295,7 @@ for (let i = 0; i < 3; ++i) {
   height: 4%;
   text-align: left;
 }
+
 .operation-btn {
   margin-right: 1%;
 }

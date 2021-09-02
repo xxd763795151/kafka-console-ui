@@ -18,6 +18,8 @@ public interface AclService {
 
     ResponseData deleteUser(String name);
 
+    ResponseData deleteUserAndAuth(String name);
+
     ResponseData getAclList();
 
     ResponseData getAclList(AclEntry entry);

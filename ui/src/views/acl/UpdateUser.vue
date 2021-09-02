@@ -57,7 +57,7 @@ export default {
   },
   beforeCreate() {
     //创建表单
-    this.form = this.$form.createForm(this, { name: "form_in_modal" });
+    this.form = this.$form.createForm(this, { name: "addOrUpdateUserModal" });
   },
   data() {
     return {
@@ -90,7 +90,7 @@ export default {
               message: res.msg,
             });
             form.resetFields();
-            this.$emit("updateDialogData", { ok: true, show: false });
+            this.$emit("updateUserDialogData", { ok: true, show: false });
           } else {
             notification.error({
               message: res.msg,
@@ -100,7 +100,7 @@ export default {
       });
     },
     handleCancel() {
-      this.$emit("updateDialogData", { ok: false, show: false });
+      this.$emit("updateUserDialogData", { ok: false, show: false });
     },
   },
 };

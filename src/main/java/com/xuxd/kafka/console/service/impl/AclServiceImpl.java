@@ -21,6 +21,7 @@ import org.apache.kafka.common.acl.AclBinding;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import scala.Tuple2;
 
 /**
  * kafka-console-ui.
@@ -57,7 +58,24 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
 
     @Override public ResponseData deleteUser(String name) {
         log.info("delete user: {}", name);
-        return configConsole.deleteUser(name) ? ResponseData.create().success() : ResponseData.create().failed();
+        Tuple2<Object, String> tuple2 = configConsole.deleteUser(name);
+        return (boolean)tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override public ResponseData deleteUserAndAuth(String name) {
+        log.info("delete user and authority: {}", name);
+        AclEntry entry = new AclEntry();
+        entry.setPrincipal(name);
+        if ( aclConsole.deleteUserAcl(entry)) {
+            Tuple2<Object, String> delUR = configConsole.deleteUser(name);
+            if (!((boolean)delUR._1())) {
+                return ResponseData.create().failed("用户权限删除成功，但是用户信息删除失败: " + delUR._2());
+            }
+        } else {
+            return ResponseData.create().failed("删除用户权限失败");
+        }
+
+        return ResponseData.create().success();
     }
 
     @Override public ResponseData getAclList() {

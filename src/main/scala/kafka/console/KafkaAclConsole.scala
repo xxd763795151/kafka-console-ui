@@ -123,8 +123,8 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
 
     def deleteUserAcl(entry: AclEntry): Boolean = {
         val filter: AclBindingFilter = entry.toAclBindingFilter
-        val delFilter = new AclBindingFilter(new ResourcePatternFilter(ResourceType.ANY, ResourcePattern.WILDCARD_RESOURCE, filter.patternFilter().patternType()),
-            new AccessControlEntryFilter(filter.entryFilter().principal(), filter.entryFilter().host(), AclOperation.ANY, AclPermissionType.ANY))
+        val delFilter = new AclBindingFilter(new ResourcePatternFilter(ResourceType.ANY, null, filter.patternFilter().patternType()),
+            new AccessControlEntryFilter(filter.entryFilter().principal(), null, AclOperation.ANY, AclPermissionType.ANY))
 
         deleteAcl(Collections.singleton(delFilter))
     }

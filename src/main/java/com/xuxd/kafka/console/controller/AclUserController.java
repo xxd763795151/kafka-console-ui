@@ -37,4 +37,10 @@ public class AclUserController {
     public Object deleteUser(@RequestBody AclUser user) {
         return aclService.deleteUser(user.getUsername());
     }
+
+
+    @DeleteMapping("/auth")
+    public Object deleteUserAndAuth(@RequestBody AclUser user) {
+        return aclService.deleteUserAndAuth(user.getUsername());
+    }
 }
