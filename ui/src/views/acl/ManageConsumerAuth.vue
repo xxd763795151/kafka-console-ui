@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    title="管理生产权限"
+    title="管理消费权限"
     :visible="show"
     :confirm-loading="confirmLoading"
     :width="800"
@@ -23,6 +23,14 @@
           v-decorator="[
             'topic',
             { rules: [{ required: true, message: '请输入topic!' }] },
+          ]"
+        />
+      </a-form-item>
+      <a-form-item label="消费组">
+        <a-input
+          v-decorator="[
+            'groupId',
+            { rules: [{ required: true, message: '请输入消费组!' }] },
           ]"
         />
       </a-form-item>
@@ -70,14 +78,18 @@ export default {
         if (e) {
           return;
         }
-        const param = { username: v.username, topic: v.topic };
+        const param = {
+          username: v.username,
+          topic: v.topic,
+          groupId: v.groupId,
+        };
         const api = {};
         switch (v.type) {
           case "grant":
-            Object.assign(api, KafkaAclApi.addProducerAuth);
+            Object.assign(api, KafkaAclApi.addConsumerAuth);
             break;
           case "revoke":
-            Object.assign(api, KafkaAclApi.deleteProducerAuth);
+            Object.assign(api, KafkaAclApi.deleteConsumerAuth);
             break;
           default:
             this.$message.error("unknown error");
@@ -93,7 +105,7 @@ export default {
           this.confirmLoading = false;
           if (res.code == 0) {
             this.$message.success(res.msg);
-            this.$emit("manageProducerAuthDialog", v);
+            this.$emit("manageConsumerAuthDialog", v);
           } else {
             this.$message.error(res.msg);
           }
@@ -101,7 +113,7 @@ export default {
       });
     },
     handleCancel() {
-      this.$emit("manageProducerAuthDialog", {});
+      this.$emit("manageConsumerAuthDialog", {});
     },
   },
 };

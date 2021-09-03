@@ -19,4 +19,12 @@ export const KafkaAclApi = {
     url: "/acl/producer",
     method: "delete",
   },
+  addConsumerAuth: {
+    url: "/acl/consumer",
+    method: "post",
+  },
+  deleteConsumerAuth: {
+    url: "/acl/consumer",
+    method: "delete",
+  },
 };

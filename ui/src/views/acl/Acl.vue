@@ -74,7 +74,17 @@
             ></ManageProducerAuth>
           </a>
 
-          <a href="javascript:;" class="operation-btn">管理消费权限</a>
+          <a
+            href="javascript:;"
+            class="operation-btn"
+            @click="onManageConsumerAuth(record)"
+            >管理消费权限
+            <ManageConsumerAuth
+              :visible="openManageConsumerAuthDialog"
+              :record="selectRow"
+              @manageConsumerAuthDialog="closeManageConsumerAuthDialog"
+            ></ManageConsumerAuth>
+          </a>
           <a href="javascript:;" class="operation-btn">增加权限</a>
         </a>
         <!--        <a-table-->
@@ -112,10 +122,11 @@ import notification from "ant-design-vue/es/notification";
 import UpdateUser from "@/views/acl/UpdateUser";
 import { KafkaAclApi } from "@/utils/api";
 import ManageProducerAuth from "@/views/acl/ManageProducerAuth";
+import ManageConsumerAuth from "@/views/acl/ManageConsumerAuth";
 
 export default {
   name: "Acl",
-  components: { UpdateUser, ManageProducerAuth },
+  components: { UpdateUser, ManageProducerAuth, ManageConsumerAuth },
   data() {
     return {
       queryParam: {},
@@ -128,6 +139,7 @@ export default {
       showUpdateUser: false,
       deleteUserConfirm: false,
       openManageProducerAuthDialog: false,
+      openManageConsumerAuthDialog: false,
     };
   },
   methods: {
@@ -183,12 +195,22 @@ export default {
       Object.assign(rowData, row);
       this.selectRow = rowData;
     },
+    onManageConsumerAuth(row) {
+      this.openManageConsumerAuthDialog = true;
+      const rowData = {};
+      Object.assign(rowData, row);
+      this.selectRow = rowData;
+    },
     cancel(e) {
       console.log(e);
       this.$message.error("Click on No");
     },
     closeManageProducerAuthDialog() {
       this.openManageProducerAuthDialog = false;
+      getAclList(this.data, this.queryParam);
+    },
+    closeManageConsumerAuthDialog() {
+      this.openManageConsumerAuthDialog = false;
       getAclList(this.data, this.queryParam);
     },
   },
