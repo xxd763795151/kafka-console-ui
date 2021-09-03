@@ -27,4 +27,12 @@ export const KafkaAclApi = {
     url: "/acl/consumer",
     method: "delete",
   },
+  getOperationList: {
+    url: "/acl/operation/list",
+    method: "get",
+  },
+  addAclAuth: {
+    url: "/acl",
+    method: "post",
+  },
 };

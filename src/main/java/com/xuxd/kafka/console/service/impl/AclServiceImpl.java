@@ -6,6 +6,7 @@ import com.xuxd.kafka.console.beans.CounterMap;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.config.KafkaConfig;
 import com.xuxd.kafka.console.service.AclService;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.UserScramCredentialsDescription;
 import org.apache.kafka.common.acl.AclBinding;
+import org.apache.kafka.common.acl.AclOperation;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,16 +61,16 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
     @Override public ResponseData deleteUser(String name) {
         log.info("delete user: {}", name);
         Tuple2<Object, String> tuple2 = configConsole.deleteUser(name);
-        return (boolean)tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
     @Override public ResponseData deleteUserAndAuth(String name) {
         log.info("delete user and authority: {}", name);
         AclEntry entry = new AclEntry();
         entry.setPrincipal(name);
-        if ( aclConsole.deleteUserAcl(entry)) {
+        if (aclConsole.deleteUserAcl(entry)) {
             Tuple2<Object, String> delUR = configConsole.deleteUser(name);
-            if (!((boolean)delUR._1())) {
+            if (!((boolean) delUR._1())) {
                 return ResponseData.create().failed("用户权限删除成功，但是用户信息删除失败: " + delUR._2());
             }
         } else {
@@ -146,6 +148,11 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
 
     @Override public ResponseData deleteUserAcl(AclEntry entry) {
         return aclConsole.deleteUserAcl(entry) ? ResponseData.create().success() : ResponseData.create().failed();
+    }
+
+    @Override public ResponseData getOperationList() {
+        Set<String> operations = Arrays.stream(AclOperation.values()).filter(o -> o != AclOperation.ANY && o != AclOperation.UNKNOWN).map(AclOperation::name).collect(Collectors.toSet());
+        return ResponseData.create().data(operations).success();
     }
 
     @Override public void afterSingletonsInstantiated() {

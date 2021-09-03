@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.beans.AclEntry;
+import com.xuxd.kafka.console.beans.dto.AddAuthDTO;
 import com.xuxd.kafka.console.beans.dto.ConsumerAuthDTO;
 import com.xuxd.kafka.console.beans.dto.DeleteAclDTO;
 import com.xuxd.kafka.console.beans.dto.ProducerAuthDTO;
@@ -32,14 +33,19 @@ public class AclAuthController {
         return aclService.getAclList();
     }
 
+    @GetMapping("/operation/list")
+    public Object getAclOperationList() {
+        return aclService.getOperationList();
+    }
+
     @PostMapping("/list")
     public Object getAclList(@RequestBody QueryAclDTO param) {
         return aclService.getAclList(param.toEntry());
     }
 
     @PostMapping
-    public Object addAcl(@RequestBody AclEntry entry) {
-        return aclService.addAcl(entry);
+    public Object addAcl(@RequestBody AddAuthDTO param) {
+        return aclService.addAcl(param.toAclEntry());
     }
 
     /**

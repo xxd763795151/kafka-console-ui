@@ -40,7 +40,7 @@
 import { KafkaAclApi } from "@/utils/api";
 import request from "@/utils/request";
 export default {
-  name: "AddProducerAuth",
+  name: "ManageProducerAuth",
   props: {
     visible: {
       type: Boolean,

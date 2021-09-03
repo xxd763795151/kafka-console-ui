@@ -38,4 +38,6 @@ public interface AclService {
 
     ResponseData deleteUserAcl(AclEntry entry);
 
+    ResponseData getOperationList();
+
 }

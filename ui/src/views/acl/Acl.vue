@@ -89,7 +89,17 @@
               @manageConsumerAuthDialog="closeManageConsumerAuthDialog"
             ></ManageConsumerAuth>
           </a>
-          <a href="javascript:;" class="operation-btn">增加权限</a>
+          <a
+            href="javascript:;"
+            class="operation-btn"
+            @click="onAddAuth(record)"
+            >增加权限
+            <AddAuth
+              :visible="openAddAuthDialog"
+              :record="selectRow"
+              @addAuthDialog="closeAddAuthDialog"
+            ></AddAuth>
+          </a>
         </a>
         <!--        <a-table-->
         <!--          slot="expandedRowRender"-->
@@ -127,10 +137,11 @@ import UpdateUser from "@/views/acl/UpdateUser";
 import { KafkaAclApi } from "@/utils/api";
 import ManageProducerAuth from "@/views/acl/ManageProducerAuth";
 import ManageConsumerAuth from "@/views/acl/ManageConsumerAuth";
+import AddAuth from "@/views/acl/AddAuth";
 
 export default {
   name: "Acl",
-  components: { UpdateUser, ManageProducerAuth, ManageConsumerAuth },
+  components: { UpdateUser, ManageProducerAuth, ManageConsumerAuth, AddAuth },
   data() {
     return {
       queryParam: {},
@@ -144,6 +155,7 @@ export default {
       deleteUserConfirm: false,
       openManageProducerAuthDialog: false,
       openManageConsumerAuthDialog: false,
+      openAddAuthDialog: false,
     };
   },
   methods: {
@@ -205,12 +217,22 @@ export default {
       Object.assign(rowData, row);
       this.selectRow = rowData;
     },
+    onAddAuth(row) {
+      this.openAddAuthDialog = true;
+      const rowData = {};
+      Object.assign(rowData, row);
+      this.selectRow = rowData;
+    },
     closeManageProducerAuthDialog() {
       this.openManageProducerAuthDialog = false;
       getAclList(this.data, this.queryParam);
     },
     closeManageConsumerAuthDialog() {
       this.openManageConsumerAuthDialog = false;
+      getAclList(this.data, this.queryParam);
+    },
+    closeAddAuthDialog() {
+      this.openAddAuthDialog = false;
       getAclList(this.data, this.queryParam);
     },
   },
