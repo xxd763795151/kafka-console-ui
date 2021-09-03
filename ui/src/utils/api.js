@@ -35,4 +35,8 @@ export const KafkaAclApi = {
     url: "/acl",
     method: "post",
   },
+  getAclDetailList: {
+    url: "/acl/detail",
+    method: "post",
+  },
 };

@@ -80,8 +80,8 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
         return ResponseData.create().success();
     }
 
-    @Override public ResponseData getAclList() {
-        List<AclBinding> aclBindingList = aclConsole.getAclList(null);
+    @Override public ResponseData getAclDetailList(AclEntry entry) {
+        List<AclBinding> aclBindingList = entry ==null || entry.isNull() ? aclConsole.getAclList(null) : aclConsole.getAclList(entry);
 
         return ResponseData.create().data(new CounterList<>(aclBindingList.stream().map(x -> AclEntry.valueOf(x)).collect(Collectors.toList()))).success();
     }

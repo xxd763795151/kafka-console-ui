@@ -53,6 +53,31 @@
         ></UpdateUser>
       </div>
       <a-table :columns="columns" :data-source="data" bordered>
+        <a slot="topicList" slot-scope="topicList, record">
+          <a
+            href="#"
+            v-for="t in topicList"
+            :key="t"
+            @click="onTopicDetail(t, record.username)"
+            >{{ t }},
+          </a>
+          <AclDetail
+            :visible="openAclDetailDialog"
+            :selectDetail="selectDetail"
+            @aclDetailDialog="closeAclDetailDialog"
+          ></AclDetail>
+        </a>
+
+        <a slot="groupList" slot-scope="groupList, record">
+          <a
+            href="#"
+            v-for="t in groupList"
+            :key="t"
+            @click="onGroupDetail(t, record.username)"
+            >{{ t }},
+          </a>
+        </a>
+
         <a
           slot="operation"
           slot-scope="record"
@@ -101,30 +126,30 @@
             ></AddAuth>
           </a>
         </a>
-        <!--        <a-table-->
-        <!--          slot="expandedRowRender"-->
-        <!--          slot-scope="{}"-->
-        <!--          :columns="innerColumns"-->
-        <!--          :data-source="innerData"-->
-        <!--          :pagination="false"-->
-        <!--        >-->
-        <!--          <span slot="status" slot-scope="{}"> <a-badge status="success" />Finished </span>-->
-        <!--          <span slot="operation" slot-scope="{}" class="table-operation">-->
-        <!--            <a>Pause</a>-->
-        <!--            <a>Stop</a>-->
-        <!--            <a-dropdown>-->
-        <!--              <a-menu slot="overlay">-->
-        <!--                <a-menu-item>-->
-        <!--                  Action 1-->
-        <!--                </a-menu-item>-->
-        <!--                <a-menu-item>-->
-        <!--                  Action 2-->
-        <!--                </a-menu-item>-->
-        <!--              </a-menu>-->
-        <!--              <a> More <a-icon type="down" /> </a>-->
-        <!--            </a-dropdown>-->
-        <!--          </span>-->
-        <!--        </a-table>-->
+        <!--                <a-table-->
+        <!--                  slot="expandedRowRender"-->
+        <!--                  slot-scope="{}"-->
+        <!--                  :columns="innerColumns"-->
+        <!--                  :data-source="innerData"-->
+        <!--                  :pagination="false"-->
+        <!--                >-->
+        <!--                  <span slot="status" slot-scope="{}"> <a-badge status="success" />Finished </span>-->
+        <!--                  <span slot="operation" slot-scope="{}" class="table-operation">-->
+        <!--                    <a>Pause</a>-->
+        <!--                    <a>Stop</a>-->
+        <!--                    <a-dropdown>-->
+        <!--                      <a-menu slot="overlay">-->
+        <!--                        <a-menu-item>-->
+        <!--                          Action 1-->
+        <!--                        </a-menu-item>-->
+        <!--                        <a-menu-item>-->
+        <!--                          Action 2-->
+        <!--                        </a-menu-item>-->
+        <!--                      </a-menu>-->
+        <!--                      <a> More <a-icon type="down" /> </a>-->
+        <!--                    </a-dropdown>-->
+        <!--                  </span>-->
+        <!--                </a-table>-->
       </a-table>
     </div>
   </div>
@@ -138,10 +163,17 @@ import { KafkaAclApi } from "@/utils/api";
 import ManageProducerAuth from "@/views/acl/ManageProducerAuth";
 import ManageConsumerAuth from "@/views/acl/ManageConsumerAuth";
 import AddAuth from "@/views/acl/AddAuth";
+import AclDetail from "@/views/acl/AclDetail";
 
 export default {
   name: "Acl",
-  components: { UpdateUser, ManageProducerAuth, ManageConsumerAuth, AddAuth },
+  components: {
+    UpdateUser,
+    ManageProducerAuth,
+    ManageConsumerAuth,
+    AddAuth,
+    AclDetail,
+  },
   data() {
     return {
       queryParam: {},
@@ -156,6 +188,12 @@ export default {
       openManageProducerAuthDialog: false,
       openManageConsumerAuthDialog: false,
       openAddAuthDialog: false,
+      openAclDetailDialog: false,
+      selectDetail: {
+        resourceName: "",
+        resourceType: "",
+        username: "",
+      },
     };
   },
   methods: {
@@ -223,6 +261,18 @@ export default {
       Object.assign(rowData, row);
       this.selectRow = rowData;
     },
+    onTopicDetail(topic, username) {
+      this.selectDetail.resourceType = "TOPIC";
+      this.selectDetail.resourceName = topic;
+      this.selectDetail.username = username;
+      this.openAclDetailDialog = true;
+    },
+    onGroupDetail(group, username) {
+      this.selectDetail.resourceType = "GROUP";
+      this.selectDetail.resourceName = group;
+      this.selectDetail.username = username;
+      this.openAclDetailDialog = true;
+    },
     closeManageProducerAuthDialog() {
       this.openManageProducerAuthDialog = false;
       getAclList(this.data, this.queryParam);
@@ -233,6 +283,10 @@ export default {
     },
     closeAddAuthDialog() {
       this.openAddAuthDialog = false;
+      getAclList(this.data, this.queryParam);
+    },
+    closeAclDetailDialog() {
+      this.openAclDetailDialog = false;
       getAclList(this.data, this.queryParam);
     },
   },
@@ -265,8 +319,8 @@ function getAclList(data, requestParameters) {
       data.push({
         key: k,
         username: k,
-        topicList: topicList.join(", "),
-        groupList: groupList.join(", "),
+        topicList: topicList,
+        groupList: groupList,
         user: response.data.map[k]["USER"],
       });
     }
@@ -275,8 +329,20 @@ function getAclList(data, requestParameters) {
 
 const columns = [
   { title: "用户名", dataIndex: "username", key: "username" },
-  { title: "topic列表", dataIndex: "topicList", key: "topicList" },
-  { title: "消费组列表", dataIndex: "groupList", key: "groupList" },
+  {
+    title: "topic列表",
+    dataIndex: "topicList",
+    key: "topicList",
+    slots: { title: "topicList" },
+    scopedSlots: { customRender: "topicList" },
+  },
+  {
+    title: "消费组列表",
+    dataIndex: "groupList",
+    key: "groupList",
+    slots: { title: "groupList" },
+    scopedSlots: { customRender: "groupList" },
+  },
   {
     title: "操作",
     key: "operation",

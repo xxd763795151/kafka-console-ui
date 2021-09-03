@@ -28,9 +28,9 @@ public class AclAuthController {
     @Autowired
     private AclService aclService;
 
-    @GetMapping
-    public Object getAclList() {
-        return aclService.getAclList();
+    @PostMapping("/detail")
+    public Object getAclDetailList(@RequestBody QueryAclDTO param) {
+        return aclService.getAclDetailList(param.toEntry());
     }
 
     @GetMapping("/operation/list")
