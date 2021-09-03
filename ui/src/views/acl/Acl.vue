@@ -53,7 +53,11 @@
         ></UpdateUser>
       </div>
       <a-table :columns="columns" :data-source="data" bordered>
-        <a slot="operation" slot-scope="record">
+        <a
+          slot="operation"
+          slot-scope="record"
+          v-show="!record.user || record.user.role != 'admin'"
+        >
           <a-popconfirm
             :title="'删除用户: ' + record.username + '及相关权限？'"
             ok-text="确认"
@@ -241,6 +245,7 @@ function getAclList(data, requestParameters) {
         username: k,
         topicList: topicList.join(", "),
         groupList: groupList.join(", "),
+        user: response.data.map[k]["USER"],
       });
     }
   });

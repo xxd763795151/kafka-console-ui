@@ -88,9 +88,15 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
         List<AclBinding> aclBindingList = entry.isNull() ? aclConsole.getAclList(null) : aclConsole.getAclList(entry);
         List<AclEntry> entryList = aclBindingList.stream().map(x -> AclEntry.valueOf(x)).collect(Collectors.toList());
         Map<String, List<AclEntry>> entryMap = entryList.stream().collect(Collectors.groupingBy(AclEntry::getPrincipal));
-        Map<String, Map<String, List<AclEntry>>> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
         entryMap.forEach((k, v) -> {
             Map<String, List<AclEntry>> map = v.stream().collect(Collectors.groupingBy(e -> e.getResourceType() + "#" + e.getName()));
+            if (k.equals(kafkaConfig.getAdminUsername())) {
+                Map<String, Object> map2 = new HashMap<>(map);
+                Map<String, Object> userMap = new HashMap<>();
+                userMap.put("role", "admin");
+                map2.put("USER", userMap);
+            }
             resultMap.put(k, map);
         });
         if (entry.isNull() || StringUtils.isNotBlank(entry.getPrincipal())) {
@@ -98,7 +104,15 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
 
             detailList.values().forEach(u -> {
                 if (!resultMap.containsKey(u.name()) && !u.credentialInfos().isEmpty()) {
-                    resultMap.put(u.name(), Collections.emptyMap());
+                    if (!u.name().equals(kafkaConfig.getAdminUsername())) {
+                        resultMap.put(u.name(), Collections.emptyMap());
+                    } else {
+                        Map<String, Object> map2 = new HashMap<>();
+                        Map<String, Object> userMap = new HashMap<>();
+                        userMap.put("role", "admin");
+                        map2.put("USER", userMap);
+                        resultMap.put(u.name(), map2);
+                    }
                 }
             });
         }

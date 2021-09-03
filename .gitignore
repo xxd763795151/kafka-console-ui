@@ -58,3 +58,6 @@ pnpm-debug.log*
 *.sln
 *.sw?
 /ui/node
+/logs
+/LOGGING_HOME_IS_UNDEFINED
+*.log
