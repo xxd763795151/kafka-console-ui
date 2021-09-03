@@ -1,24 +1,62 @@
 <configuration debug="false">
+    <springProperty scope="context" name="APPLICATION_NAME" source="spring.application.name"/>
+    <springProperty scope="context" name="LOGGING_HOME" source="logging.home"/>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
-        </layout>
+    <!-- 日志目录   -->
+    <property name="LOG_HOME" value="${LOGGING_HOME}/logs"/>
+    <!--    日志文件名-->
+    <property name="APP_NAME" value="${APPLICATION_NAME:-.}"/>
+
+    <!--    使用默认的输出格式-->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <appender name="DefaultAppender"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/${APP_NAME}.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/${APP_NAME}.%i.log.gz</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+        <!--        基于大小的滚动策略-->
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>20MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+    </appender>
+    <!--    异步输出-->
+    <appender name="AsyncFileAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="DefaultAppender"/>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
+    <root>
+        <level value="INFO"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="AsyncFileAppender"/>
     </root>
 
     <logger name="org.apache.kafka.clients.consumer" level="warn" additivity="false">
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="AsyncFileAppender"/>
+    </logger>
+
+    <logger name="org.apache.kafka.clients.consumer" level="warn" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="AsyncFileAppender"/>
     </logger>
 
     <logger name="org.apache.kafka.clients.admin.AdminClientConfig" level="warn" additivity="false">
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="AsyncFileAppender"/>
     </logger>
 
     <logger name="ch.qos.logback" level="error" additivity="false">
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="AsyncFileAppender"/>
     </logger>
 </configuration>

@@ -201,10 +201,6 @@ export default {
       Object.assign(rowData, row);
       this.selectRow = rowData;
     },
-    cancel(e) {
-      console.log(e);
-      this.$message.error("Click on No");
-    },
     closeManageProducerAuthDialog() {
       this.openManageProducerAuthDialog = false;
       getAclList(this.data, this.queryParam);

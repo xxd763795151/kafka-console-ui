@@ -1,7 +1,8 @@
 server:
   port: 7766
   servlet:
-    context-path: /kafka-console
+    # 不要修改context-path
+    context-path: /
 
 kafka:
   config:
@@ -16,6 +17,13 @@ kafka:
     admin-password: admin
     # 启动自动创建配置的超级管理员用户
     admin-create: true
+    # broker连接的zk地址
     zookeeper-addr: localhost:2181
     sasl-jaas-config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${kafka.config.admin-username}" password="${kafka.config.admin-password}";
 
+spring:
+  application:
+    name: kafka-console-ui
+
+logging:
+  home: ./
