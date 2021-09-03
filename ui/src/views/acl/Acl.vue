@@ -65,18 +65,16 @@
           <a
             href="javascript:;"
             class="operation-btn"
-            @click="onAddProducerAuth(record)"
-            >授予生产权限
-            <AddProducerAuth
-              :visible="openAddProducerAuthDialog"
+            @click="onManageProducerAuth(record)"
+            >管理生产权限
+            <ManageProducerAuth
+              :visible="openManageProducerAuthDialog"
               :record="selectRow"
-              @addProducerAuthDialog="closeAddProducerAuthDialog"
-            ></AddProducerAuth>
+              @manageProducerAuthDialog="closeManageProducerAuthDialog"
+            ></ManageProducerAuth>
           </a>
 
-          <a href="javascript:;" class="operation-btn">收回生产权限</a>
-          <a href="javascript:;" class="operation-btn">授予消费权限</a>
-          <a href="javascript:;" class="operation-btn">收回消费权限</a>
+          <a href="javascript:;" class="operation-btn">管理消费权限</a>
           <a href="javascript:;" class="operation-btn">增加权限</a>
         </a>
         <!--        <a-table-->
@@ -113,11 +111,11 @@ import request from "@/utils/request";
 import notification from "ant-design-vue/es/notification";
 import UpdateUser from "@/views/acl/UpdateUser";
 import { KafkaAclApi } from "@/utils/api";
-import AddProducerAuth from "@/views/acl/AddProducerAuth";
+import ManageProducerAuth from "@/views/acl/ManageProducerAuth";
 
 export default {
   name: "Acl",
-  components: { UpdateUser, AddProducerAuth },
+  components: { UpdateUser, ManageProducerAuth },
   data() {
     return {
       queryParam: {},
@@ -129,7 +127,7 @@ export default {
       form: this.$form.createForm(this, { name: "advanced_search" }),
       showUpdateUser: false,
       deleteUserConfirm: false,
-      openAddProducerAuthDialog: false,
+      openManageProducerAuthDialog: false,
     };
   },
   methods: {
@@ -179,19 +177,19 @@ export default {
         }
       });
     },
-    onAddProducerAuth(row) {
-      this.openAddProducerAuthDialog = true;
+    onManageProducerAuth(row) {
+      this.openManageProducerAuthDialog = true;
       const rowData = {};
       Object.assign(rowData, row);
       this.selectRow = rowData;
-      console.log("onAddProducerAuth user:", rowData);
     },
     cancel(e) {
       console.log(e);
       this.$message.error("Click on No");
     },
-    closeAddProducerAuthDialog() {
-      this.openAddProducerAuthDialog = false;
+    closeManageProducerAuthDialog() {
+      this.openManageProducerAuthDialog = false;
+      getAclList(this.data, this.queryParam);
     },
   },
   created() {

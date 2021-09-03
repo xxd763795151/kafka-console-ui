@@ -11,4 +11,12 @@ export const KafkaAclApi = {
     url: "/acl/list",
     method: "post",
   },
+  addProducerAuth: {
+    url: "/acl/producer",
+    method: "post",
+  },
+  deleteProducerAuth: {
+    url: "/acl/producer",
+    method: "delete",
+  },
 };
