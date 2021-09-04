@@ -23,7 +23,16 @@
           }
         "
         >>
-        <a slot="name" slot-scope="text">{{ text }}</a>
+        <a slot="action" slot-scope="record">
+          <a-popconfirm
+            :title="'删除操作权限: ' + record.operation + '？'"
+            ok-text="确认"
+            cancel-text="取消"
+            @confirm="onDelete(record)"
+          >
+            <a-button>删除</a-button>
+          </a-popconfirm>
+        </a>
       </a-table>
     </div>
   </a-modal>
@@ -98,8 +107,23 @@ export default {
           this.$message.error(res.msg);
         } else {
           this.data = res.data.list;
-          // this.data.slice(0, data.length);
-          // this.data.push(...res.data.list);
+        }
+      });
+    },
+    onDelete(record) {
+      const param = Object.assign({}, record);
+      delete param["null"];
+      const api = KafkaAclApi.deleteAcl;
+      request({
+        url: api.url,
+        method: api.method,
+        data: param,
+      }).then((res) => {
+        if (res.code != 0) {
+          this.$message.error(res.msg);
+        } else {
+          this.$message.success(res.msg);
+          this.getAclDetail();
         }
       });
     },

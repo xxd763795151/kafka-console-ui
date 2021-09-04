@@ -121,6 +121,10 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
         }).asInstanceOf[Boolean]
     }
 
+    def deleteAcl(entry: AclEntry): Boolean = {
+        deleteAcl(Collections.singleton(entry.toAclBindingFilter))
+    }
+
     def deleteUserAcl(entry: AclEntry): Boolean = {
         val filter: AclBindingFilter = entry.toAclBindingFilter
         val delFilter = new AclBindingFilter(new ResourcePatternFilter(ResourceType.ANY, null, filter.patternFilter().patternType()),

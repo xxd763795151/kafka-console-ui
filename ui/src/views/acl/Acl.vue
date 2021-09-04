@@ -328,7 +328,7 @@ function getAclList(data, requestParameters) {
 }
 
 const columns = [
-  { title: "用户名", dataIndex: "username", key: "username" },
+  { title: "用户名", dataIndex: "username", key: "username", width: 200 },
   {
     title: "topic列表",
     dataIndex: "topicList",
@@ -347,6 +347,7 @@ const columns = [
     title: "操作",
     key: "operation",
     scopedSlots: { customRender: "operation" },
+    width: 350,
   },
 ];
 

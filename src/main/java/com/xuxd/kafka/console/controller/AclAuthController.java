@@ -73,6 +73,17 @@ public class AclAuthController {
     }
 
     /**
+     * delete acl .
+     *
+     * @param entry entry
+     * @return
+     */
+    @DeleteMapping
+    public Object deleteAclByUser(@RequestBody AclEntry entry) {
+        return aclService.deleteAcl(entry);
+    }
+
+    /**
      * delete user acl .
      *
      * @param param entry.username

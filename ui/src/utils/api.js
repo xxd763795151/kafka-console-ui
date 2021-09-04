@@ -39,4 +39,8 @@ export const KafkaAclApi = {
     url: "/acl/detail",
     method: "post",
   },
+  deleteAcl: {
+    url: "/acl",
+    method: "delete",
+  },
 };

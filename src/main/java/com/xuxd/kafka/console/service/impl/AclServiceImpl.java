@@ -123,7 +123,7 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
     }
 
     @Override public ResponseData deleteAcl(AclEntry entry) {
-        return aclConsole.deleteAcl(entry, false, false, false) ? ResponseData.create().success() : ResponseData.create().failed();
+        return aclConsole.deleteAcl(entry) ? ResponseData.create().success() : ResponseData.create().failed();
     }
 
     @Override public ResponseData addAcl(AclEntry entry) {
