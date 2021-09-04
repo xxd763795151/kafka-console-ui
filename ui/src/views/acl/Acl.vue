@@ -59,7 +59,7 @@
             v-for="t in topicList"
             :key="t"
             @click="onTopicDetail(t, record.username)"
-            >{{ t }},
+            ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
           </a>
           <AclDetail
             :visible="openAclDetailDialog"
@@ -74,7 +74,7 @@
             v-for="t in groupList"
             :key="t"
             @click="onGroupDetail(t, record.username)"
-            >{{ t }},
+            ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
           </a>
         </a>
 
@@ -323,6 +323,7 @@ function getAclList(data, requestParameters) {
         groupList: groupList,
         user: response.data.map[k]["USER"],
       });
+      data.sort((a, b) => a.username.localeCompare(b.username));
     }
   });
 }
