@@ -53,7 +53,23 @@
         ></UpdateUser>
       </div>
       <a-table :columns="columns" :data-source="data" bordered>
-        <a slot="topicList" slot-scope="topicList, record">
+        <div slot="username" slot-scope="username">
+          <span>{{ username }}</span
+          ><a-button
+            size="small"
+            shape="round"
+            type="dashed"
+            style="float: right"
+            @click="onUserDetail(username)"
+            >详情</a-button
+          >
+          <UserDetail
+            :visible="openUserDetailDialog"
+            @userDetailDialog="closeUserDetailDialog"
+          ></UserDetail>
+        </div>
+
+        <div slot="topicList" slot-scope="topicList, record">
           <a
             href="#"
             v-for="t in topicList"
@@ -66,9 +82,9 @@
             :selectDetail="selectDetail"
             @aclDetailDialog="closeAclDetailDialog"
           ></AclDetail>
-        </a>
+        </div>
 
-        <a slot="groupList" slot-scope="groupList, record">
+        <div slot="groupList" slot-scope="groupList, record">
           <a
             href="#"
             v-for="t in groupList"
@@ -76,9 +92,9 @@
             @click="onGroupDetail(t, record.username)"
             ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
           </a>
-        </a>
+        </div>
 
-        <a
+        <div
           slot="operation"
           slot-scope="record"
           v-show="!record.user || record.user.role != 'admin'"
@@ -89,9 +105,12 @@
             cancel-text="取消"
             @confirm="onDeleteUser(record)"
           >
-            <a href="javascript:;" class="operation-btn">删除</a>
+            <a-button size="small" href="javascript:;" class="operation-btn"
+              >删除</a-button
+            >
           </a-popconfirm>
-          <a
+          <a-button
+            size="small"
             href="javascript:;"
             class="operation-btn"
             @click="onManageProducerAuth(record)"
@@ -101,9 +120,10 @@
               :record="selectRow"
               @manageProducerAuthDialog="closeManageProducerAuthDialog"
             ></ManageProducerAuth>
-          </a>
+          </a-button>
 
-          <a
+          <a-button
+            size="small"
             href="javascript:;"
             class="operation-btn"
             @click="onManageConsumerAuth(record)"
@@ -113,8 +133,9 @@
               :record="selectRow"
               @manageConsumerAuthDialog="closeManageConsumerAuthDialog"
             ></ManageConsumerAuth>
-          </a>
-          <a
+          </a-button>
+          <a-button
+            size="small"
             href="javascript:;"
             class="operation-btn"
             @click="onAddAuth(record)"
@@ -124,32 +145,8 @@
               :record="selectRow"
               @addAuthDialog="closeAddAuthDialog"
             ></AddAuth>
-          </a>
-        </a>
-        <!--                <a-table-->
-        <!--                  slot="expandedRowRender"-->
-        <!--                  slot-scope="{}"-->
-        <!--                  :columns="innerColumns"-->
-        <!--                  :data-source="innerData"-->
-        <!--                  :pagination="false"-->
-        <!--                >-->
-        <!--                  <span slot="status" slot-scope="{}"> <a-badge status="success" />Finished </span>-->
-        <!--                  <span slot="operation" slot-scope="{}" class="table-operation">-->
-        <!--                    <a>Pause</a>-->
-        <!--                    <a>Stop</a>-->
-        <!--                    <a-dropdown>-->
-        <!--                      <a-menu slot="overlay">-->
-        <!--                        <a-menu-item>-->
-        <!--                          Action 1-->
-        <!--                        </a-menu-item>-->
-        <!--                        <a-menu-item>-->
-        <!--                          Action 2-->
-        <!--                        </a-menu-item>-->
-        <!--                      </a-menu>-->
-        <!--                      <a> More <a-icon type="down" /> </a>-->
-        <!--                    </a-dropdown>-->
-        <!--                  </span>-->
-        <!--                </a-table>-->
+          </a-button>
+        </div>
       </a-table>
     </div>
   </div>
@@ -164,6 +161,7 @@ import ManageProducerAuth from "@/views/acl/ManageProducerAuth";
 import ManageConsumerAuth from "@/views/acl/ManageConsumerAuth";
 import AddAuth from "@/views/acl/AddAuth";
 import AclDetail from "@/views/acl/AclDetail";
+import UserDetail from "@/views/acl/UserDetail";
 
 export default {
   name: "Acl",
@@ -173,14 +171,13 @@ export default {
     ManageConsumerAuth,
     AddAuth,
     AclDetail,
+    UserDetail,
   },
   data() {
     return {
       queryParam: {},
       data: [],
       columns,
-      innerColumns,
-      innerData,
       selectRow: {},
       form: this.$form.createForm(this, { name: "advanced_search" }),
       showUpdateUser: false,
@@ -189,6 +186,7 @@ export default {
       openManageConsumerAuthDialog: false,
       openAddAuthDialog: false,
       openAclDetailDialog: false,
+      openUserDetailDialog: false,
       selectDetail: {
         resourceName: "",
         resourceType: "",
@@ -273,6 +271,10 @@ export default {
       this.selectDetail.username = username;
       this.openAclDetailDialog = true;
     },
+    onUserDetail(username) {
+      this.selectDetail.username = username;
+      this.openUserDetailDialog = true;
+    },
     closeManageProducerAuthDialog() {
       this.openManageProducerAuthDialog = false;
       getAclList(this.data, this.queryParam);
@@ -288,6 +290,9 @@ export default {
     closeAclDetailDialog() {
       this.openAclDetailDialog = false;
       getAclList(this.data, this.queryParam);
+    },
+    closeUserDetailDialog() {
+      this.openUserDetailDialog = false;
     },
   },
   created() {
@@ -329,7 +334,14 @@ function getAclList(data, requestParameters) {
 }
 
 const columns = [
-  { title: "用户名", dataIndex: "username", key: "username", width: 200 },
+  {
+    title: "用户名",
+    dataIndex: "username",
+    key: "username",
+    width: 300,
+    slots: { title: "username" },
+    scopedSlots: { customRender: "username" },
+  },
   {
     title: "topic列表",
     dataIndex: "topicList",
@@ -348,32 +360,9 @@ const columns = [
     title: "操作",
     key: "operation",
     scopedSlots: { customRender: "operation" },
-    width: 350,
+    width: 500,
   },
 ];
-
-const innerColumns = [
-  { title: "Date", dataIndex: "date", key: "date" },
-  { title: "Name", dataIndex: "name", key: "name" },
-  { title: "Status", key: "state", scopedSlots: { customRender: "status" } },
-  { title: "Upgrade Status", dataIndex: "upgradeNum", key: "upgradeNum" },
-  {
-    title: "Action",
-    dataIndex: "operation",
-    key: "operation",
-    scopedSlots: { customRender: "operation" },
-  },
-];
-
-const innerData = [];
-for (let i = 0; i < 3; ++i) {
-  innerData.push({
-    key: i,
-    date: "2014-12-24 23:12:00",
-    name: "This is production name",
-    upgradeNum: "Upgraded: 56",
-  });
-}
 </script>
 
 <style scoped>
@@ -422,6 +411,6 @@ for (let i = 0; i < 3; ++i) {
 }
 
 .operation-btn {
-  margin-right: 1%;
+  margin-right: 3%;
 }
 </style>

@@ -40,4 +40,6 @@ public interface AclService {
 
     ResponseData getOperationList();
 
+    ResponseData getUserDetail(String username);
+
 }

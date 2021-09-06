@@ -181,6 +181,18 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
         return ResponseData.create().data(operations).success();
     }
 
+    @Override public ResponseData getUserDetail(String username) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("username", username);
+        List<KafkaUserDO> dos = kafkaUserMapper.selectByMap(param);
+        if (dos.isEmpty()) {
+            return ResponseData.create().data(new CounterList<>(dos)).success("Retrieved the user info is null.");
+        }
+        // check for consistency.
+
+        return null;
+    }
+
     @Override public void afterSingletonsInstantiated() {
         if (kafkaConfig.isAdminCreate()) {
             log.info("Start create admin user, username: {}, password: {}", kafkaConfig.getAdminUsername(), kafkaConfig.getAdminPassword());

@@ -7,10 +7,8 @@ import java.util.{Properties, Set}
 import com.xuxd.kafka.console.config.KafkaConfig
 import kafka.server.ConfigType
 import kafka.utils.Implicits.PropertiesOps
-import kafka.zk.{AdminZkClient, KafkaZkClient}
 import org.apache.kafka.clients.admin._
 import org.apache.kafka.common.security.scram.internals.{ScramCredentialUtils, ScramFormatter}
-import org.apache.kafka.common.utils.Time
 
 /**
  * kafka-console-ui.
@@ -51,27 +49,24 @@ class KafkaConfigConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
     }
 
     def addOrUpdateUserWithZK(name: String, pass: String): Boolean = {
+        withZKClient(adminZkClient => {
+            try {
+                val credential = new ScramFormatter(org.apache.kafka.common.security.scram.internals.ScramMechanism.forMechanismName(config.getSaslMechanism))
+                    .generateCredential(pass, defaultIterations)
+                val credentialStr = ScramCredentialUtils.credentialToString(credential)
 
-        val zkClient = KafkaZkClient(config.getZookeeperAddr, false, 30000, 30000, Int.MaxValue, Time.SYSTEM)
-        val adminZkClient = new AdminZkClient(zkClient)
-        try {
-            val credential = new ScramFormatter(org.apache.kafka.common.security.scram.internals.ScramMechanism.forMechanismName(config.getSaslMechanism))
-                .generateCredential(pass, defaultIterations)
-            val credentialStr = ScramCredentialUtils.credentialToString(credential)
+                val userConfig: Properties = new Properties()
+                userConfig.put(config.getSaslMechanism, credentialStr)
 
-            val userConfig: Properties = new Properties()
-            userConfig.put(config.getSaslMechanism, credentialStr)
-
-            val configs = adminZkClient.fetchEntityConfig(ConfigType.User, name)
-            userConfig ++= configs
-            adminZkClient.changeConfigs(ConfigType.User, name, userConfig)
-            true
-        } catch {
-            case e: Exception => log.error("addOrUpdateAdminWithZK error.", e)
-                false
-        } finally {
-            zkClient.close()
-        }
+                val configs = adminZkClient.fetchEntityConfig(ConfigType.User, name)
+                userConfig ++= configs
+                adminZkClient.changeConfigs(ConfigType.User, name, userConfig)
+                true
+            } catch {
+                case e: Exception => log.error("addOrUpdateAdminWithZK error.", e)
+                    false
+            }
+        }).asInstanceOf[Boolean]
     }
 
     def deleteUser(name: String): (Boolean, String) = {
