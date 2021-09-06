@@ -4,7 +4,9 @@ import com.xuxd.kafka.console.beans.AclEntry;
 import com.xuxd.kafka.console.beans.CounterList;
 import com.xuxd.kafka.console.beans.CounterMap;
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.dos.KafkaUserDO;
 import com.xuxd.kafka.console.config.KafkaConfig;
+import com.xuxd.kafka.console.dao.KafkaUserMapper;
 import com.xuxd.kafka.console.service.AclService;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.UserScramCredentialsDescription;
 import org.apache.kafka.common.acl.AclBinding;
 import org.apache.kafka.common.acl.AclOperation;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +47,12 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
     @Autowired
     private KafkaConfig kafkaConfig;
 
+    private final KafkaUserMapper kafkaUserMapper;
+
+    public AclServiceImpl(ObjectProvider<KafkaUserMapper> kafkaUserMapper) {
+        this.kafkaUserMapper = kafkaUserMapper.getIfAvailable();
+    }
+
     @Override public ResponseData<Set<String>> getUserList() {
         try {
             return ResponseData.create(Set.class).data(configConsole.getUserList(null)).success();
@@ -55,7 +64,24 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
 
     @Override public ResponseData addOrUpdateUser(String name, String pass) {
         log.info("add or update user, username: {}, password: {}", name, pass);
-        return configConsole.addOrUpdateUser(name, pass) ? ResponseData.create().success() : ResponseData.create().failed();
+        if (!configConsole.addOrUpdateUser(name, pass)) {
+            log.error("add user to kafka failed.");
+            return ResponseData.create().failed("add user to kafka failed");
+        }
+        // save user info to database.
+        KafkaUserDO userDO = new KafkaUserDO();
+        userDO.setUsername(name);
+        userDO.setPassword(pass);
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("username", name);
+            kafkaUserMapper.deleteByMap(map);
+            kafkaUserMapper.insert(userDO);
+        }catch (Exception e) {
+            log.error("kafkaUserMapper.insert error.", e);
+            return ResponseData.create().failed(e.getMessage());
+        }
+        return ResponseData.create().success();
     }
 
     @Override public ResponseData deleteUser(String name) {

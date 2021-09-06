@@ -24,6 +24,26 @@ kafka:
 spring:
   application:
     name: kafka-console-ui
+  # h2 database
+  datasource:
+#    url: jdbc:h2:file:/data/demo
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+    schema: classpath:db/schema-h2.sql
+#    data: classpath:db/data-h2.sql
+  h2:
+    console:
+      enabled: true
+
 
 logging:
   home: ./
+
+cron:
+#  clear-dirty-user: 0 * * * * ?
+  clear-dirty-user: 0 0 1 * * ?
+
+
+#spring.jpa.database-platform=org.hibernate.dialect.H2Dialect

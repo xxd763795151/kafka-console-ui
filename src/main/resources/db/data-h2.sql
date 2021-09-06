@@ -1,0 +1,5 @@
+-- DELETE FROM t_kafka_user;
+--
+-- INSERT INTO t_kafka_user (id, username, password) VALUES
+-- (1, 'Jone', 'p1'),
+-- (2, 'Jack', 'p2');
