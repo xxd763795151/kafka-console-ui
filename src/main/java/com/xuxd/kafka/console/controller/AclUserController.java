@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -42,5 +43,10 @@ public class AclUserController {
     @DeleteMapping("/auth")
     public Object deleteUserAndAuth(@RequestBody AclUser user) {
         return aclService.deleteUserAndAuth(user.getUsername());
+    }
+
+    @GetMapping("/detail")
+    public Object getUserDetail(@RequestParam String username) {
+        return aclService.getUserDetail(username);
     }
 }

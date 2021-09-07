@@ -4,10 +4,7 @@
     :visible="show"
     :confirm-loading="confirmLoading"
     :width="1200"
-    @ok="handleOk"
     @cancel="handleCancel"
-    okText="提交"
-    cancelText="取消"
     :mask="false"
     :destroyOnClose="true"
     :footer="null"
@@ -69,32 +66,8 @@ export default {
     },
   },
   methods: {
-    handleOk() {
-      const form = this.form;
-      form.validateFields((e, v) => {
-        if (e) {
-          return;
-        }
-        const param = Object.assign({}, v);
-        const api = KafkaAclApi.addAclAuth;
-        this.confirmLoading = true;
-        request({
-          url: api.url,
-          method: api.method,
-          data: param,
-        }).then((res) => {
-          this.confirmLoading = false;
-          if (res.code == 0) {
-            this.$message.success(res.msg);
-            this.$emit("aclDetailDialog", v);
-          } else {
-            this.$message.error(res.msg);
-          }
-        });
-      });
-    },
     handleCancel() {
-      this.$emit("aclDetailDialog", {});
+      this.$emit("aclDetailDialog", { refresh: true });
     },
     getAclDetail() {
       const api = KafkaAclApi.getAclDetailList;

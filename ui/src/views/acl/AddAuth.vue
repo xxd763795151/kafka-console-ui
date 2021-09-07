@@ -98,7 +98,12 @@ export default {
   },
   watch: {
     visible(v) {
-      this.show = v;
+      if (this.show != v) {
+        this.show = v;
+        if (this.show) {
+          this.getOperationList();
+        }
+      }
     },
   },
   methods: {
@@ -119,7 +124,7 @@ export default {
           this.confirmLoading = false;
           if (res.code == 0) {
             this.$message.success(res.msg);
-            this.$emit("addAuthDialog", v);
+            this.$emit("addAuthDialog", { refresh: true });
           } else {
             this.$message.error(res.msg);
           }
@@ -127,21 +132,21 @@ export default {
       });
     },
     handleCancel() {
-      this.$emit("addAuthDialog", {});
+      this.$emit("addAuthDialog", { refresh: false });
     },
-  },
-  beforeMount() {
-    request({
-      url: KafkaAclApi.getOperationList.url,
-      method: KafkaAclApi.getOperationList.method,
-    }).then((res) => {
-      if (res.code != 0) {
-        this.$message.error(res.msg);
-      } else {
-        operationList.splice(0, operationList.length);
-        operationList.push(...res.data);
-      }
-    });
+    getOperationList() {
+      request({
+        url: KafkaAclApi.getOperationList.url,
+        method: KafkaAclApi.getOperationList.method,
+      }).then((res) => {
+        if (res.code != 0) {
+          this.$message.error(res.msg);
+        } else {
+          operationList.splice(0, operationList.length);
+          operationList.push(...res.data);
+        }
+      });
+    },
   },
 };
 const operationList = [];

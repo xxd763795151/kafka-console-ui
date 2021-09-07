@@ -3,6 +3,10 @@ export const KafkaAclApi = {
     url: "/user",
     method: "post",
   },
+  getKafkaUserDetail: {
+    url: "/user/detail",
+    method: "get",
+  },
   deleteKafkaUser: {
     url: "/user/auth",
     method: "delete",

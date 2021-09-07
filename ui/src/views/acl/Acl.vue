@@ -63,10 +63,6 @@
             @click="onUserDetail(username)"
             >详情</a-button
           >
-          <UserDetail
-            :visible="openUserDetailDialog"
-            @userDetailDialog="closeUserDetailDialog"
-          ></UserDetail>
         </div>
 
         <div slot="topicList" slot-scope="topicList, record">
@@ -77,11 +73,6 @@
             @click="onTopicDetail(t, record.username)"
             ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
           </a>
-          <AclDetail
-            :visible="openAclDetailDialog"
-            :selectDetail="selectDetail"
-            @aclDetailDialog="closeAclDetailDialog"
-          ></AclDetail>
         </div>
 
         <div slot="groupList" slot-scope="groupList, record">
@@ -115,11 +106,6 @@
             class="operation-btn"
             @click="onManageProducerAuth(record)"
             >管理生产权限
-            <ManageProducerAuth
-              :visible="openManageProducerAuthDialog"
-              :record="selectRow"
-              @manageProducerAuthDialog="closeManageProducerAuthDialog"
-            ></ManageProducerAuth>
           </a-button>
 
           <a-button
@@ -128,11 +114,6 @@
             class="operation-btn"
             @click="onManageConsumerAuth(record)"
             >管理消费权限
-            <ManageConsumerAuth
-              :visible="openManageConsumerAuthDialog"
-              :record="selectRow"
-              @manageConsumerAuthDialog="closeManageConsumerAuthDialog"
-            ></ManageConsumerAuth>
           </a-button>
           <a-button
             size="small"
@@ -140,14 +121,34 @@
             class="operation-btn"
             @click="onAddAuth(record)"
             >增加权限
-            <AddAuth
-              :visible="openAddAuthDialog"
-              :record="selectRow"
-              @addAuthDialog="closeAddAuthDialog"
-            ></AddAuth>
           </a-button>
         </div>
       </a-table>
+      <UserDetail
+        :visible="openUserDetailDialog"
+        :username="selectDetail.username"
+        @userDetailDialog="closeUserDetailDialog"
+      ></UserDetail>
+      <AclDetail
+        :visible="openAclDetailDialog"
+        :selectDetail="selectDetail"
+        @aclDetailDialog="closeAclDetailDialog"
+      ></AclDetail>
+      <ManageProducerAuth
+        :visible="openManageProducerAuthDialog"
+        :record="selectRow"
+        @manageProducerAuthDialog="closeManageProducerAuthDialog"
+      ></ManageProducerAuth>
+      <ManageConsumerAuth
+        :visible="openManageConsumerAuthDialog"
+        :record="selectRow"
+        @manageConsumerAuthDialog="closeManageConsumerAuthDialog"
+      ></ManageConsumerAuth>
+      <AddAuth
+        :visible="openAddAuthDialog"
+        :record="selectRow"
+        @addAuthDialog="closeAddAuthDialog"
+      ></AddAuth>
     </div>
   </div>
 </template>
@@ -283,13 +284,17 @@ export default {
       this.openManageConsumerAuthDialog = false;
       getAclList(this.data, this.queryParam);
     },
-    closeAddAuthDialog() {
+    closeAddAuthDialog(p) {
       this.openAddAuthDialog = false;
-      getAclList(this.data, this.queryParam);
+      if (p.refresh) {
+        getAclList(this.data, this.queryParam);
+      }
     },
-    closeAclDetailDialog() {
+    closeAclDetailDialog(p) {
       this.openAclDetailDialog = false;
-      getAclList(this.data, this.queryParam);
+      if (p.refresh) {
+        getAclList(this.data, this.queryParam);
+      }
     },
     closeUserDetailDialog() {
       this.openUserDetailDialog = false;

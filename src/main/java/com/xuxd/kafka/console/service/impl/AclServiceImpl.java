@@ -5,6 +5,7 @@ import com.xuxd.kafka.console.beans.CounterList;
 import com.xuxd.kafka.console.beans.CounterMap;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.KafkaUserDO;
+import com.xuxd.kafka.console.beans.vo.KafkaUserDetailVO;
 import com.xuxd.kafka.console.config.KafkaConfig;
 import com.xuxd.kafka.console.dao.KafkaUserMapper;
 import com.xuxd.kafka.console.service.AclService;
@@ -77,7 +78,7 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
             map.put("username", name);
             kafkaUserMapper.deleteByMap(map);
             kafkaUserMapper.insert(userDO);
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("kafkaUserMapper.insert error.", e);
             return ResponseData.create().failed(e.getMessage());
         }
@@ -107,7 +108,7 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
     }
 
     @Override public ResponseData getAclDetailList(AclEntry entry) {
-        List<AclBinding> aclBindingList = entry ==null || entry.isNull() ? aclConsole.getAclList(null) : aclConsole.getAclList(entry);
+        List<AclBinding> aclBindingList = entry == null || entry.isNull() ? aclConsole.getAclList(null) : aclConsole.getAclList(entry);
 
         return ResponseData.create().data(new CounterList<>(aclBindingList.stream().map(x -> AclEntry.valueOf(x)).collect(Collectors.toList()))).success();
     }
@@ -182,15 +183,26 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
     }
 
     @Override public ResponseData getUserDetail(String username) {
+
+        KafkaUserDetailVO vo = new KafkaUserDetailVO();
+        vo.setUsername(username);
+        Map<String, UserScramCredentialsDescription> detailList = configConsole.getUserDetailList(Collections.singletonList(username));
+        if (!detailList.isEmpty() && detailList.containsKey(username)) {
+            UserScramCredentialsDescription description = detailList.get(username);
+            String credentialInfo = StringUtils.join(description.credentialInfos(), ";");
+            vo.setCredentialInfos(credentialInfo);
+        }
         Map<String, Object> param = new HashMap<>();
         param.put("username", username);
         List<KafkaUserDO> dos = kafkaUserMapper.selectByMap(param);
         if (dos.isEmpty()) {
-            return ResponseData.create().data(new CounterList<>(dos)).success("Retrieved the user info is null.");
+            vo.setConsistencyDescription("Password is null.");
+        } else {
+            vo.setPassword(dos.stream().findFirst().get().getPassword());
         }
         // check for consistency.
 
-        return null;
+        return ResponseData.create().data(vo).success();
     }
 
     @Override public void afterSingletonsInstantiated() {
