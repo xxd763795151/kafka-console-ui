@@ -1,6 +1,8 @@
 # kafka可视化管理平台
-目前支持部分acl功能管理操作  
+目前支持acl：SASL认证机制及受权管理操作  
 实现：spring boot + scala + vue + kafka  
+## kafka版本
+* kafka 2.8.0
 # 打包、部署
 ## 打包
 环境要求  

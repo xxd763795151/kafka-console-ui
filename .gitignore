@@ -61,3 +61,4 @@ pnpm-debug.log*
 /logs
 /LOGGING_HOME_IS_UNDEFINED
 *.log
+/data

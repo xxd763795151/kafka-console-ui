@@ -199,8 +199,10 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
             vo.setConsistencyDescription("Password is null.");
         } else {
             vo.setPassword(dos.stream().findFirst().get().getPassword());
+            // check for consistency.
+            boolean consistent = configConsole.isPassConsistent(username, vo.getPassword());
+            vo.setConsistencyDescription(consistent ? "Consistent" : "Password is not consistent.");
         }
-        // check for consistency.
 
         return ResponseData.create().data(vo).success();
     }

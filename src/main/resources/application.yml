@@ -26,13 +26,14 @@ spring:
     name: kafka-console-ui
   # h2 database
   datasource:
-#    url: jdbc:h2:file:/data/demo
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:file:${data.dir:${user.dir}}/data/db/kafak-console
+#    url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
-    username: sa
-    password: password
+    username: kafka
+    password: 1234567890
     schema: classpath:db/schema-h2.sql
 #    data: classpath:db/data-h2.sql
+    initialization-mode: always
   h2:
     console:
       enabled: true

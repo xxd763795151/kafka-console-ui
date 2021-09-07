@@ -1,5 +1,6 @@
 package kafka.console
 
+import java.security.MessageDigest
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Properties, Set}
@@ -9,6 +10,8 @@ import kafka.server.ConfigType
 import kafka.utils.Implicits.PropertiesOps
 import org.apache.kafka.clients.admin._
 import org.apache.kafka.common.security.scram.internals.{ScramCredentialUtils, ScramFormatter}
+
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, DictionaryHasAsScala, SeqHasAsJava}
 
 /**
  * kafka-console-ui.
@@ -69,12 +72,41 @@ class KafkaConfigConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
         }).asInstanceOf[Boolean]
     }
 
+    /**
+     * password consistency check.
+     * return true: is consistent, or not.
+     */
+    def isPassConsistent(username: String, password: String): Boolean = {
+        withZKClient(zkClient => {
+            val entityConfig = zkClient.fetchEntityConfig(ConfigType.User, username)
+            log.info(entityConfig.toString)
+            var res: Boolean = false
+            entityConfig.asScala.foreach(e => {
+                val credential = ScramCredentialUtils.credentialFromString(e._2.asInstanceOf[String])
+                val scramFormatter = new ScramFormatter(org.apache.kafka.common.security.scram.internals.ScramMechanism.forMechanismName(e._1.asInstanceOf[String]))
+                val saltPassword = scramFormatter.saltedPassword(password, credential.salt(), credential.iterations())
+                val expectStoredKey = credential.storedKey()
+                val computedStoredKey = scramFormatter.storedKey(scramFormatter.clientKey(saltPassword))
+                res |= MessageDigest.isEqual(expectStoredKey, computedStoredKey)
+            })
+            res
+        }).asInstanceOf[Boolean]
+    }
+
     def deleteUser(name: String): (Boolean, String) = {
         withAdminClient(adminClient => {
             try {
-                adminClient.alterUserScramCredentials(util.Arrays.asList(
-                    new UserScramCredentialDeletion(name, ScramMechanism.fromMechanismName(config.getSaslMechanism))))
-                    .all().get(3000, TimeUnit.MILLISECONDS)
+                //                adminClient.alterUserScramCredentials(util.Arrays.asList(
+                //                    new UserScramCredentialDeletion(name, ScramMechanism.fromMechanismName(config.getSaslMechanism))))
+                //                    .all().get(3000, TimeUnit.MILLISECONDS)
+                // all delete
+                val userDetail = getUserDetailList(util.Collections.singletonList(name))
+                userDetail.values().asScala.foreach(u => {
+                    adminClient.alterUserScramCredentials(u.credentialInfos().asScala.map(s => new UserScramCredentialDeletion(u.name(), s.mechanism())
+                        .asInstanceOf[UserScramCredentialAlteration]).toList.asJava)
+                        .all().get(3000, TimeUnit.MILLISECONDS)
+                })
+
                 (true, null)
             } catch {
                 case ex: Exception => log.error("deleteUser error", ex)
