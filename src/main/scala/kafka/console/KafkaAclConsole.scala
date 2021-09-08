@@ -44,8 +44,10 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
                     if (StringUtils.isNotBlank(entry.getPrincipal()) && !KafkaPrincipal.ANONYMOUS.toString.equalsIgnoreCase(f.entryFilter().principal())) {
                         principal = f.entryFilter().principal();
                     }
+
+                    val host: String = if (entry.getHost != null) f.entryFilter().host() else null
                     val filter = new AclBindingFilter(new ResourcePatternFilter(resourceType, name, f.patternFilter().patternType()),
-                        new AccessControlEntryFilter(principal, f.entryFilter().host(), AclOperation.ANY, AclPermissionType.ANY))
+                        new AccessControlEntryFilter(principal, host, AclOperation.ANY, AclPermissionType.ANY))
                     log.info(filter.toString)
                     withAdminClient(adminClient => adminClient.describeAcls(filter).values().get()).asInstanceOf[List[AclBinding]]
                 }
