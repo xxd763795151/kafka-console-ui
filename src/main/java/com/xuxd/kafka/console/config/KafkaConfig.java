@@ -31,6 +31,8 @@ public class KafkaConfig {
 
     private String zookeeperAddr;
 
+    private boolean enableAcl;
+
     public String getBootstrapServer() {
         return bootstrapServer;
     }
@@ -101,5 +103,13 @@ public class KafkaConfig {
 
     public void setZookeeperAddr(String zookeeperAddr) {
         this.zookeeperAddr = zookeeperAddr;
+    }
+
+    public boolean isEnableAcl() {
+        return enableAcl;
+    }
+
+    public void setEnableAcl(boolean enableAcl) {
+        this.enableAcl = enableAcl;
     }
 }

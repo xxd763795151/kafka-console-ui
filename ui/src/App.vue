@@ -2,16 +2,39 @@
   <div id="app">
     <div id="nav">
       <router-link to="/" class="pad-l-r">主页</router-link>
-      |<router-link to="/acl" class="pad-l-r">Acl</router-link>
-      <!--      |<router-link-->
-      <!--        to="/topic"-->
-      <!--        class="pad-l-r"-->
-      <!--        >主题</router-link-->
-      <!--      >-->
+      <span>|</span
+      ><router-link to="/topic" class="pad-l-r">Topic</router-link>
+      <span>|</span
+      ><router-link to="/group" class="pad-l-r">消费组</router-link>
+      <span v-show="config.enableAcl">|</span
+      ><router-link to="/acl" class="pad-l-r" v-show="config.enableAcl"
+        >Acl</router-link
+      >
+      <span>|</span><router-link to="/op" class="pad-l-r">运维</router-link>
     </div>
     <router-view class="content" />
   </div>
 </template>
+<script>
+import { KafkaAclApi } from "@/utils/api";
+import request from "@/utils/request";
+
+export default {
+  data() {
+    return {
+      config: {},
+    };
+  },
+  created() {
+    request({
+      url: KafkaAclApi.getConfig.url,
+      method: KafkaAclApi.getConfig.method,
+    }).then((res) => {
+      this.config = res.data;
+    });
+  },
+};
+</script>
 
 <style>
 #app {

@@ -208,7 +208,7 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
     }
 
     @Override public void afterSingletonsInstantiated() {
-        if (kafkaConfig.isAdminCreate()) {
+        if (kafkaConfig.isEnableAcl() && kafkaConfig.isAdminCreate()) {
             log.info("Start create admin user, username: {}, password: {}", kafkaConfig.getAdminUsername(), kafkaConfig.getAdminPassword());
             boolean done = configConsole.addOrUpdateUserWithZK(kafkaConfig.getAdminUsername(), kafkaConfig.getAdminPassword());
             if (!done) {

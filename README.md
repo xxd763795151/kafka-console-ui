@@ -1,13 +1,23 @@
 # kafka可视化管理平台
-目前支持acl：SASL认证机制及受权管理操作  
-实现：spring boot + scala + vue + kafka  
+## 功能支持
+* 基于SASL_SCRAM认证授权管理
+* Topic管理
+* 消费组管理
+* 运维
+## 技术栈
+* spring boot 
+* java、scala 
+* kafka
+* h2  
+* vue 
 ## kafka版本
-* kafka 2.8.0
+* 当前使用的kafka 2.8.0
 # 打包、部署
 ## 打包
 环境要求  
 * maven 3+
 * jdk 8
+* git  
 ```
 git clone https://github.com/xxd763795151/kafka-console-ui.git
 cd kafka-console-ui

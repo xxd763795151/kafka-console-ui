@@ -9,6 +9,8 @@ kafka:
     # kafka broker地址，多个以逗号分隔
     bootstrap-server: 'localhost:9092'
     request-timeout-ms: 60000
+    # 服务端是否启用acl，如果不启用，下面的几项都忽略即可
+    enable-acl: true
     security-protocol: SASL_PLAINTEXT
     sasl-mechanism: SCRAM-SHA-256
     # 超级管理员用户名，在broker上已经配置为超级管理员

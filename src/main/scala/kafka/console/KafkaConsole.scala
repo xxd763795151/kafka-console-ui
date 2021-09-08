@@ -41,9 +41,11 @@ class KafkaConsole(config: KafkaConfig) {
         val props: Properties = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServer)
         props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, config.getRequestTimeoutMs())
-        props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, config.getSecurityProtocol())
-        props.put(SaslConfigs.SASL_MECHANISM, config.getSaslMechanism())
-        props.put(SaslConfigs.SASL_JAAS_CONFIG, config.getSaslJaasConfig())
+        if (config.isEnableAcl) {
+            props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, config.getSecurityProtocol())
+            props.put(SaslConfigs.SASL_MECHANISM, config.getSaslMechanism())
+            props.put(SaslConfigs.SASL_JAAS_CONFIG, config.getSaslJaasConfig())
+        }
 
         Admin.create(props)
     }

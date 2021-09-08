@@ -47,4 +47,8 @@ export const KafkaAclApi = {
     url: "/acl",
     method: "delete",
   },
+  getConfig: {
+    url: "/config",
+    method: "get",
+  },
 };
