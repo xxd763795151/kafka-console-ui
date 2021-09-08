@@ -2,6 +2,7 @@ package com.xuxd.kafka.console.config;
 
 import kafka.console.KafkaAclConsole;
 import kafka.console.KafkaConfigConsole;
+import kafka.console.TopicConsole;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,5 +23,10 @@ public class KafkaConfiguration {
     @Bean
     public KafkaAclConsole kafkaAclConsole(KafkaConfig config) {
         return new KafkaAclConsole(config);
+    }
+
+    @Bean
+    public TopicConsole topicConsole(KafkaConfig config) {
+        return new TopicConsole(config);
     }
 }

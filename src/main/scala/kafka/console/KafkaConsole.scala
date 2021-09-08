@@ -27,6 +27,14 @@ class KafkaConsole(config: KafkaConfig) {
         }
     }
 
+    protected def withAdminClientAndCatchError(f: Admin => Any, eh: Exception => Any): Any = {
+        try {
+            withAdminClient(f)
+        } catch {
+            case er: Exception => eh(er)
+        }
+    }
+
     protected def withZKClient(f: AdminZkClient => Any): Any = {
         val zkClient = KafkaZkClient(config.getZookeeperAddr, false, 30000, 30000, Int.MaxValue, Time.SYSTEM)
         val adminZkClient = new AdminZkClient(zkClient)
