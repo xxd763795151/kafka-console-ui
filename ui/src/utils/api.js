@@ -61,4 +61,8 @@ export const KafkaTopicApi = {
     url: "/topic/list",
     method: "get",
   },
+  deleteTopic: {
+    url: "/topic",
+    method: "delete",
+  },
 };

@@ -15,4 +15,5 @@ public interface TopicService {
 
     ResponseData getTopicList(String topic, TopicType type);
 
+    ResponseData deleteTopic(String topic);
 }

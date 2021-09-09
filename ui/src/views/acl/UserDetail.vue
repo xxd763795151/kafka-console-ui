@@ -8,12 +8,7 @@
     :footer="null"
     @cancel="handleCancel"
   >
-    <a-form
-      :form="form"
-      :label-col="{ span: 5 }"
-      :wrapper-col="{ span: 12 }"
-      @submit="handleSubmit"
-    >
+    <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
       <a-form-item label="用户名">
         <span>{{ user.username }}</span>
       </a-form-item>

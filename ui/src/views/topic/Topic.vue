@@ -59,7 +59,7 @@
             :title="'删除topic: ' + record.name + '？'"
             ok-text="确认"
             cancel-text="取消"
-            @confirm="handleReset(record)"
+            @confirm="deleteTopic(record.name)"
           >
             <a-button size="small" href="javascript:;" class="operation-btn"
               >删除</a-button
@@ -74,6 +74,7 @@
 <script>
 import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
+import notification from "ant-design-vue/es/notification";
 export default {
   name: "Topic",
   components: {},
@@ -111,6 +112,22 @@ export default {
         params: this.queryParam,
       }).then((res) => {
         this.data = res.data;
+      });
+    },
+    deleteTopic(topic) {
+      request({
+        url: KafkaTopicApi.deleteTopic.url + "?topic=" + topic,
+        method: KafkaTopicApi.deleteTopic.method,
+      }).then((res) => {
+        if (res.code == 0) {
+          this.$message.success(res.msg);
+          this.getTopicList();
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
       });
     },
   },

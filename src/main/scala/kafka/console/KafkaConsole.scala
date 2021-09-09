@@ -17,6 +17,8 @@ import org.apache.kafka.common.utils.Time
  * */
 class KafkaConsole(config: KafkaConfig) {
 
+    protected val timeoutMs: Int = 3000
+
     protected def withAdminClient(f: Admin => Any): Any = {
 
         val admin = createAdminClient()

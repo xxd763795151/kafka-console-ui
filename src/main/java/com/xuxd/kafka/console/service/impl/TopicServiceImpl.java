@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import scala.Tuple2;
 
 /**
  * kafka-console-ui.
@@ -63,5 +64,10 @@ public class TopicServiceImpl implements TopicService {
         topicDescriptions.sort(Comparator.comparing(TopicDescription::name));
 
         return ResponseData.create().data(topicDescriptions.stream().map(d -> TopicDescriptionVO.from(d))).success();
+    }
+
+    @Override public ResponseData deleteTopic(String topic) {
+        Tuple2<Object, String> tuple2 = topicConsole.deleteTopic(topic);
+        return (Boolean) tuple2._1 ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2);
     }
 }

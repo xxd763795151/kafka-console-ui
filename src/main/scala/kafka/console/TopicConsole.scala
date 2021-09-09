@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import java.util.{Collections, List, Set}
 
 import com.xuxd.kafka.console.config.KafkaConfig
-import org.apache.kafka.clients.admin.{ListTopicsOptions, TopicDescription}
+import org.apache.kafka.clients.admin.{DeleteTopicsOptions, ListTopicsOptions, TopicDescription}
 
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, SetHasAsJava}
 
@@ -54,5 +54,16 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
                 Collections.emptyList()
             }).asInstanceOf[List[TopicDescription]]
         }
+    }
+
+    def deleteTopic(topic: String): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            admin.deleteTopics(Collections.singleton(topic), new DeleteTopicsOptions().retryOnQuotaViolation(false)).all().get(timeoutMs, TimeUnit.MILLISECONDS)
+            (true, "")
+        },
+            e => {
+                log.error("delete topic error, topic: " + topic, e)
+                (false, e.getMessage)
+            }).asInstanceOf[(Boolean, String)]
     }
 }

@@ -3,6 +3,7 @@ package com.xuxd.kafka.console.controller;
 import com.xuxd.kafka.console.beans.enums.TopicType;
 import com.xuxd.kafka.console.service.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,5 +25,10 @@ public class TopicController {
     @GetMapping("/list")
     public Object getTopicList(@RequestParam(required = false) String topic, @RequestParam String type) {
         return topicService.getTopicList(topic, TopicType.valueOf(type.toUpperCase()));
+    }
+
+    @DeleteMapping
+    public Object deleteTopic(@RequestParam String topic) {
+        return topicService.deleteTopic(topic);
     }
 }
