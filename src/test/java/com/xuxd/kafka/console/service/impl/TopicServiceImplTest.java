@@ -1,7 +1,7 @@
 package com.xuxd.kafka.console.service.impl;
 
+import com.xuxd.kafka.console.beans.enums.TopicType;
 import com.xuxd.kafka.console.service.TopicService;
-import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,6 @@ public class TopicServiceImplTest {
 
     @Test
     public void getTopicList() {
-        log.info(topicService.getTopicList().getData().toString());
+        log.info(topicService.getTopicList(null, TopicType.ALL).getData().toString());
     }
 }

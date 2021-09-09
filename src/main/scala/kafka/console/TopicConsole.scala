@@ -7,6 +7,8 @@ import java.util.{Collections, List, Set}
 import com.xuxd.kafka.console.config.KafkaConfig
 import org.apache.kafka.clients.admin.{ListTopicsOptions, TopicDescription}
 
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, SetHasAsJava}
+
 /**
  * kafka-console-ui.
  *
@@ -15,11 +17,30 @@ import org.apache.kafka.clients.admin.{ListTopicsOptions, TopicDescription}
  * */
 class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig) with Logging {
 
-    def getTopicNameList(): Set[String] = {
-        withAdminClientAndCatchError(admin => admin.listTopics(new ListTopicsOptions().listInternal(true)).names()
+    /**
+     * get all topic name set.
+     *
+     * @return all topic name set.
+     */
+    def getTopicNameList(internal: Boolean = true): Set[String] = {
+        withAdminClientAndCatchError(admin => admin.listTopics(new ListTopicsOptions().listInternal(internal)).names()
             .get(3000, TimeUnit.MILLISECONDS),
             e => {
                 log.error("listTopics error.", e)
+                Collections.emptySet()
+            }).asInstanceOf[Set[String]]
+    }
+
+    /**
+     * get all internal topic name set.
+     *
+     * @return internal topic name set.
+     */
+    def getInternalTopicNameList(): Set[String] = {
+        withAdminClientAndCatchError(admin => admin.listTopics(new ListTopicsOptions().listInternal(true)).listings()
+            .get(3000, TimeUnit.MILLISECONDS).asScala.filter(_.isInternal).map(_.name()).toSet[String].asJava,
+            e => {
+                log.error("listInternalTopics error.", e)
                 Collections.emptySet()
             }).asInstanceOf[Set[String]]
     }

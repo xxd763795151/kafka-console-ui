@@ -7,7 +7,7 @@ server:
 kafka:
   config:
     # kafka broker地址，多个以逗号分隔
-#    bootstrap-server: 'localhost:9092'
+    bootstrap-server: 'localhost:9092'
     request-timeout-ms: 60000
     # 服务端是否启用acl，如果不启用，下面的几项都忽略即可
     enable-acl: true
@@ -17,7 +17,7 @@ kafka:
     # 超级管理员用户名，在broker上已经配置为超级管理员
     admin-username: admin
     # 超级管理员密码
-    admin-password: admin!QAZ
+    admin-password: admin
     # 启动自动创建配置的超级管理员用户
     admin-create: true
     # broker连接的zk地址
@@ -48,6 +48,3 @@ logging:
 cron:
 #  clear-dirty-user: 0 * * * * ?
   clear-dirty-user: 0 0 1 * * ?
-
-
-#spring.jpa.database-platform=org.hibernate.dialect.H2Dialect

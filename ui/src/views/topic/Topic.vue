@@ -17,6 +17,19 @@
                 />
               </a-form-item>
             </a-col>
+            <a-col :span="8">
+              <a-form-item :label="`类型`">
+                <a-select
+                  class="type-select"
+                  v-decorator="['type', { initialValue: 'all' }]"
+                  placeholder="Please select a country"
+                >
+                  <a-select-option value="all"> 所有 </a-select-option>
+                  <a-select-option value="normal"> 普通 </a-select-option>
+                  <a-select-option value="system"> 系统 </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
 
             <a-col :span="8" :style="{ textAlign: 'right' }">
               <a-form-item>
@@ -32,22 +45,18 @@
       <div class="operation-row-button">
         <a-button type="primary" @click="handleReset">新增/更新</a-button>
       </div>
-      <a-table :columns="columns" :data-source="data" bordered>
+      <a-table :columns="columns" :data-source="data" bordered row-key="name">
         <div slot="partitions" slot-scope="text">
           <a href="#">{{ text }} </a>
         </div>
 
         <div slot="internal" slot-scope="text">
-          <span v-if="text">是</span><span v-else>否</span>
+          <span v-if="text" style="color: red">是</span><span v-else>否</span>
         </div>
 
-        <div
-          slot="operation"
-          slot-scope="record"
-          v-show="!record.user || record.user.role != 'admin'"
-        >
+        <div slot="operation" slot-scope="record" v-show="!record.internal">
           <a-popconfirm
-            :title="'删除用户: ' + record.username + '及相关权限？'"
+            :title="'删除topic: ' + record.name + '？'"
             ok-text="确认"
             cancel-text="取消"
             @confirm="handleReset(record)"
@@ -70,11 +79,11 @@ export default {
   components: {},
   data() {
     return {
-      queryParam: {},
+      queryParam: { type: "all" },
       data: [],
       columns,
       selectRow: {},
-      form: this.$form.createForm(this, { name: "advanced_search" }),
+      form: this.$form.createForm(this, { name: "topic_advanced_search" }),
       showUpdateUser: false,
       deleteUserConfirm: false,
       selectDetail: {
@@ -87,20 +96,7 @@ export default {
   methods: {
     handleSearch(e) {
       e.preventDefault();
-      this.form.validateFields((error, values) => {
-        let queryParam = {};
-        if (values.username) {
-          queryParam.username = values.username;
-        }
-        if (values.topic) {
-          queryParam.resourceType = "TOPIC";
-          queryParam.resourceName = values.topic;
-        } else if (values.groupId) {
-          queryParam.resourceType = "GROUP";
-          queryParam.resourceName = values.groupId;
-        }
-        Object.assign(this.queryParam, queryParam);
-      });
+      this.getTopicList();
     },
 
     handleReset() {
@@ -108,9 +104,11 @@ export default {
     },
 
     getTopicList() {
+      Object.assign(this.queryParam, this.form.getFieldsValue());
       request({
         url: KafkaTopicApi.getTopicList.url,
         method: KafkaTopicApi.getTopicList.method,
+        params: this.queryParam,
       }).then((res) => {
         this.data = res.data;
       });
@@ -198,5 +196,9 @@ const columns = [
 
 .operation-btn {
   margin-right: 3%;
+}
+
+.type-select {
+  width: 200px !important;
 }
 </style>

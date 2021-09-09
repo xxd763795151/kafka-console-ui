@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.service;
 
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.enums.TopicType;
 
 /**
  * kafka-console-ui.
@@ -12,6 +13,6 @@ public interface TopicService {
 
     ResponseData getTopicNameList();
 
-    ResponseData getTopicList();
+    ResponseData getTopicList(String topic, TopicType type);
 
 }
