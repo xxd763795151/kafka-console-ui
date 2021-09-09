@@ -47,8 +47,18 @@ export const KafkaAclApi = {
     url: "/acl",
     method: "delete",
   },
+};
+
+export const KafkaConfigApi = {
   getConfig: {
     url: "/config",
+    method: "get",
+  },
+};
+
+export const KafkaTopicApi = {
+  getTopicList: {
+    url: "/topic/list",
     method: "get",
   },
 };

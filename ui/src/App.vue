@@ -16,7 +16,7 @@
   </div>
 </template>
 <script>
-import { KafkaAclApi } from "@/utils/api";
+import { KafkaConfigApi } from "@/utils/api";
 import request from "@/utils/request";
 
 export default {
@@ -27,8 +27,8 @@ export default {
   },
   created() {
     request({
-      url: KafkaAclApi.getConfig.url,
-      method: KafkaAclApi.getConfig.method,
+      url: KafkaConfigApi.getConfig.url,
+      method: KafkaConfigApi.getConfig.method,
     }).then((res) => {
       this.config = res.data;
     });

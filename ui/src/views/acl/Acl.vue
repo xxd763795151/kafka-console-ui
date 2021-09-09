@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <div class="acl">
-      <div id="components-form-demo-advanced-search">
+      <div id="components-form-acl-advanced-search">
         <a-form
           class="ant-advanced-search-form"
           :form="form"
@@ -391,12 +391,12 @@ const columns = [
   flex: 1;
 }
 
-#components-form-demo-advanced-search .ant-form {
+#components-form-acl-advanced-search .ant-form {
   max-width: none;
   margin-bottom: 1%;
 }
 
-#components-form-demo-advanced-search .search-result-list {
+#components-form-acl-advanced-search .search-result-list {
   margin-top: 16px;
   border: 1px dashed #e9e9e9;
   border-radius: 6px;

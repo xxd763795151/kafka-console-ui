@@ -25,6 +25,18 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "topic" */ "../views/topic/Topic.vue"),
   },
+  {
+    path: "/group",
+    name: "Group",
+    component: () =>
+      import(/* webpackChunkName: "group" */ "../views/group/Group.vue"),
+  },
+  {
+    path: "/op",
+    name: "Operation",
+    component: () =>
+      import(/* webpackChunkName: "op" */ "../views/op/Operation.vue"),
+  },
 ];
 
 const router = new VueRouter({

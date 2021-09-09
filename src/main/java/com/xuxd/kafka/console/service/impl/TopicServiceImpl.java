@@ -3,10 +3,8 @@ package com.xuxd.kafka.console.service.impl;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.vo.TopicDescriptionVO;
 import com.xuxd.kafka.console.service.TopicService;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import kafka.console.TopicConsole;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.TopicDescription;
@@ -31,7 +29,7 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override public ResponseData getTopicList() {
-        List<TopicDescription>  topicDescriptions = topicConsole.getTopicList(topicConsole.getTopicNameList());
+        List<TopicDescription> topicDescriptions = topicConsole.getTopicList(topicConsole.getTopicNameList());
         topicDescriptions.sort(Comparator.comparing(TopicDescription::name));
 
         return ResponseData.create().data(topicDescriptions.stream().map(d -> TopicDescriptionVO.from(d))).success();
