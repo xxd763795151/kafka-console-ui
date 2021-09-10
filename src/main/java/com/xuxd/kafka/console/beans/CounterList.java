@@ -23,4 +23,11 @@ public class CounterList<T> {
     public int getTotal() {
         return list != null ? list.size() : 0;
     }
+
+    @Override public String toString() {
+        return "CounterList{" +
+            "list=" + list +
+            ", total=" + getTotal() +
+            '}';
+    }
 }

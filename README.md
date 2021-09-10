@@ -48,7 +48,7 @@ sh bin/shutdown.sh
 除了webstorm是开发前端的ide可以根据自己需要代替，jdk scala是必须有的。
 # 本地开发配置
 以我自己为例，开发环境里的工具准备好，然后代码clone到本地。
-## 后端配置
+## 后端配置w
 1. 用idea打开项目
 2. 打开idea的Project Structure(Settings) ->  Modules -> 设置src/main/scala为Sources，因为约定src/main/java是源码目录，所以这里要再加一个
 3. 打开idea的Project Structure(Settings) -> Libraries 添加scala sdk，然后选择本地下载的scala 2.13的目录，确定添加进来
