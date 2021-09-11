@@ -70,6 +70,10 @@ export const KafkaTopicApi = {
 export const KafkaConsumerApi = {
   getConsumerGroupList: {
     url: "/consumer/group/list",
-    method: "get",
+    method: "post",
+  },
+  deleteConsumerGroup: {
+    url: "/consumer/group",
+    method: "delete",
   },
 };

@@ -4,7 +4,7 @@ import java.util
 import java.util.{Collections, Set}
 
 import com.xuxd.kafka.console.config.KafkaConfig
-import org.apache.kafka.clients.admin.{ConsumerGroupDescription, ListConsumerGroupsOptions}
+import org.apache.kafka.clients.admin.{ConsumerGroupDescription, DeleteConsumerGroupsOptions, ListConsumerGroupsOptions}
 import org.apache.kafka.common.ConsumerGroupState
 
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, SetHasAsJava}
@@ -34,5 +34,20 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
                 log.error("listConsumerGroups error.", e)
                 Collections.emptySet()
             }).asInstanceOf[Set[ConsumerGroupDescription]]
+    }
+
+    def deleteConsumerGroups(groupIds: util.Collection[String]): (Boolean, String) = {
+        if (groupIds == null || groupIds.isEmpty) {
+            (false, "group id is empty.")
+        } else {
+            withAdminClientAndCatchError(admin => {
+                admin.deleteConsumerGroups(groupIds, new DeleteConsumerGroupsOptions).all().get()
+                (true, "")
+            }
+                , e => {
+                    log.error("deleteConsumerGroups error.", e)
+                    (false, e.getMessage)
+                }).asInstanceOf[(Boolean, String)]
+        }
     }
 }

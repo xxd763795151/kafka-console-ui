@@ -5,6 +5,7 @@ import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.vo.ConsumerGroupVO;
 import com.xuxd.kafka.console.service.ConsumerService;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,7 @@ import kafka.console.ConsumerConsole;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import scala.Tuple2;
 
 /**
  * kafka-console-ui.
@@ -44,6 +46,12 @@ public class ConsumerServiceImpl implements ConsumerService {
             groupList.addAll(consumerConsole.getConsumerGroupIdList(states));
         }
         List<ConsumerGroupVO> consumerGroupVOS = consumerConsole.getConsumerGroupList(groupList).stream().map(c -> ConsumerGroupVO.from(c)).collect(Collectors.toList());
+        consumerGroupVOS.sort(Comparator.comparing(ConsumerGroupVO::getGroupId));
         return ResponseData.create().data(new CounterList<>(consumerGroupVOS)).success();
+    }
+
+    @Override public ResponseData deleteConsumerGroup(String groupId) {
+        Tuple2<Object, String> tuple2 = consumerConsole.deleteConsumerGroups(Collections.singletonList(groupId));
+        return (Boolean) tuple2._1 ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2);
     }
 }

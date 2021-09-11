@@ -14,5 +14,5 @@ public class QueryConsumerGroupDTO {
 
     private String groupId;
 
-    private List<String> State;
+    private List<String> states;
 }

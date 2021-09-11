@@ -14,4 +14,6 @@ import org.apache.kafka.common.ConsumerGroupState;
 public interface ConsumerService {
 
     ResponseData getConsumerGroupList(List<String> groupIds, Set<ConsumerGroupState> states);
+
+    ResponseData deleteConsumerGroup(String groupId);
 }

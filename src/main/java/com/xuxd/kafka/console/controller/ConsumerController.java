@@ -11,9 +11,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -29,7 +31,7 @@ public class ConsumerController {
     @Autowired
     private ConsumerService consumerService;
 
-    @GetMapping("/group/list")
+    @PostMapping("/group/list")
     public Object getGroupList(@RequestBody(required = false) QueryConsumerGroupDTO dto) {
         if (Objects.isNull(dto)) {
             return consumerService.getConsumerGroupList(null, null);
@@ -37,9 +39,14 @@ public class ConsumerController {
         List<String> groupIdList = StringUtils.isNotBlank(dto.getGroupId()) ? Collections.singletonList(dto.getGroupId()) : Collections.emptyList();
 
         Set<ConsumerGroupState> stateSet = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(dto.getState())) {
-            dto.getState().stream().forEach(s -> stateSet.add(ConsumerGroupState.valueOf(s)));
+        if (CollectionUtils.isNotEmpty(dto.getStates())) {
+            dto.getStates().stream().forEach(s -> stateSet.add(ConsumerGroupState.valueOf(s.toUpperCase())));
         }
         return consumerService.getConsumerGroupList(groupIdList, stateSet);
+    }
+
+    @DeleteMapping("/group")
+    public Object deleteConsumerGroup(@RequestParam String groupId) {
+        return consumerService.deleteConsumerGroup(groupId);
     }
 }

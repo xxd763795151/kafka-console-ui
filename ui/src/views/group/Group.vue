@@ -9,29 +9,43 @@
         >
           <a-row :gutter="24">
             <a-col :span="8">
-              <a-form-item :label="`topic`">
+              <a-form-item :label="`消费组`">
                 <a-input
-                  placeholder="topic"
+                  placeholder="groupId"
                   class="input-w"
-                  v-decorator="['topic']"
+                  v-decorator="['groupId']"
                 />
               </a-form-item>
             </a-col>
-            <a-col :span="8">
-              <a-form-item :label="`类型`">
-                <a-select
-                  class="type-select"
-                  v-decorator="['type', { initialValue: 'all' }]"
-                  placeholder="Please select a country"
-                >
-                  <a-select-option value="all"> 所有 </a-select-option>
-                  <a-select-option value="normal"> 普通 </a-select-option>
-                  <a-select-option value="system"> 系统 </a-select-option>
-                </a-select>
+            <a-col :span="12">
+              <a-form-item :label="`状态`">
+                <a-checkbox-group v-decorator="['states']" style="width: 100%">
+                  <a-row>
+                    <a-col :span="8">
+                      <a-checkbox value="Empty"> Empty</a-checkbox>
+                    </a-col>
+                    <a-col :span="8">
+                      <a-checkbox value="PreparingRebalance">
+                        PreparingRebalance
+                      </a-checkbox>
+                    </a-col>
+                    <a-col :span="8">
+                      <a-checkbox value="CompletingRebalance">
+                        CompletingRebalance
+                      </a-checkbox>
+                    </a-col>
+                    <a-col :span="8">
+                      <a-checkbox value="Stable"> Stable</a-checkbox>
+                    </a-col>
+                    <a-col :span="8">
+                      <a-checkbox value="Dead"> Dead</a-checkbox>
+                    </a-col>
+                  </a-row>
+                </a-checkbox-group>
               </a-form-item>
             </a-col>
 
-            <a-col :span="8" :style="{ textAlign: 'right' }">
+            <a-col :span="4" :style="{ textAlign: 'right' }">
               <a-form-item>
                 <a-button type="primary" html-type="submit"> 搜索</a-button>
                 <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
@@ -65,11 +79,11 @@
             :title="'删除消费组: ' + record.groupId + '？'"
             ok-text="确认"
             cancel-text="取消"
-            @confirm="deleteTopic(record.groupId)"
+            @confirm="deleteGroup(record.groupId)"
           >
             <a-button size="small" href="javascript:;" class="operation-btn"
-              >删除</a-button
-            >
+              >删除
+            </a-button>
           </a-popconfirm>
         </div>
       </a-table>
@@ -79,18 +93,21 @@
 
 <script>
 import request from "@/utils/request";
-import { KafkaTopicApi, KafkaConsumerApi } from "@/utils/api";
+import { KafkaConsumerApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
+
 export default {
   name: "ConsumerGroup",
   components: {},
   data() {
     return {
-      queryParam: { type: "all" },
+      queryParam: {},
       data: [],
       columns,
       selectRow: {},
-      form: this.$form.createForm(this, { name: "topic_advanced_search" }),
+      form: this.$form.createForm(this, {
+        name: "consumer_group_advanced_search",
+      }),
       showUpdateUser: false,
       deleteUserConfirm: false,
       selectDetail: {
@@ -111,19 +128,19 @@ export default {
     },
 
     getConsumerGroupList() {
-      // Object.assign(this.queryParam, this.form.getFieldsValue());
+      Object.assign(this.queryParam, this.form.getFieldsValue());
       request({
         url: KafkaConsumerApi.getConsumerGroupList.url,
         method: KafkaConsumerApi.getConsumerGroupList.method,
-        params: this.queryParam,
+        data: this.queryParam,
       }).then((res) => {
         this.data = res.data.list;
       });
     },
-    deleteTopic(topic) {
+    deleteGroup(group) {
       request({
-        url: KafkaTopicApi.deleteTopic.url + "?topic=" + topic,
-        method: KafkaTopicApi.deleteTopic.method,
+        url: KafkaConsumerApi.deleteConsumerGroup.url + "?groupId=" + group,
+        method: KafkaConsumerApi.deleteConsumerGroup.method,
       }).then((res) => {
         if (res.code == 0) {
           this.$message.success(res.msg);
@@ -163,6 +180,21 @@ const columns = [
     slots: { title: "state" },
     scopedSlots: { customRender: "state" },
   },
+  {
+    title: "分区分配器",
+    dataIndex: "partitionAssignor",
+    key: "partitionAssignor",
+  },
+  {
+    title: "协调者节点",
+    dataIndex: "coordinator",
+    key: "coordinator",
+  },
+  // {
+  //   title: "授权操作数量",
+  //   dataIndex: "authorizedOperations",
+  //   key: "authorizedOperations",
+  // },
   {
     title: "操作",
     key: "operation",
