@@ -1,17 +1,227 @@
 <template>
-  <div>
-    <HelloWorld msg="This is group console."></HelloWorld>
+  <div class="content">
+    <div class="topic">
+      <div id="form-consumer-group-advanced-search">
+        <a-form
+          class="ant-advanced-search-form"
+          :form="form"
+          @submit="handleSearch"
+        >
+          <a-row :gutter="24">
+            <a-col :span="8">
+              <a-form-item :label="`topic`">
+                <a-input
+                  placeholder="topic"
+                  class="input-w"
+                  v-decorator="['topic']"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item :label="`类型`">
+                <a-select
+                  class="type-select"
+                  v-decorator="['type', { initialValue: 'all' }]"
+                  placeholder="Please select a country"
+                >
+                  <a-select-option value="all"> 所有 </a-select-option>
+                  <a-select-option value="normal"> 普通 </a-select-option>
+                  <a-select-option value="system"> 系统 </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="8" :style="{ textAlign: 'right' }">
+              <a-form-item>
+                <a-button type="primary" html-type="submit"> 搜索</a-button>
+                <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
+                  重置
+                </a-button>
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+      </div>
+      <div class="operation-row-button">
+        <a-button type="primary" @click="handleReset">新增/更新</a-button>
+      </div>
+      <a-table
+        :columns="columns"
+        :data-source="data"
+        bordered
+        row-key="groupId"
+      >
+        <div slot="members" slot-scope="text">
+          <a href="#">{{ text }} </a>
+        </div>
+
+        <div slot="state" slot-scope="text">
+          {{ text }}
+          <!--          <span v-if="text" style="color: red">是</span><span v-else>否</span>-->
+        </div>
+
+        <div slot="operation" slot-scope="record" v-show="!record.internal">
+          <a-popconfirm
+            :title="'删除消费组: ' + record.groupId + '？'"
+            ok-text="确认"
+            cancel-text="取消"
+            @confirm="deleteTopic(record.groupId)"
+          >
+            <a-button size="small" href="javascript:;" class="operation-btn"
+              >删除</a-button
+            >
+          </a-popconfirm>
+        </div>
+      </a-table>
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from "@/components/HelloWorld.vue";
+import request from "@/utils/request";
+import { KafkaTopicApi, KafkaConsumerApi } from "@/utils/api";
+import notification from "ant-design-vue/es/notification";
 export default {
-  name: "Group",
-  components: {
-    HelloWorld,
+  name: "ConsumerGroup",
+  components: {},
+  data() {
+    return {
+      queryParam: { type: "all" },
+      data: [],
+      columns,
+      selectRow: {},
+      form: this.$form.createForm(this, { name: "topic_advanced_search" }),
+      showUpdateUser: false,
+      deleteUserConfirm: false,
+      selectDetail: {
+        resourceName: "",
+        resourceType: "",
+        username: "",
+      },
+    };
+  },
+  methods: {
+    handleSearch(e) {
+      e.preventDefault();
+      this.getConsumerGroupList();
+    },
+
+    handleReset() {
+      this.form.resetFields();
+    },
+
+    getConsumerGroupList() {
+      // Object.assign(this.queryParam, this.form.getFieldsValue());
+      request({
+        url: KafkaConsumerApi.getConsumerGroupList.url,
+        method: KafkaConsumerApi.getConsumerGroupList.method,
+        params: this.queryParam,
+      }).then((res) => {
+        this.data = res.data.list;
+      });
+    },
+    deleteTopic(topic) {
+      request({
+        url: KafkaTopicApi.deleteTopic.url + "?topic=" + topic,
+        method: KafkaTopicApi.deleteTopic.method,
+      }).then((res) => {
+        if (res.code == 0) {
+          this.$message.success(res.msg);
+          this.getConsumerGroupList();
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    },
+  },
+  created() {
+    this.getConsumerGroupList();
   },
 };
+
+const columns = [
+  {
+    title: "消费组",
+    dataIndex: "groupId",
+    key: "groupId",
+    width: 300,
+  },
+  {
+    title: "消费端数量",
+    dataIndex: "members",
+    key: "members",
+    slots: { title: "members" },
+    scopedSlots: { customRender: "members" },
+  },
+  {
+    title: "当前状态",
+    dataIndex: "state",
+    key: "state",
+    slots: { title: "state" },
+    scopedSlots: { customRender: "state" },
+  },
+  {
+    title: "操作",
+    key: "operation",
+    scopedSlots: { customRender: "operation" },
+    width: 500,
+  },
+];
 </script>
 
-<style scoped></style>
+<style scoped>
+.topic {
+  width: 100%;
+  height: 100%;
+}
+
+.ant-advanced-search-form {
+  padding: 24px;
+  background: #fbfbfb;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+}
+
+.ant-advanced-search-form .ant-form-item {
+  display: flex;
+}
+
+.ant-advanced-search-form .ant-form-item-control-wrapper {
+  flex: 1;
+}
+
+#form-consumer-group-advanced-search .ant-form {
+  max-width: none;
+  margin-bottom: 1%;
+}
+
+#form-consumer-group-advanced-search .search-result-list {
+  margin-top: 16px;
+  border: 1px dashed #e9e9e9;
+  border-radius: 6px;
+  background-color: #fafafa;
+  min-height: 200px;
+  text-align: center;
+  padding-top: 80px;
+}
+
+.input-w {
+  width: 400px;
+}
+
+.operation-row-button {
+  height: 4%;
+  text-align: left;
+}
+
+.operation-btn {
+  margin-right: 3%;
+}
+
+.type-select {
+  width: 200px !important;
+}
+</style>
