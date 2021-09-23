@@ -19,9 +19,9 @@ kafka:
     # 超级管理员密码
     admin-password: admin
     # 启动自动创建配置的超级管理员用户
-    admin-create: true
+    admin-create: false
     # broker连接的zk地址
-    zookeeper-addr: localhost:2181
+    zookeeper-addr: 'localhost:2181'
     sasl-jaas-config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${kafka.config.admin-username}" password="${kafka.config.admin-password}";
 
 spring:

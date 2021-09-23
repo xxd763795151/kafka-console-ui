@@ -56,6 +56,12 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
         }
     }
 
+    /**
+     * delete topic by topic name.
+     *
+     * @param topic topic name.
+     * @return result or : fail message.
+     */
     def deleteTopic(topic: String): (Boolean, String) = {
         withAdminClientAndCatchError(admin => {
             admin.deleteTopics(Collections.singleton(topic), new DeleteTopicsOptions().retryOnQuotaViolation(false)).all().get(timeoutMs, TimeUnit.MILLISECONDS)

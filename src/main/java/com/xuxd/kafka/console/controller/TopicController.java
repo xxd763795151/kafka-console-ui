@@ -31,4 +31,9 @@ public class TopicController {
     public Object deleteTopic(@RequestParam String topic) {
         return topicService.deleteTopic(topic);
     }
+
+    @GetMapping("/partition")
+    public Object getTopicPartitionInfo(@RequestParam String topic) {
+        return topicService.getTopicPartitionInfo(topic);
+    }
 }

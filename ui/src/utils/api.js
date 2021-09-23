@@ -65,6 +65,10 @@ export const KafkaTopicApi = {
     url: "/topic",
     method: "delete",
   },
+  getPartitionInfo: {
+    url: "/topic/partition",
+    method: "get",
+  },
 };
 
 export const KafkaConsumerApi = {

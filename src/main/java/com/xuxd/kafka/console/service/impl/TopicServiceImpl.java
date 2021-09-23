@@ -3,6 +3,7 @@ package com.xuxd.kafka.console.service.impl;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.enums.TopicType;
 import com.xuxd.kafka.console.beans.vo.TopicDescriptionVO;
+import com.xuxd.kafka.console.beans.vo.TopicPartitionVO;
 import com.xuxd.kafka.console.service.TopicService;
 import java.util.Collections;
 import java.util.Comparator;
@@ -69,5 +70,15 @@ public class TopicServiceImpl implements TopicService {
     @Override public ResponseData deleteTopic(String topic) {
         Tuple2<Object, String> tuple2 = topicConsole.deleteTopic(topic);
         return (Boolean) tuple2._1 ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2);
+    }
+
+    @Override public ResponseData getTopicPartitionInfo(String topic) {
+        List<TopicDescription> list = topicConsole.getTopicList(Collections.singleton(topic));
+        if (list.isEmpty()) {
+            return ResponseData.create().success();
+        }
+        TopicDescription topicDescription = list.get(0);
+
+        return ResponseData.create().data(topicDescription.partitions().stream().map(p -> TopicPartitionVO.from(p))).success();
     }
 }

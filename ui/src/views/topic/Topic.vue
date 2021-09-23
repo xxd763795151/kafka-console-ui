@@ -46,8 +46,10 @@
         <a-button type="primary" @click="handleReset">新增/更新</a-button>
       </div>
       <a-table :columns="columns" :data-source="data" bordered row-key="name">
-        <div slot="partitions" slot-scope="text">
-          <a href="#">{{ text }} </a>
+        <div slot="partitions" slot-scope="text, record">
+          <a href="#" @click="openPartitionInfoDialog(record.name)"
+            >{{ text }}
+          </a>
         </div>
 
         <div slot="internal" slot-scope="text">
@@ -67,6 +69,11 @@
           </a-popconfirm>
         </div>
       </a-table>
+      <PartitionInfo
+        :topic="selectDetail.resourceName"
+        :visible="showPartitionInfo"
+        @closePartitionInfoDialog="closePartitionInfoDialog"
+      ></PartitionInfo>
     </div>
   </div>
 </template>
@@ -75,9 +82,10 @@
 import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
+import PartitionInfo from "@/views/topic/PartitionInfo";
 export default {
   name: "Topic",
-  components: {},
+  components: { PartitionInfo },
   data() {
     return {
       queryParam: { type: "all" },
@@ -92,6 +100,7 @@ export default {
         resourceType: "",
         username: "",
       },
+      showPartitionInfo: false,
     };
   },
   methods: {
@@ -129,6 +138,13 @@ export default {
           });
         }
       });
+    },
+    openPartitionInfoDialog(topic) {
+      this.selectDetail.resourceName = topic;
+      this.showPartitionInfo = true;
+    },
+    closePartitionInfoDialog() {
+      this.showPartitionInfo = false;
     },
   },
   created() {
