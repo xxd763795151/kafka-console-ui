@@ -10,30 +10,32 @@
     @cancel="handleCancel"
   >
     <div>
-      <a-table
-        :columns="columns"
-        :data-source="data"
-        :rowKey="
-          (record, index) => {
-            return index;
-          }
-        "
-      >
-        <ul slot="replicas" slot-scope="text">
-          <ol v-for="i in text" :key="i">
-            {{
-              i
-            }}
-          </ol>
-        </ul>
-        <ul slot="isr" slot-scope="text">
-          <ol v-for="i in text" :key="i">
-            {{
-              i
-            }}
-          </ol>
-        </ul>
-      </a-table>
+      <a-spin :spinning="loading">
+        <a-table
+          :columns="columns"
+          :data-source="data"
+          :rowKey="
+            (record, index) => {
+              return index;
+            }
+          "
+        >
+          <ul slot="replicas" slot-scope="text">
+            <ol v-for="i in text" :key="i">
+              {{
+                i
+              }}
+            </ol>
+          </ul>
+          <ul slot="isr" slot-scope="text">
+            <ol v-for="i in text" :key="i">
+              {{
+                i
+              }}
+            </ol>
+          </ul>
+        </a-table>
+      </a-spin>
     </div>
   </a-modal>
 </template>
@@ -59,6 +61,7 @@ export default {
       columns: columns,
       show: this.visible,
       data: [],
+      loading: false,
     };
   },
   watch: {
@@ -71,10 +74,12 @@ export default {
   },
   methods: {
     getPartitionInfo() {
+      this.loading = true;
       request({
         url: KafkaTopicApi.getPartitionInfo.url + "?topic=" + this.topic,
         method: KafkaTopicApi.getPartitionInfo.method,
       }).then((res) => {
+        this.loading = false;
         if (res.code != 0) {
           notification.error({
             message: "error",
@@ -86,6 +91,7 @@ export default {
       });
     },
     handleCancel() {
+      this.data = [];
       this.$emit("closePartitionInfoDialog", {});
     },
   },

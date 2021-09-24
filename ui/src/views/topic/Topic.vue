@@ -1,80 +1,82 @@
 <template>
   <div class="content">
-    <div class="topic">
-      <div id="components-form-topic-advanced-search">
-        <a-form
-          class="ant-advanced-search-form"
-          :form="form"
-          @submit="handleSearch"
-        >
-          <a-row :gutter="24">
-            <a-col :span="8">
-              <a-form-item :label="`topic`">
-                <a-input
-                  placeholder="topic"
-                  class="input-w"
-                  v-decorator="['topic']"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="8">
-              <a-form-item :label="`类型`">
-                <a-select
-                  class="type-select"
-                  v-decorator="['type', { initialValue: 'all' }]"
-                  placeholder="Please select a country"
-                >
-                  <a-select-option value="all"> 所有 </a-select-option>
-                  <a-select-option value="normal"> 普通 </a-select-option>
-                  <a-select-option value="system"> 系统 </a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-
-            <a-col :span="8" :style="{ textAlign: 'right' }">
-              <a-form-item>
-                <a-button type="primary" html-type="submit"> 搜索</a-button>
-                <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
-                  重置
-                </a-button>
-              </a-form-item>
-            </a-col>
-          </a-row>
-        </a-form>
-      </div>
-      <div class="operation-row-button">
-        <a-button type="primary" @click="handleReset">新增/更新</a-button>
-      </div>
-      <a-table :columns="columns" :data-source="data" bordered row-key="name">
-        <div slot="partitions" slot-scope="text, record">
-          <a href="#" @click="openPartitionInfoDialog(record.name)"
-            >{{ text }}
-          </a>
-        </div>
-
-        <div slot="internal" slot-scope="text">
-          <span v-if="text" style="color: red">是</span><span v-else>否</span>
-        </div>
-
-        <div slot="operation" slot-scope="record" v-show="!record.internal">
-          <a-popconfirm
-            :title="'删除topic: ' + record.name + '？'"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="deleteTopic(record.name)"
+    <a-spin :spinning="loading">
+      <div class="topic">
+        <div id="components-form-topic-advanced-search">
+          <a-form
+            class="ant-advanced-search-form"
+            :form="form"
+            @submit="handleSearch"
           >
-            <a-button size="small" href="javascript:;" class="operation-btn"
-              >删除</a-button
-            >
-          </a-popconfirm>
+            <a-row :gutter="24">
+              <a-col :span="8">
+                <a-form-item :label="`topic`">
+                  <a-input
+                    placeholder="topic"
+                    class="input-w"
+                    v-decorator="['topic']"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item :label="`类型`">
+                  <a-select
+                    class="type-select"
+                    v-decorator="['type', { initialValue: 'all' }]"
+                    placeholder="Please select a country"
+                  >
+                    <a-select-option value="all"> 所有</a-select-option>
+                    <a-select-option value="normal"> 普通</a-select-option>
+                    <a-select-option value="system"> 系统</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+
+              <a-col :span="8" :style="{ textAlign: 'right' }">
+                <a-form-item>
+                  <a-button type="primary" html-type="submit"> 搜索</a-button>
+                  <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
+                    重置
+                  </a-button>
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </a-form>
         </div>
-      </a-table>
-      <PartitionInfo
-        :topic="selectDetail.resourceName"
-        :visible="showPartitionInfo"
-        @closePartitionInfoDialog="closePartitionInfoDialog"
-      ></PartitionInfo>
-    </div>
+        <div class="operation-row-button">
+          <a-button type="primary" @click="handleReset">新增/更新</a-button>
+        </div>
+        <a-table :columns="columns" :data-source="data" bordered row-key="name">
+          <div slot="partitions" slot-scope="text, record">
+            <a href="#" @click="openPartitionInfoDialog(record.name)"
+              >{{ text }}
+            </a>
+          </div>
+
+          <div slot="internal" slot-scope="text">
+            <span v-if="text" style="color: red">是</span><span v-else>否</span>
+          </div>
+
+          <div slot="operation" slot-scope="record" v-show="!record.internal">
+            <a-popconfirm
+              :title="'删除topic: ' + record.name + '？'"
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="deleteTopic(record.name)"
+            >
+              <a-button size="small" href="javascript:;" class="operation-btn"
+                >删除
+              </a-button>
+            </a-popconfirm>
+          </div>
+        </a-table>
+        <PartitionInfo
+          :topic="selectDetail.resourceName"
+          :visible="showPartitionInfo"
+          @closePartitionInfoDialog="closePartitionInfoDialog"
+        ></PartitionInfo>
+      </div>
+    </a-spin>
   </div>
 </template>
 
@@ -83,6 +85,7 @@ import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
 import PartitionInfo from "@/views/topic/PartitionInfo";
+
 export default {
   name: "Topic",
   components: { PartitionInfo },
@@ -101,6 +104,7 @@ export default {
         username: "",
       },
       showPartitionInfo: false,
+      loading: false,
     };
   },
   methods: {
@@ -115,11 +119,13 @@ export default {
 
     getTopicList() {
       Object.assign(this.queryParam, this.form.getFieldsValue());
+      this.loading = true;
       request({
         url: KafkaTopicApi.getTopicList.url,
         method: KafkaTopicApi.getTopicList.method,
         params: this.queryParam,
       }).then((res) => {
+        this.loading = false;
         this.data = res.data;
       });
     },
