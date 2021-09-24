@@ -114,6 +114,21 @@ const columns = [
     key: "isr",
     scopedSlots: { customRender: "isr" },
   },
+  {
+    title: "最小位点",
+    dataIndex: "beginOffset",
+    key: "beginOffset",
+  },
+  {
+    title: "最大位点",
+    dataIndex: "endOffset",
+    key: "endOffset",
+  },
+  {
+    title: "消息总数",
+    dataIndex: "diff",
+    key: "diff",
+  },
 ];
 </script>
 

@@ -23,6 +23,12 @@ public class TopicPartitionVO {
 
     private List<String> isr;
 
+    private long beginOffset;
+
+    private long endOffset;
+
+    private long diff;
+
     public static TopicPartitionVO from(TopicPartitionInfo partitionInfo) {
         TopicPartitionVO partitionVO = new TopicPartitionVO();
         partitionVO.setPartition(partitionInfo.partition());

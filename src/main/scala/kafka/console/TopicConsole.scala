@@ -6,6 +6,7 @@ import java.util.{Collections, List, Set}
 
 import com.xuxd.kafka.console.config.KafkaConfig
 import org.apache.kafka.clients.admin.{DeleteTopicsOptions, ListTopicsOptions, TopicDescription}
+import org.apache.kafka.common.TopicPartition
 
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, SetHasAsJava}
 
@@ -71,5 +72,25 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
                 log.error("delete topic error, topic: " + topic, e)
                 (false, e.getMessage)
             }).asInstanceOf[(Boolean, String)]
+    }
+
+    /**
+     * get topic begin offset and end offset.
+     *
+     * @param topic      topic name.
+     * @param partitions topic partition info list.
+     * @return partition ->  begin offset and end offset.
+     */
+    def getTopicOffset(topic: String,
+        partitions: List[TopicPartition]): (util.Map[TopicPartition, Long], util.Map[TopicPartition, Long]) = {
+
+        withConsumerAndCatchError(consumer => {
+            val beginOffsets = consumer.beginningOffsets(partitions)
+            val endOffsets = consumer.endOffsets(partitions)
+            (beginOffsets, endOffsets)
+        }, e => {
+            log.error("getTopicOffset error, topic: " + topic, e)
+            (Collections.emptyMap(), Collections.emptyMap())
+        }).asInstanceOf[(util.Map[TopicPartition, Long], util.Map[TopicPartition, Long])]
     }
 }
