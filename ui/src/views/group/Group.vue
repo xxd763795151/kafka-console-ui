@@ -69,8 +69,10 @@
           bordered
           row-key="groupId"
         >
-          <div slot="members" slot-scope="text">
-            <a href="#">{{ text }} </a>
+          <div slot="members" slot-scope="text, record">
+            <a href="#" @click="openConsumerMemberDialog(record.groupId)"
+              >{{ text }}
+            </a>
           </div>
 
           <div slot="state" slot-scope="text">
@@ -91,6 +93,11 @@
             </a-popconfirm>
           </div>
         </a-table>
+        <Member
+          :visible="showConsumerGroupDialog"
+          :group="selectDetail.resourceName"
+          @closeConsumerMemberDialog="closeConsumerDialog"
+        ></Member>
       </div>
     </a-spin>
   </div>
@@ -100,10 +107,11 @@
 import request from "@/utils/request";
 import { KafkaConsumerApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
+import Member from "@/views/group/Member";
 
 export default {
   name: "ConsumerGroup",
-  components: {},
+  components: { Member },
   data() {
     return {
       queryParam: {},
@@ -121,6 +129,7 @@ export default {
         username: "",
       },
       loading: false,
+      showConsumerGroupDialog: false,
     };
   },
   methods: {
@@ -162,6 +171,13 @@ export default {
           });
         }
       });
+    },
+    openConsumerMemberDialog(groupId) {
+      this.showConsumerGroupDialog = true;
+      this.selectDetail.resourceName = groupId;
+    },
+    closeConsumerDialog() {
+      this.showConsumerGroupDialog = false;
     },
   },
   created() {

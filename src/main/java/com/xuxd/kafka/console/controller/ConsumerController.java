@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,5 +49,10 @@ public class ConsumerController {
     @DeleteMapping("/group")
     public Object deleteConsumerGroup(@RequestParam String groupId) {
         return consumerService.deleteConsumerGroup(groupId);
+    }
+
+    @GetMapping("/member")
+    public Object getConsumerMembers(@RequestParam String groupId) {
+        return consumerService.getConsumerMembers(groupId);
     }
 }

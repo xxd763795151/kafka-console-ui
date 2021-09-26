@@ -80,4 +80,8 @@ export const KafkaConsumerApi = {
     url: "/consumer/group",
     method: "delete",
   },
+  getConsumerMembers: {
+    url: "/consumer/member",
+    method: "get",
+  },
 };

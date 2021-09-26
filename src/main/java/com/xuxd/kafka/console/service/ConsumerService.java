@@ -16,4 +16,6 @@ public interface ConsumerService {
     ResponseData getConsumerGroupList(List<String> groupIds, Set<ConsumerGroupState> states);
 
     ResponseData deleteConsumerGroup(String groupId);
+
+    ResponseData getConsumerMembers(String groupId);
 }
