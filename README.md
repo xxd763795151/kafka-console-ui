@@ -1,8 +1,9 @@
 # kafka可视化管理平台
 ## 功能支持
-* 基于SASL_SCRAM认证授权管理
+* 集群信息
 * Topic管理
 * 消费组管理
+* 基于SASL_SCRAM认证授权管理
 * 运维
 ## 技术栈
 * spring boot 

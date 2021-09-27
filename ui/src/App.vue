@@ -3,14 +3,16 @@
     <div id="nav">
       <router-link to="/" class="pad-l-r">主页</router-link>
       <span>|</span
-      ><router-link to="/topic" class="pad-l-r">Topic</router-link>
+      ><router-link to="/cluster-page" class="pad-l-r">集群</router-link>
       <span>|</span
-      ><router-link to="/group" class="pad-l-r">消费组</router-link>
+      ><router-link to="/topic-page" class="pad-l-r">Topic</router-link>
+      <span>|</span
+      ><router-link to="/group-page" class="pad-l-r">消费组</router-link>
       <span v-show="config.enableAcl">|</span
-      ><router-link to="/acl" class="pad-l-r" v-show="config.enableAcl"
+      ><router-link to="/acl-page" class="pad-l-r" v-show="config.enableAcl"
         >Acl</router-link
       >
-      <span>|</span><router-link to="/op" class="pad-l-r">运维</router-link>
+      <span>|</span><router-link to="/op-page" class="pad-l-r">运维</router-link>
     </div>
     <router-view class="content" />
   </div>

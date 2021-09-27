@@ -113,7 +113,7 @@ const columns = [
     key: "host",
   },
   {
-    title: "分区信息",
+    title: "订阅分区信息",
     dataIndex: "partitions",
     key: "partitions",
     scopedSlots: { customRender: "partitions" },

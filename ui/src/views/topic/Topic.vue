@@ -22,7 +22,7 @@
                 <a-form-item :label="`类型`">
                   <a-select
                     class="type-select"
-                    v-decorator="['type', { initialValue: 'all' }]"
+                    v-decorator="['type', { initialValue: 'normal' }]"
                     placeholder="Please select a country"
                   >
                     <a-select-option value="all"> 所有</a-select-option>
@@ -91,7 +91,7 @@ export default {
   components: { PartitionInfo },
   data() {
     return {
-      queryParam: { type: "all" },
+      queryParam: { type: "normal" },
       data: [],
       columns,
       selectRow: {},
