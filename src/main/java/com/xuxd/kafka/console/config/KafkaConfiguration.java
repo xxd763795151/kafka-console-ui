@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.config;
 
+import kafka.console.ClusterConsole;
 import kafka.console.ConsumerConsole;
 import kafka.console.KafkaAclConsole;
 import kafka.console.KafkaConfigConsole;
@@ -34,5 +35,10 @@ public class KafkaConfiguration {
     @Bean
     public ConsumerConsole consumerConsole(KafkaConfig config) {
         return new ConsumerConsole(config);
+    }
+
+    @Bean
+    public ClusterConsole clusterConsole(KafkaConfig config) {
+        return new ClusterConsole(config);
     }
 }

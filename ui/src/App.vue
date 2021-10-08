@@ -12,7 +12,8 @@
       ><router-link to="/acl-page" class="pad-l-r" v-show="config.enableAcl"
         >Acl</router-link
       >
-      <span>|</span><router-link to="/op-page" class="pad-l-r">运维</router-link>
+      <span>|</span
+      ><router-link to="/op-page" class="pad-l-r">运维</router-link>
     </div>
     <router-view class="content" />
   </div>

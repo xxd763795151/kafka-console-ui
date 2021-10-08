@@ -85,3 +85,10 @@ export const KafkaConsumerApi = {
     method: "get",
   },
 };
+
+export const KafkaClusterApi = {
+  getClusterInfo: {
+    url: "/cluster",
+    method: "get",
+  },
+};

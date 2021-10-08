@@ -37,6 +37,12 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "op" */ "../views/op/Operation.vue"),
   },
+  {
+    path: "/cluster-page",
+    name: "Cluster",
+    component: () =>
+      import(/* webpackChunkName: "cluster" */ "../views/cluster/Cluster.vue"),
+  },
 ];
 
 const router = new VueRouter({
