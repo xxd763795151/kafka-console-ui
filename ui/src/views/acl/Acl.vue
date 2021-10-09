@@ -1,155 +1,157 @@
 <template>
   <div class="content">
-    <div class="acl">
-      <div id="components-form-acl-advanced-search">
-        <a-form
-          class="ant-advanced-search-form"
-          :form="form"
-          @submit="handleSearch"
-        >
-          <a-row :gutter="24">
-            <a-col :span="8">
-              <a-form-item :label="`用户名`">
-                <a-input
-                  placeholder="username"
-                  class="input-w"
-                  v-decorator="['username']"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="8">
-              <a-form-item :label="`topic`">
-                <a-input
-                  placeholder="topic"
-                  class="input-w"
-                  v-decorator="['topic']"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="8">
-              <a-form-item :label="`消费组`">
-                <a-input
-                  placeholder="groupId"
-                  class="input-w"
-                  v-decorator="['groupId']"
-                />
-              </a-form-item>
-            </a-col>
-
-            <a-col :span="24" :style="{ textAlign: 'right' }">
-              <a-button type="primary" html-type="submit"> 搜索</a-button>
-              <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
-                重置
-              </a-button>
-            </a-col>
-          </a-row>
-        </a-form>
-      </div>
-      <div class="operation-row-button">
-        <a-button type="primary" @click="updateUser">新增/更新用户</a-button>
-        <UpdateUser
-          :visible="showUpdateUser"
-          @updateUserDialogData="closeUpdateUserDialog"
-        ></UpdateUser>
-      </div>
-      <a-table :columns="columns" :data-source="data" bordered>
-        <div slot="username" slot-scope="username">
-          <span>{{ username }}</span
-          ><a-button
-            size="small"
-            shape="round"
-            type="dashed"
-            style="float: right"
-            @click="onUserDetail(username)"
-            >详情</a-button
+    <a-spin :spinning="loading">
+      <div class="acl">
+        <div id="components-form-acl-advanced-search">
+          <a-form
+            class="ant-advanced-search-form"
+            :form="form"
+            @submit="handleSearch"
           >
-        </div>
+            <a-row :gutter="24">
+              <a-col :span="8">
+                <a-form-item :label="`用户名`">
+                  <a-input
+                    placeholder="username"
+                    class="input-w"
+                    v-decorator="['username']"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item :label="`topic`">
+                  <a-input
+                    placeholder="topic"
+                    class="input-w"
+                    v-decorator="['topic']"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item :label="`消费组`">
+                  <a-input
+                    placeholder="groupId"
+                    class="input-w"
+                    v-decorator="['groupId']"
+                  />
+                </a-form-item>
+              </a-col>
 
-        <div slot="topicList" slot-scope="topicList, record">
-          <a
-            href="#"
-            v-for="t in topicList"
-            :key="t"
-            @click="onTopicDetail(t, record.username)"
-            ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
-          </a>
+              <a-col :span="24" :style="{ textAlign: 'right' }">
+                <a-button type="primary" html-type="submit"> 搜索</a-button>
+                <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
+                  重置
+                </a-button>
+              </a-col>
+            </a-row>
+          </a-form>
         </div>
-
-        <div slot="groupList" slot-scope="groupList, record">
-          <a
-            href="#"
-            v-for="t in groupList"
-            :key="t"
-            @click="onGroupDetail(t, record.username)"
-            ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
-          </a>
+        <div class="operation-row-button">
+          <a-button type="primary" @click="updateUser">新增/更新用户</a-button>
+          <UpdateUser
+            :visible="showUpdateUser"
+            @updateUserDialogData="closeUpdateUserDialog"
+          ></UpdateUser>
         </div>
-
-        <div
-          slot="operation"
-          slot-scope="record"
-          v-show="!record.user || record.user.role != 'admin'"
-        >
-          <a-popconfirm
-            :title="'删除用户: ' + record.username + '及相关权限？'"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="onDeleteUser(record)"
-          >
-            <a-button size="small" href="javascript:;" class="operation-btn"
-              >删除</a-button
+        <a-table :columns="columns" :data-source="data" bordered>
+          <div slot="username" slot-scope="username">
+            <span>{{ username }}</span
+            ><a-button
+              size="small"
+              shape="round"
+              type="dashed"
+              style="float: right"
+              @click="onUserDetail(username)"
+              >详情</a-button
             >
-          </a-popconfirm>
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="onManageProducerAuth(record)"
-            >管理生产权限
-          </a-button>
+          </div>
 
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="onManageConsumerAuth(record)"
-            >管理消费权限
-          </a-button>
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="onAddAuth(record)"
-            >增加权限
-          </a-button>
-        </div>
-      </a-table>
-      <UserDetail
-        :visible="openUserDetailDialog"
-        :username="selectDetail.username"
-        @userDetailDialog="closeUserDetailDialog"
-      ></UserDetail>
-      <AclDetail
-        :visible="openAclDetailDialog"
-        :selectDetail="selectDetail"
-        @aclDetailDialog="closeAclDetailDialog"
-      ></AclDetail>
-      <ManageProducerAuth
-        :visible="openManageProducerAuthDialog"
-        :record="selectRow"
-        @manageProducerAuthDialog="closeManageProducerAuthDialog"
-      ></ManageProducerAuth>
-      <ManageConsumerAuth
-        :visible="openManageConsumerAuthDialog"
-        :record="selectRow"
-        @manageConsumerAuthDialog="closeManageConsumerAuthDialog"
-      ></ManageConsumerAuth>
-      <AddAuth
-        :visible="openAddAuthDialog"
-        :record="selectRow"
-        @addAuthDialog="closeAddAuthDialog"
-      ></AddAuth>
-    </div>
+          <div slot="topicList" slot-scope="topicList, record">
+            <a
+              href="#"
+              v-for="t in topicList"
+              :key="t"
+              @click="onTopicDetail(t, record.username)"
+              ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
+            </a>
+          </div>
+
+          <div slot="groupList" slot-scope="groupList, record">
+            <a
+              href="#"
+              v-for="t in groupList"
+              :key="t"
+              @click="onGroupDetail(t, record.username)"
+              ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
+            </a>
+          </div>
+
+          <div
+            slot="operation"
+            slot-scope="record"
+            v-show="!record.user || record.user.role != 'admin'"
+          >
+            <a-popconfirm
+              :title="'删除用户: ' + record.username + '及相关权限？'"
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="onDeleteUser(record)"
+            >
+              <a-button size="small" href="javascript:;" class="operation-btn"
+                >删除</a-button
+              >
+            </a-popconfirm>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="onManageProducerAuth(record)"
+              >管理生产权限
+            </a-button>
+
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="onManageConsumerAuth(record)"
+              >管理消费权限
+            </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="onAddAuth(record)"
+              >增加权限
+            </a-button>
+          </div>
+        </a-table>
+        <UserDetail
+          :visible="openUserDetailDialog"
+          :username="selectDetail.username"
+          @userDetailDialog="closeUserDetailDialog"
+        ></UserDetail>
+        <AclDetail
+          :visible="openAclDetailDialog"
+          :selectDetail="selectDetail"
+          @aclDetailDialog="closeAclDetailDialog"
+        ></AclDetail>
+        <ManageProducerAuth
+          :visible="openManageProducerAuthDialog"
+          :record="selectRow"
+          @manageProducerAuthDialog="closeManageProducerAuthDialog"
+        ></ManageProducerAuth>
+        <ManageConsumerAuth
+          :visible="openManageConsumerAuthDialog"
+          :record="selectRow"
+          @manageConsumerAuthDialog="closeManageConsumerAuthDialog"
+        ></ManageConsumerAuth>
+        <AddAuth
+          :visible="openAddAuthDialog"
+          :record="selectRow"
+          @addAuthDialog="closeAddAuthDialog"
+        ></AddAuth>
+      </div>
+    </a-spin>
   </div>
 </template>
 
@@ -193,6 +195,7 @@ export default {
         resourceType: "",
         username: "",
       },
+      loading: false,
     };
   },
   methods: {
@@ -211,7 +214,7 @@ export default {
           queryParam.resourceName = values.groupId;
         }
         Object.assign(this.queryParam, queryParam);
-        getAclList(this.data, queryParam);
+        this.getAclList();
       });
     },
 
@@ -225,7 +228,7 @@ export default {
     closeUpdateUserDialog(data) {
       this.showUpdateUser = data.show;
       if (data.ok) {
-        getAclList(this.data, this.queryParam);
+        this.getAclList();
       }
     },
     onDeleteUser(row) {
@@ -234,7 +237,7 @@ export default {
         method: KafkaAclApi.deleteKafkaUser.method,
         data: { username: row.username },
       }).then((res) => {
-        getAclList(this.data, this.queryParam);
+        this.getAclList();
         if (res.code == 0) {
           this.$message.success(res.msg);
         } else {
@@ -278,65 +281,99 @@ export default {
     },
     closeManageProducerAuthDialog() {
       this.openManageProducerAuthDialog = false;
-      getAclList(this.data, this.queryParam);
+      this.getAclList();
     },
     closeManageConsumerAuthDialog() {
       this.openManageConsumerAuthDialog = false;
-      getAclList(this.data, this.queryParam);
+      this.getAclList();
     },
     closeAddAuthDialog(p) {
       this.openAddAuthDialog = false;
       if (p.refresh) {
-        getAclList(this.data, this.queryParam);
+        this.getAclList();
       }
     },
     closeAclDetailDialog(p) {
       this.openAclDetailDialog = false;
       if (p.refresh) {
-        getAclList(this.data, this.queryParam);
+        this.getAclList();
       }
     },
     closeUserDetailDialog() {
       this.openUserDetailDialog = false;
     },
+    getAclList() {
+      this.loading = true;
+      request({
+        url: KafkaAclApi.getAclList.url,
+        method: KafkaAclApi.getAclList.method,
+        data: this.queryParam,
+      }).then((response) => {
+        this.loading = false;
+        this.data.splice(0, this.data.length);
+        if (response.code != 0) {
+          notification.error({
+            message: response.msg,
+          });
+          return;
+        }
+        for (let k in response.data.map) {
+          let v = response.data.map[k];
+          let topicList = Object.keys(v)
+            .filter((e) => e.startsWith("TOPIC"))
+            .map((e) => e.split("#")[1]);
+          let groupList = Object.keys(v)
+            .filter((e) => e.startsWith("GROUP"))
+            .map((e) => e.split("#")[1]);
+          this.data.push({
+            key: k,
+            username: k,
+            topicList: topicList,
+            groupList: groupList,
+            user: response.data.map[k]["USER"],
+          });
+          this.data.sort((a, b) => a.username.localeCompare(b.username));
+        }
+      });
+    },
   },
   created() {
-    getAclList(this.data, this.queryParam);
+    this.getAclList();
   },
 };
 
-function getAclList(data, requestParameters) {
-  request({
-    url: KafkaAclApi.getAclList.url,
-    method: KafkaAclApi.getAclList.method,
-    data: requestParameters,
-  }).then((response) => {
-    data.splice(0, data.length);
-    if (response.code != 0) {
-      notification.error({
-        message: response.msg,
-      });
-      return;
-    }
-    for (let k in response.data.map) {
-      let v = response.data.map[k];
-      let topicList = Object.keys(v)
-        .filter((e) => e.startsWith("TOPIC"))
-        .map((e) => e.split("#")[1]);
-      let groupList = Object.keys(v)
-        .filter((e) => e.startsWith("GROUP"))
-        .map((e) => e.split("#")[1]);
-      data.push({
-        key: k,
-        username: k,
-        topicList: topicList,
-        groupList: groupList,
-        user: response.data.map[k]["USER"],
-      });
-      data.sort((a, b) => a.username.localeCompare(b.username));
-    }
-  });
-}
+// function getAclList(data, requestParameters) {
+//   request({
+//     url: KafkaAclApi.getAclList.url,
+//     method: KafkaAclApi.getAclList.method,
+//     data: requestParameters,
+//   }).then((response) => {
+//     data.splice(0, data.length);
+//     if (response.code != 0) {
+//       notification.error({
+//         message: response.msg,
+//       });
+//       return;
+//     }
+//     for (let k in response.data.map) {
+//       let v = response.data.map[k];
+//       let topicList = Object.keys(v)
+//         .filter((e) => e.startsWith("TOPIC"))
+//         .map((e) => e.split("#")[1]);
+//       let groupList = Object.keys(v)
+//         .filter((e) => e.startsWith("GROUP"))
+//         .map((e) => e.split("#")[1]);
+//       data.push({
+//         key: k,
+//         username: k,
+//         topicList: topicList,
+//         groupList: groupList,
+//         user: response.data.map[k]["USER"],
+//       });
+//       data.sort((a, b) => a.username.localeCompare(b.username));
+//     }
+//   });
+// }
 
 const columns = [
   {

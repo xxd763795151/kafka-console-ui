@@ -10,28 +10,30 @@
     :footer="null"
     :maskClosable="false"
   >
-    <div>
-      <a-table
-        :columns="columns"
-        :data-source="data"
-        :rowKey="
-          (record, index) => {
-            return index;
-          }
-        "
-        >>
-        <a slot="action" slot-scope="record">
-          <a-popconfirm
-            :title="'删除操作权限: ' + record.operation + '？'"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="onDelete(record)"
-          >
-            <a-button>删除</a-button>
-          </a-popconfirm>
-        </a>
-      </a-table>
-    </div>
+    <a-spin :spinning="loading">
+      <div>
+        <a-table
+          :columns="columns"
+          :data-source="data"
+          :rowKey="
+            (record, index) => {
+              return index;
+            }
+          "
+          >>
+          <a slot="action" slot-scope="record">
+            <a-popconfirm
+              :title="'删除操作权限: ' + record.operation + '？'"
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="onDelete(record)"
+            >
+              <a-button>删除</a-button>
+            </a-popconfirm>
+          </a>
+        </a-table>
+      </div>
+    </a-spin>
   </a-modal>
 </template>
 
@@ -55,12 +57,14 @@ export default {
       show: this.visible,
       data,
       columns,
+      loading: false,
     };
   },
   watch: {
     visible(v) {
       this.show = v;
       if (this.show) {
+        this.data = [];
         this.getAclDetail();
       }
     },
@@ -70,12 +74,14 @@ export default {
       this.$emit("aclDetailDialog", { refresh: true });
     },
     getAclDetail() {
+      this.loading = true;
       const api = KafkaAclApi.getAclDetailList;
       request({
         url: api.url,
         method: api.method,
         data: this.selectDetail,
       }).then((res) => {
+        this.loading = false;
         if (res.code != 0) {
           this.$message.error(res.msg);
         } else {
