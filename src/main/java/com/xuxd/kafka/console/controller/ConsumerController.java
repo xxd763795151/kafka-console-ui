@@ -55,4 +55,9 @@ public class ConsumerController {
     public Object getConsumerMembers(@RequestParam String groupId) {
         return consumerService.getConsumerMembers(groupId);
     }
+
+    @GetMapping("/detail")
+    public Object getConsumerDetail(@RequestParam String groupId) {
+        return consumerService.getConsumerDetail(groupId);
+    }
 }

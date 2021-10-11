@@ -18,4 +18,6 @@ public interface ConsumerService {
     ResponseData deleteConsumerGroup(String groupId);
 
     ResponseData getConsumerMembers(String groupId);
+
+    ResponseData getConsumerDetail(String groupId);
 }

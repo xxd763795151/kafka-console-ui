@@ -78,4 +78,8 @@ public class ConsumerServiceImpl implements ConsumerService {
         vos.sort(Comparator.comparing(ConsumerMemberVO::getClientId));
         return ResponseData.create().data(vos).success();
     }
+
+    @Override public ResponseData getConsumerDetail(String groupId) {
+        return ResponseData.create().data(consumerConsole.getConsumerDetail(Collections.singleton(groupId))).success();
+    }
 }
