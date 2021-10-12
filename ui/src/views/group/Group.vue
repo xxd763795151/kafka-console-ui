@@ -61,7 +61,7 @@
           </a-form>
         </div>
         <div class="operation-row-button">
-          <a-button type="primary" @click="handleReset">新增/更新</a-button>
+          <!--          <a-button type="primary" @click="handleReset">新增/更新</a-button>-->
         </div>
         <a-table
           :columns="columns"
@@ -91,6 +91,13 @@
                 >删除
               </a-button>
             </a-popconfirm>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openConsumerDetailDialog(record.groupId)"
+              >消费详情
+            </a-button>
           </div>
         </a-table>
         <Member
@@ -98,6 +105,12 @@
           :group="selectDetail.resourceName"
           @closeConsumerMemberDialog="closeConsumerDialog"
         ></Member>
+        <ConsumerDetail
+          :visible="showConsumerDetailDialog"
+          :group="selectDetail.resourceName"
+          @closeConsumerDetailDialog="closeConsumerDetailDialog"
+        >
+        </ConsumerDetail>
       </div>
     </a-spin>
   </div>
@@ -108,10 +121,11 @@ import request from "@/utils/request";
 import { KafkaConsumerApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
 import Member from "@/views/group/Member";
+import ConsumerDetail from "@/views/group/ConsumerDetail";
 
 export default {
   name: "ConsumerGroup",
-  components: { Member },
+  components: { Member, ConsumerDetail },
   data() {
     return {
       queryParam: {},
@@ -130,6 +144,7 @@ export default {
       },
       loading: false,
       showConsumerGroupDialog: false,
+      showConsumerDetailDialog: false,
     };
   },
   methods: {
@@ -178,6 +193,13 @@ export default {
     },
     closeConsumerDialog() {
       this.showConsumerGroupDialog = false;
+    },
+    openConsumerDetailDialog(groupId) {
+      this.showConsumerDetailDialog = true;
+      this.selectDetail.resourceName = groupId;
+    },
+    closeConsumerDetailDialog() {
+      this.showConsumerDetailDialog = false;
     },
   },
   created() {

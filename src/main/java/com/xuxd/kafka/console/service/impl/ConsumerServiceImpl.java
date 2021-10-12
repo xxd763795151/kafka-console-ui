@@ -2,14 +2,17 @@ package com.xuxd.kafka.console.service.impl;
 
 import com.xuxd.kafka.console.beans.CounterList;
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.vo.ConsumerDetailVO;
 import com.xuxd.kafka.console.beans.vo.ConsumerGroupVO;
 import com.xuxd.kafka.console.beans.vo.ConsumerMemberVO;
 import com.xuxd.kafka.console.service.ConsumerService;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import kafka.console.ConsumerConsole;
@@ -80,6 +83,19 @@ public class ConsumerServiceImpl implements ConsumerService {
     }
 
     @Override public ResponseData getConsumerDetail(String groupId) {
-        return ResponseData.create().data(consumerConsole.getConsumerDetail(Collections.singleton(groupId))).success();
+        Collection<ConsumerConsole.TopicPartitionConsumeInfo> consumerDetail = consumerConsole.getConsumerDetail(Collections.singleton(groupId));
+
+        List<ConsumerDetailVO> collect = consumerDetail.stream().map(ConsumerDetailVO::from).collect(Collectors.toList());
+        Map<String, List<ConsumerDetailVO>> map = collect.stream().collect(Collectors.groupingBy(ConsumerDetailVO::getTopic));
+
+        Map<String, Object> res = new HashMap<>();
+        map.forEach((topic, list) -> {
+            Map<String, Object> sorting = new HashMap<>();
+            Collections.sort(list);
+            sorting.put("data", list);
+            sorting.put("lag", list.stream().map(ConsumerDetailVO::getLag).reduce(Long::sum));
+            res.put(topic, sorting);
+        });
+        return ResponseData.create().data(res).success();
     }
 }

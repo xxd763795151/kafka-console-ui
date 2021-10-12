@@ -84,6 +84,10 @@ export const KafkaConsumerApi = {
     url: "/consumer/member",
     method: "get",
   },
+  getConsumerDetail: {
+    url: "/consumer/detail",
+    method: "get",
+  },
 };
 
 export const KafkaClusterApi = {

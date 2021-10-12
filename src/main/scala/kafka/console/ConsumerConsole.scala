@@ -11,7 +11,7 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.{ConsumerGroupState, TopicPartition}
 
 import scala.beans.BeanProperty
-import scala.collection.{Map, Seq, mutable}
+import scala.collection.{Map, mutable}
 import scala.jdk.CollectionConverters._
 
 /**
@@ -86,6 +86,7 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
                 t.logEndOffset = endOffsets.get(t.topicPartition).get.offset()
                 t.consumerOffset = getPartitionOffset(t.topicPartition).get
                 t.lag = t.logEndOffset - t.consumerOffset
+                t.groupId = consumerGroup.groupId()
                 (topicPartition, t)
             }).toMap
 
@@ -94,12 +95,16 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
                     val t = topicPartitionConsumeInfoMap.get(topicPartition).get
                     t.clientId = m.clientId()
                     t.consumerId = m.consumerId()
+                    t.host = m.host()
                 })
             })
 
-            topicPartitionConsumeInfoMap
+            topicPartitionConsumeInfoMap.map(_._2).asInstanceOf[List[TopicPartitionConsumeInfo]]
         }
-        groupOffsets.asJava.asInstanceOf[ util.Collection[TopicPartitionConsumeInfo]]
+        val res = new util.ArrayList[TopicPartitionConsumeInfo]()
+        groupOffsets.flatMap(_.toList).foreach(res.add(_))
+
+        res
     }
 
     private def describeConsumerGroups(groupIds: util.Set[String]): mutable.Map[String, ConsumerGroupDescription] = {
