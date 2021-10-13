@@ -2,6 +2,7 @@ package com.xuxd.kafka.console.service;
 
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.enums.TopicType;
+import org.apache.kafka.clients.admin.NewTopic;
 
 /**
  * kafka-console-ui.
@@ -18,4 +19,6 @@ public interface TopicService {
     ResponseData deleteTopic(String topic);
 
     ResponseData getTopicPartitionInfo(String topic);
+
+    ResponseData createTopic(NewTopic topic);
 }

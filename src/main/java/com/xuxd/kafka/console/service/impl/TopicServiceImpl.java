@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import kafka.console.TopicConsole;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
@@ -105,5 +106,10 @@ public class TopicServiceImpl implements TopicService {
             partitionVO.setDiff(end - begin);
         }
         return ResponseData.create().data(voList).success();
+    }
+
+    @Override public ResponseData createTopic(NewTopic topic) {
+        Tuple2<Object, String> createResult = topicConsole.createTopic(topic);
+        return (boolean) createResult._1 ? ResponseData.create().success() : ResponseData.create().failed(String.valueOf(createResult._2));
     }
 }

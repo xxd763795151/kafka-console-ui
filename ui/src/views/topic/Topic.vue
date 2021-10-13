@@ -44,7 +44,9 @@
           </a-form>
         </div>
         <div class="operation-row-button">
-          <a-button type="primary" @click="handleReset">新增/更新</a-button>
+          <a-button type="primary" @click="openCreateTopicDialog"
+            >新增</a-button
+          >
         </div>
         <a-table :columns="columns" :data-source="data" bordered row-key="name">
           <div slot="partitions" slot-scope="text, record">
@@ -75,6 +77,11 @@
           :visible="showPartitionInfo"
           @closePartitionInfoDialog="closePartitionInfoDialog"
         ></PartitionInfo>
+        <CreateTopic
+          :visible="showCreateTopic"
+          @closeCreateTopicDialog="closeCreateTopicDialog"
+        >
+        </CreateTopic>
       </div>
     </a-spin>
   </div>
@@ -85,10 +92,11 @@ import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
 import PartitionInfo from "@/views/topic/PartitionInfo";
+import CreateTopic from "@/views/topic/CreateTopic";
 
 export default {
   name: "Topic",
-  components: { PartitionInfo },
+  components: { PartitionInfo, CreateTopic },
   data() {
     return {
       queryParam: { type: "normal" },
@@ -105,6 +113,7 @@ export default {
       },
       showPartitionInfo: false,
       loading: false,
+      showCreateTopic: false,
     };
   },
   methods: {
@@ -151,6 +160,15 @@ export default {
     },
     closePartitionInfoDialog() {
       this.showPartitionInfo = false;
+    },
+    openCreateTopicDialog() {
+      this.showCreateTopic = true;
+    },
+    closeCreateTopicDialog(res) {
+      this.showCreateTopic = false;
+      if (res.refresh) {
+        this.getTopicList();
+      }
     },
   },
   created() {

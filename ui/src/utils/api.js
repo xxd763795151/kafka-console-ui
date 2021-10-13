@@ -69,6 +69,10 @@ export const KafkaTopicApi = {
     url: "/topic/partition",
     method: "get",
   },
+  creatTopic: {
+    url: "/topic/new",
+    method: "post",
+  },
 };
 
 export const KafkaConsumerApi = {

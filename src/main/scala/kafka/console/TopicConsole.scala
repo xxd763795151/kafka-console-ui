@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import java.util.{Collections, List, Set}
 
 import com.xuxd.kafka.console.config.KafkaConfig
-import org.apache.kafka.clients.admin.{DeleteTopicsOptions, ListTopicsOptions, TopicDescription}
+import org.apache.kafka.clients.admin.{CreateTopicsOptions, DeleteTopicsOptions, ListTopicsOptions, NewTopic, TopicDescription}
 import org.apache.kafka.common.TopicPartition
 
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, SetHasAsJava}
@@ -92,5 +92,19 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
             log.error("getTopicOffset error, topic: " + topic, e)
             (Collections.emptyMap(), Collections.emptyMap())
         }).asInstanceOf[(util.Map[TopicPartition, Long], util.Map[TopicPartition, Long])]
+    }
+
+    /**
+     * create topic.
+     */
+    def createTopic(topic: NewTopic): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            val createResult = admin.createTopics(Collections.singleton(topic), new CreateTopicsOptions().retryOnQuotaViolation(false))
+            createResult.all().get(timeoutMs, TimeUnit.MILLISECONDS)
+            (true, "")
+        }, e => {
+            log.error("create topic error, topic: " + topic.name(), e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
     }
 }
