@@ -92,10 +92,15 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
 
             consumerGroup.members().asScala.filter(!_.assignment().topicPartitions().isEmpty).foreach(m => {
                 m.assignment().topicPartitions().asScala.foreach(topicPartition => {
-                    val t = topicPartitionConsumeInfoMap.get(topicPartition).get
-                    t.clientId = m.clientId()
-                    t.consumerId = m.consumerId()
-                    t.host = m.host()
+                    topicPartitionConsumeInfoMap.get(topicPartition) match {
+                        case None =>
+                        case Some(t) => {
+                            t.clientId = m.clientId()
+                            t.consumerId = m.consumerId()
+                            t.host = m.host()
+                        }
+                    }
+
                 })
             })
 
