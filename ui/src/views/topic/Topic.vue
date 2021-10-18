@@ -70,6 +70,13 @@
                 >删除
               </a-button>
             </a-popconfirm>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openAddPartitionDialog"
+              >增加分区
+            </a-button>
           </div>
         </a-table>
         <PartitionInfo
@@ -82,6 +89,10 @@
           @closeCreateTopicDialog="closeCreateTopicDialog"
         >
         </CreateTopic>
+        <AddPartition
+          :visible="showAddPartition"
+          @closeAddPartitionDialog="closeAddPartitionDialog"
+        ></AddPartition>
       </div>
     </a-spin>
   </div>
@@ -93,10 +104,11 @@ import { KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
 import PartitionInfo from "@/views/topic/PartitionInfo";
 import CreateTopic from "@/views/topic/CreateTopic";
+import AddPartition from "@/views/topic/AddPartition";
 
 export default {
   name: "Topic",
-  components: { PartitionInfo, CreateTopic },
+  components: { PartitionInfo, CreateTopic, AddPartition },
   data() {
     return {
       queryParam: { type: "normal" },
@@ -114,6 +126,7 @@ export default {
       showPartitionInfo: false,
       loading: false,
       showCreateTopic: false,
+      showAddPartition: false,
     };
   },
   methods: {
@@ -166,6 +179,15 @@ export default {
     },
     closeCreateTopicDialog(res) {
       this.showCreateTopic = false;
+      if (res.refresh) {
+        this.getTopicList();
+      }
+    },
+    openAddPartitionDialog() {
+      this.showAddPartition = true;
+    },
+    closeAddPartitionDialog(res) {
+      this.showAddPartition = false;
       if (res.refresh) {
         this.getTopicList();
       }

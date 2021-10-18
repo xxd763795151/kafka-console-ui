@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.dto.AddPartitionDTO;
 import com.xuxd.kafka.console.beans.dto.NewTopicDTO;
 import com.xuxd.kafka.console.beans.enums.TopicType;
 import com.xuxd.kafka.console.service.TopicService;
@@ -37,11 +38,16 @@ public class TopicController {
 
     @GetMapping("/partition")
     public Object getTopicPartitionInfo(@RequestParam String topic) {
-        return topicService.getTopicPartitionInfo(topic);
+        return topicService.getTopicPartitionInfo(topic.trim());
     }
 
     @PostMapping("/new")
     public Object createNewTopic(@RequestBody NewTopicDTO topicDTO) {
         return topicService.createTopic(topicDTO.toNewTopic());
+    }
+
+    @PostMapping("/partition/new")
+    public Object addPartition(@RequestBody AddPartitionDTO partitionDTO) {
+        return topicService.addPartitions(partitionDTO.getTopic().trim(), partitionDTO.getAddNum(), partitionDTO.getAssignment());
     }
 }

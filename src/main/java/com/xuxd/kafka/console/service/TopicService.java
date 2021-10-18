@@ -2,6 +2,9 @@ package com.xuxd.kafka.console.service;
 
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.enums.TopicType;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import org.apache.kafka.clients.admin.NewTopic;
 
 /**
@@ -21,4 +24,6 @@ public interface TopicService {
     ResponseData getTopicPartitionInfo(String topic);
 
     ResponseData createTopic(NewTopic topic);
+
+    ResponseData addPartitions(String topic, int addNum, List<List<Integer>> newAssignmentst);
 }

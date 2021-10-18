@@ -21,7 +21,7 @@ public class NewTopicDTO {
     private Map<String, String> configs = new HashMap<>();
 
     public NewTopic toNewTopic() {
-        NewTopic topic = new NewTopic(name, numPartitions, replicationFactor);
+        NewTopic topic = new NewTopic(name.trim(), numPartitions, replicationFactor);
         if (MapUtils.isNotEmpty(configs)) {
             topic.configs(configs);
         }

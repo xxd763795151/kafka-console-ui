@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import kafka.console.TopicConsole;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.admin.NewPartitions;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.common.TopicPartition;
@@ -111,5 +112,22 @@ public class TopicServiceImpl implements TopicService {
     @Override public ResponseData createTopic(NewTopic topic) {
         Tuple2<Object, String> createResult = topicConsole.createTopic(topic);
         return (boolean) createResult._1 ? ResponseData.create().success() : ResponseData.create().failed(String.valueOf(createResult._2));
+    }
+
+    @Override public ResponseData addPartitions(String topic, int addNum, List<List<Integer>> newAssignments) {
+        List<TopicDescription> list = topicConsole.getTopicList(Collections.singleton(topic));
+        if (list.isEmpty()) {
+            return ResponseData.create().failed("topic not exist.");
+        }
+        TopicDescription topicDescription = list.get(0);
+
+        Map<String, NewPartitions> param = new HashMap<>();
+        param.put(topic, (newAssignments.size() > 0 ? NewPartitions.increaseTo(topicDescription.partitions().size() + addNum, newAssignments) :
+            NewPartitions.increaseTo(topicDescription.partitions().size() + addNum)));
+
+        Tuple2<Object, String> tuple2 = topicConsole.createPartitions(param);
+        boolean success = (boolean) tuple2._1();
+
+        return success ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 }

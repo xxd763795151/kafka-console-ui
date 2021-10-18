@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import java.util.{Collections, List, Set}
 
 import com.xuxd.kafka.console.config.KafkaConfig
-import org.apache.kafka.clients.admin.{CreateTopicsOptions, DeleteTopicsOptions, ListTopicsOptions, NewTopic, TopicDescription}
+import org.apache.kafka.clients.admin._
 import org.apache.kafka.common.TopicPartition
 
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, SetHasAsJava}
@@ -104,6 +104,20 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
             (true, "")
         }, e => {
             log.error("create topic error, topic: " + topic.name(), e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
+    }
+
+    /**
+     * create new partition.
+     */
+    def createPartitions(newPartitions: util.Map[String, NewPartitions]): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            admin.createPartitions(newPartitions,
+                new CreatePartitionsOptions().retryOnQuotaViolation(false)).all().get(timeoutMs, TimeUnit.MILLISECONDS)
+            (true, "")
+        }, e => {
+            log.error("create partition error, ", e)
             (false, e.getMessage)
         }).asInstanceOf[(Boolean, String)]
     }
