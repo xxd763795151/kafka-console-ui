@@ -4,6 +4,10 @@ import com.xuxd.kafka.console.beans.dto.AddPartitionDTO;
 import com.xuxd.kafka.console.beans.dto.NewTopicDTO;
 import com.xuxd.kafka.console.beans.enums.TopicType;
 import com.xuxd.kafka.console.service.TopicService;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +52,18 @@ public class TopicController {
 
     @PostMapping("/partition/new")
     public Object addPartition(@RequestBody AddPartitionDTO partitionDTO) {
-        return topicService.addPartitions(partitionDTO.getTopic().trim(), partitionDTO.getAddNum(), partitionDTO.getAssignment());
+        String topic = partitionDTO.getTopic().trim();
+        int addNum = partitionDTO.getAddNum();
+        Map<Integer, List<Integer>> assignmentMap = partitionDTO.getAssignment();
+        List<List<Integer>> assignment = Collections.emptyList();
+
+        if (!assignmentMap.isEmpty()) {
+            assignment = new ArrayList<>(addNum);
+            for (int i = 1; i <= addNum; i++) {
+                assignment.add(assignmentMap.containsKey(i) ? assignmentMap.get(i) : Collections.emptyList());
+            }
+        }
+
+        return topicService.addPartitions(topic, addNum, assignment);
     }
 }

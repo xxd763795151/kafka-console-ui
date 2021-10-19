@@ -74,7 +74,7 @@
               size="small"
               href="javascript:;"
               class="operation-btn"
-              @click="openAddPartitionDialog"
+              @click="openAddPartitionDialog(record.name)"
               >增加分区
             </a-button>
           </div>
@@ -91,6 +91,7 @@
         </CreateTopic>
         <AddPartition
           :visible="showAddPartition"
+          :topic="selectDetail.resourceName"
           @closeAddPartitionDialog="closeAddPartitionDialog"
         ></AddPartition>
       </div>
@@ -183,7 +184,8 @@ export default {
         this.getTopicList();
       }
     },
-    openAddPartitionDialog() {
+    openAddPartitionDialog(topic) {
+      this.selectDetail.resourceName = topic;
       this.showAddPartition = true;
     },
     closeAddPartitionDialog(res) {

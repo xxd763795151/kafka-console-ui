@@ -18,20 +18,18 @@
           @submit="handleSubmit"
         >
           <a-form-item label="Topic名称">
-            <a-input disabled="true"
-              v-decorator="[
-                'name',
-                { rules: [{ required: true, message: '输入topic名称!' }] },
-              ]"
+            <a-input
+              :disabled="true"
+              v-decorator="['topic', { initialValue: topic }]"
               placeholder="topic"
             />
           </a-form-item>
-          <a-form-item label="分区">
+          <a-form-item label="增加分区数">
             <a-input-number
               :min="1"
-              :max="128"
+              :max="32"
               v-decorator="[
-                'numPartitions',
+                'addNum',
                 {
                   initialValue: 1,
                   rules: [{ required: true, message: '输入分区数!' }],
@@ -40,14 +38,13 @@
             />
             <span class="ant-form-text"> 个分区 </span>
           </a-form-item>
-          <a-form-item label="属性">
+          <a-form-item label="副本">
             <a-textarea
               rows="5"
-              placeholder="格式示例如下：
-max.message.bytes=1024
-retention.bytes=1024
-retention.ms=3600000"
-              v-decorator="['configs']"
+              placeholder="可选参数，指定新增分区的副本，格式示例如下：
+1=1,2
+2=2,3"
+              v-decorator="['assignment']"
             />
           </a-form-item>
           <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
@@ -99,24 +96,25 @@ export default {
       e.preventDefault();
       this.form.validateFields((err, values) => {
         if (!err) {
-          if (values.configs) {
-            const config = {};
-            values.configs.split("\n").forEach((e) => {
+          if (values.assignment) {
+            const assignment = {};
+            values.assignment.split("\n").forEach((e) => {
               const c = e.split("=");
               if (c.length > 1) {
-                let k = c[0].trim(),
-                  v = c[1].trim();
-                if (k && v) {
-                  config[k] = v;
+                let k = c[0];
+                let v = c[1];
+                let arr = v.split(",");
+                if (arr.length > 0) {
+                  assignment[k] = arr;
                 }
               }
             });
-            values.configs = config;
+            values.assignment = assignment;
           }
           this.loading = true;
           request({
-            url: KafkaTopicApi.creatTopic.url,
-            method: KafkaTopicApi.creatTopic.method,
+            url: KafkaTopicApi.addPartition.url,
+            method: KafkaTopicApi.addPartition.method,
             data: values,
           }).then((res) => {
             this.loading = false;

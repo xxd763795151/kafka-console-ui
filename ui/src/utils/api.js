@@ -73,6 +73,10 @@ export const KafkaTopicApi = {
     url: "/topic/new",
     method: "post",
   },
+  addPartition: {
+    url: "/topic/partition/new",
+    method: "post",
+  },
 };
 
 export const KafkaConsumerApi = {

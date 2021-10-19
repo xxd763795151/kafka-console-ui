@@ -1,7 +1,9 @@
 package com.xuxd.kafka.console.beans.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Data;
 
 /**
@@ -17,5 +19,5 @@ public class AddPartitionDTO {
 
     private int addNum;
 
-    private List<List<Integer>> assignment = new ArrayList<>();
+    private Map<Integer, List<Integer>> assignment = new HashMap<>();
 }
