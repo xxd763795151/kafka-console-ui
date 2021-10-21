@@ -1,13 +1,14 @@
 package kafka.console
 
+import java.time.Duration
 import java.util
 import java.util.concurrent.TimeUnit
-import java.util.{Collections, Set}
+import java.util.{Collections, Properties, Set}
 
 import com.xuxd.kafka.console.config.KafkaConfig
 import org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo
 import org.apache.kafka.clients.admin.{ConsumerGroupDescription, DeleteConsumerGroupsOptions, ListConsumerGroupsOptions, OffsetSpec}
-import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.clients.consumer.{ConsumerConfig, OffsetAndMetadata}
 import org.apache.kafka.common.{ConsumerGroupState, TopicPartition}
 
 import scala.beans.BeanProperty
@@ -110,6 +111,20 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
         groupOffsets.flatMap(_.toList).foreach(res.add(_))
 
         res
+    }
+
+    def consumeMessageDoNothing(groupId: String, topic: String): Unit = {
+        val props = new Properties()
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId)
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
+
+        withConsumerAndCatchError(consumer => {
+            consumer.subscribe(Collections.singletonList(topic))
+            consumer.poll(Duration.ofSeconds(1))
+            consumer.commitSync()
+        }, e=> {
+            log.error("subscribe error", e)
+        }, props)
     }
 
     private def describeConsumerGroups(groupIds: util.Set[String]): mutable.Map[String, ConsumerGroupDescription] = {

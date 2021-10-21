@@ -213,8 +213,11 @@ export default {
     openAddSubscriptionDialog() {
       this.showAddSubscriptionDialog = true;
     },
-    closeAddSubscriptionDialog() {
+    closeAddSubscriptionDialog(res) {
       this.showAddSubscriptionDialog = false;
+      if (res.refresh) {
+        this.getConsumerGroupList();
+      }
     },
   },
   created() {

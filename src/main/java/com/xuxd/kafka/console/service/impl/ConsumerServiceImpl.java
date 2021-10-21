@@ -111,7 +111,7 @@ public class ConsumerServiceImpl implements ConsumerService {
         }
 
         // consumer message and commit offset.
-
+        consumerConsole.consumeMessageDoNothing(groupId, topic);
 
         // reset consume offset to 0.
         return ResponseData.create().success();
