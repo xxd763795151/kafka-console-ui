@@ -38,8 +38,8 @@ public class TopicServiceImpl implements TopicService {
     @Autowired
     private TopicConsole topicConsole;
 
-    @Override public ResponseData getTopicNameList() {
-        return ResponseData.create().data(topicConsole.getTopicNameList(true)).success();
+    @Override public ResponseData getTopicNameList(boolean internal) {
+        return ResponseData.create().data(topicConsole.getTopicNameList(internal)).success();
     }
 
     @Override public ResponseData getTopicList(String topic, TopicType type) {

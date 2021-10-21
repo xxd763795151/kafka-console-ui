@@ -100,15 +100,9 @@ export default {
   watch: {
     visible(v) {
       this.show = v;
-      if (this.show) {
-        this.getPartitionInfo();
-      }
     },
   },
   methods: {
-    getPartitionInfo() {
-      this.loading = false;
-    },
     handleSubmit(e) {
       e.preventDefault();
       this.form.validateFields((err, values) => {

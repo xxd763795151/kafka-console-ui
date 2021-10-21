@@ -98,4 +98,22 @@ public class ConsumerServiceImpl implements ConsumerService {
         });
         return ResponseData.create().data(res).success();
     }
+
+    @Override public ResponseData addSubscription(String groupId, String topic) {
+        // check whether exist subscription relationship.
+        Collection<ConsumerConsole.TopicPartitionConsumeInfo> consumerDetail = consumerConsole.getConsumerDetail(Collections.singleton(groupId));
+        if (CollectionUtils.isNotEmpty(consumerDetail)) {
+            List<ConsumerConsole.TopicPartitionConsumeInfo> collect = consumerDetail.stream()
+                .filter(t -> t.getTopicPartition().topic().equals(topic)).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(collect)) {
+                return ResponseData.create().failed("The subscription exist.");
+            }
+        }
+
+        // consumer message and commit offset.
+
+
+        // reset consume offset to 0.
+        return ResponseData.create().success();
+    }
 }

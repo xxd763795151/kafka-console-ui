@@ -20,4 +20,6 @@ public interface ConsumerService {
     ResponseData getConsumerMembers(String groupId);
 
     ResponseData getConsumerDetail(String groupId);
+
+    ResponseData addSubscription(String groupId, String topic);
 }

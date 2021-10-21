@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.dto.AddSubscriptionDTO;
 import com.xuxd.kafka.console.beans.dto.QueryConsumerGroupDTO;
 import com.xuxd.kafka.console.service.ConsumerService;
 import java.util.Collections;
@@ -59,5 +60,10 @@ public class ConsumerController {
     @GetMapping("/detail")
     public Object getConsumerDetail(@RequestParam String groupId) {
         return consumerService.getConsumerDetail(groupId);
+    }
+
+    @PostMapping("/subscription")
+    public Object addSubscription(@RequestBody AddSubscriptionDTO subscriptionDTO) {
+        return consumerService.addSubscription(subscriptionDTO.getGroupId(), subscriptionDTO.getTopic());
     }
 }

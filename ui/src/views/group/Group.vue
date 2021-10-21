@@ -61,7 +61,9 @@
           </a-form>
         </div>
         <div class="operation-row-button">
-          <!--          <a-button type="primary" @click="handleReset">新增/更新</a-button>-->
+          <a-button type="primary" @click="openAddSubscriptionDialog"
+            >新增订阅</a-button
+          >
         </div>
         <a-table
           :columns="columns"
@@ -111,6 +113,11 @@
           @closeConsumerDetailDialog="closeConsumerDetailDialog"
         >
         </ConsumerDetail>
+        <AddSupscription
+          :visible="showAddSubscriptionDialog"
+          @closeAddSubscriptionDialog="closeAddSubscriptionDialog"
+        >
+        </AddSupscription>
       </div>
     </a-spin>
   </div>
@@ -122,10 +129,11 @@ import { KafkaConsumerApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
 import Member from "@/views/group/Member";
 import ConsumerDetail from "@/views/group/ConsumerDetail";
+import AddSupscription from "@/views/group/AddSupscription";
 
 export default {
   name: "ConsumerGroup",
-  components: { Member, ConsumerDetail },
+  components: { Member, ConsumerDetail, AddSupscription },
   data() {
     return {
       queryParam: {},
@@ -145,6 +153,7 @@ export default {
       loading: false,
       showConsumerGroupDialog: false,
       showConsumerDetailDialog: false,
+      showAddSubscriptionDialog: false,
     };
   },
   methods: {
@@ -200,6 +209,12 @@ export default {
     },
     closeConsumerDetailDialog() {
       this.showConsumerDetailDialog = false;
+    },
+    openAddSubscriptionDialog() {
+      this.showAddSubscriptionDialog = true;
+    },
+    closeAddSubscriptionDialog() {
+      this.showAddSubscriptionDialog = false;
     },
   },
   created() {

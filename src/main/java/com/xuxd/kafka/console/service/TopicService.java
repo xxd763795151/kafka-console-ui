@@ -15,7 +15,7 @@ import org.apache.kafka.clients.admin.NewTopic;
  **/
 public interface TopicService {
 
-    ResponseData getTopicNameList();
+    ResponseData getTopicNameList(boolean internal);
 
     ResponseData getTopicList(String topic, TopicType type);
 

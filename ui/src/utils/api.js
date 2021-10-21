@@ -57,6 +57,10 @@ export const KafkaConfigApi = {
 };
 
 export const KafkaTopicApi = {
+  getTopicNameList: {
+    url: "/topic",
+    method: "get",
+  },
   getTopicList: {
     url: "/topic/list",
     method: "get",
@@ -95,6 +99,10 @@ export const KafkaConsumerApi = {
   getConsumerDetail: {
     url: "/consumer/detail",
     method: "get",
+  },
+  addSubscription: {
+    url: "/consumer/subscription",
+    method: "post",
   },
 };
 

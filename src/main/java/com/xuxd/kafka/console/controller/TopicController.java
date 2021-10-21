@@ -30,6 +30,11 @@ public class TopicController {
     @Autowired
     private TopicService topicService;
 
+    @GetMapping
+    public Object getTopicNameList() {
+        return topicService.getTopicNameList(false);
+    }
+
     @GetMapping("/list")
     public Object getTopicList(@RequestParam(required = false) String topic, @RequestParam String type) {
         return topicService.getTopicList(topic, TopicType.valueOf(type.toUpperCase()));

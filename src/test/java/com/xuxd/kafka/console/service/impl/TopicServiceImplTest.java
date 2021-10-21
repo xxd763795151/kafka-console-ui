@@ -22,7 +22,7 @@ public class TopicServiceImplTest {
 
     @Test
     public void getTopicNameList() {
-        log.info(topicService.getTopicNameList().getData().toString());
+        log.info(topicService.getTopicNameList(true).getData().toString());
     }
 
     @Test
