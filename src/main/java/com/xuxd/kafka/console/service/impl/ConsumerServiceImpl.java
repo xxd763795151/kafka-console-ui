@@ -111,9 +111,14 @@ public class ConsumerServiceImpl implements ConsumerService {
         }
 
         // consumer message and commit offset.
-        consumerConsole.consumeMessageDoNothing(groupId, topic);
+        Tuple2<Object, String> tuple21 = consumerConsole.consumeMessageDoNothing(groupId, topic);
+        if (!(boolean) tuple21._1()) {
+            return ResponseData.create().failed(tuple21._2());
+        }
 
-        // reset consume offset to 0.
-        return ResponseData.create().success();
+        // reset consume offset to earliest.
+        Tuple2<Object, String> tuple2 = consumerConsole.resetOffsetToEarliest(groupId, topic);
+
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 }

@@ -84,10 +84,16 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
             val topicPartitionConsumeInfoMap = commitOffsets.keySet.map(topicPartition => {
                 val t = new TopicPartitionConsumeInfo
                 t.topicPartition = topicPartition
-                t.logEndOffset = endOffsets.get(t.topicPartition).get.offset()
-                t.consumerOffset = getPartitionOffset(t.topicPartition).get
-                t.lag = t.logEndOffset - t.consumerOffset
                 t.groupId = consumerGroup.groupId()
+                t.consumerOffset = getPartitionOffset(t.topicPartition).get
+                endOffsets.get(t.topicPartition) match {
+                    case None => t.lag = -1
+                    case Some(v) => {
+                        t.logEndOffset = v.offset()
+                        t.lag = t.logEndOffset - t.consumerOffset
+                    }
+                }
+                t.lag = t.logEndOffset - t.consumerOffset
                 (topicPartition, t)
             }).toMap
 
@@ -113,18 +119,41 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
         res
     }
 
-    def consumeMessageDoNothing(groupId: String, topic: String): Unit = {
+    def consumeMessageDoNothing(groupId: String, topic: String): (Boolean, String) = {
         val props = new Properties()
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId)
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
 
         withConsumerAndCatchError(consumer => {
             consumer.subscribe(Collections.singletonList(topic))
-            consumer.poll(Duration.ofSeconds(1))
+            for (i <- 1 to 2) {
+                consumer.poll(Duration.ofSeconds(1))
+            }
             consumer.commitSync()
-        }, e=> {
+            (true, "")
+        }, e => {
             log.error("subscribe error", e)
-        }, props)
+            (false, e.getMessage)
+        }, props).asInstanceOf[(Boolean, String)]
+    }
+
+    def resetOffsetToEarliest(groupId: String, topic: String): (Boolean, String) = {
+        val props = new Properties()
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId)
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        withConsumerAndCatchError(consumer => {
+            consumer.subscribe(Collections.singleton(topic))
+            consumer.poll(0)
+            val partitions = consumer.partitionsFor(topic).asScala.map(p => new TopicPartition(topic, p.partition())).toList
+            consumer.seekToBeginning(partitions.asJava)
+            partitions.foreach(consumer.position(_))
+            consumer.commitSync()
+            (true, "")
+        }, e => {
+            log.error("resetOffsetToEarliest error", e)
+            (false, e.getMessage)
+        }, props).asInstanceOf[(Boolean, String)]
     }
 
     private def describeConsumerGroups(groupIds: util.Set[String]): mutable.Map[String, ConsumerGroupDescription] = {
