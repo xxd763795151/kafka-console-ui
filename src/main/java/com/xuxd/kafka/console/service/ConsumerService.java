@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.ConsumerGroupState;
+import org.apache.kafka.common.TopicPartition;
 
 /**
  * kafka-console-ui.
@@ -25,4 +26,6 @@ public interface ConsumerService {
     ResponseData addSubscription(String groupId, String topic);
 
     ResponseData resetOffsetToEndpoint(String groupId, String topic, OffsetResetStrategy strategy);
+
+    ResponseData resetPartitionToTargetOffset(String groupId, TopicPartition partition, long offset);
 }

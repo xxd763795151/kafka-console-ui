@@ -53,17 +53,56 @@
             <span slot="clientId" slot-scope="text, record">
               <span v-if="text"> {{ text }}@{{ record.host }} </span>
             </span>
-            <div slot="operation" slot-scope="{}">
+            <div slot="operation" slot-scope="record">
               <a-button
                 type="primary"
                 size="small"
                 href="javascript:;"
                 class="operation-btn"
+                @click="
+                  openResetPartitionOffsetDialog(record.topic, record.partition)
+                "
                 >重置位点
               </a-button>
             </div>
           </a-table>
         </div>
+
+        <a-modal
+          id="resetPartitionOffsetModal"
+          :visible="showResetPartitionOffsetDialog"
+          :title="'重置' + select.topic + '[' + select.partition + ']消费位点'"
+          :destroyOnClose="true"
+          @cancel="closeResetPartitionOffsetDialog"
+        >
+          <template slot="footer">
+            <a-button key="back" @click="closeResetPartitionOffsetDialog">
+              取消
+            </a-button>
+            <a-button key="submit" type="primary" @click="resetPartitionOffset">
+              确认
+            </a-button>
+          </template>
+
+          <a-form
+            :form="resetPartitionOffsetForm"
+            :label-col="{ span: 8 }"
+            :wrapper-col="{ span: 12 }"
+          >
+            <a-form-item label="重置消费位点到">
+              <a-input-number
+                :min="0"
+                v-decorator="[
+                  'offset',
+                  {
+                    initialValue: 0,
+                    rules: [{ required: true, message: '输入消费位点!' }],
+                  },
+                ]"
+              />
+            </a-form-item>
+          </a-form>
+        </a-modal>
       </a-spin>
     </div>
   </a-modal>
@@ -92,6 +131,14 @@ export default {
       show: this.visible,
       data: [],
       loading: false,
+      showResetPartitionOffsetDialog: false,
+      select: {
+        topic: "",
+        partition: 0,
+      },
+      resetPartitionOffsetForm: this.$form.createForm(this, {
+        name: "resetPartitionOffsetForm",
+      }),
     };
   },
   watch: {
@@ -125,11 +172,19 @@ export default {
       this.$emit("closeConsumerDetailDialog", {});
     },
     resetTopicOffsetToEndpoint(groupId, topic, type) {
+      this.requestResetOffset({
+        groupId: groupId,
+        topic: topic,
+        level: 1,
+        type: type,
+      });
+    },
+    requestResetOffset(data, callbackOnSuccess) {
       this.loading = true;
       request({
         url: KafkaConsumerApi.resetOffset.url,
         method: KafkaConsumerApi.resetOffset.method,
-        data: { groupId: groupId, topic: topic, level: 1, type: type },
+        data: data,
       }).then((res) => {
         this.loading = false;
         if (res.code != 0) {
@@ -140,6 +195,29 @@ export default {
         } else {
           this.$message.success(res.msg);
           this.getConsumerDetail();
+          if (callbackOnSuccess) {
+            callbackOnSuccess();
+          }
+        }
+      });
+    },
+    openResetPartitionOffsetDialog(topic, partition) {
+      this.showResetPartitionOffsetDialog = true;
+      this.select.topic = topic;
+      this.select.partition = partition;
+    },
+    closeResetPartitionOffsetDialog() {
+      this.showResetPartitionOffsetDialog = false;
+    },
+    resetPartitionOffset() {
+      this.resetPartitionOffsetForm.validateFields((err, values) => {
+        if (!err) {
+          const data = Object.assign({}, values);
+          Object.assign(data, this.select);
+          data.groupId = this.group;
+          data.level = 2;
+          data.type = 4;
+          this.requestResetOffset(data, this.closeResetPartitionOffsetDialog());
         }
       });
     },
@@ -185,5 +263,8 @@ const columns = [
 <style scoped>
 .color-font {
   color: dodgerblue;
+}
+#resetPartitionOffsetModal .ant-input-number {
+  width: 100% !important;
 }
 </style>

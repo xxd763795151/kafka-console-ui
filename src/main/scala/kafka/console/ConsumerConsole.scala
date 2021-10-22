@@ -163,6 +163,16 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
         }, props).asInstanceOf[(Boolean, String)]
     }
 
+    def resetPartitionToTargetOffset(groupId: String, partition: TopicPartition, offset: Long): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            admin.alterConsumerGroupOffsets(groupId, Map(partition -> new OffsetAndMetadata(offset)).asJava).all().get(timeoutMs, TimeUnit.MILLISECONDS)
+            (true, "")
+        }, e => {
+            log.error("resetPartitionToTargetOffset error.", e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
+    }
+
     private def describeConsumerGroups(groupIds: util.Set[String]): mutable.Map[String, ConsumerGroupDescription] = {
         withAdminClientAndCatchError(admin => {
             admin.describeConsumerGroups(groupIds).describedGroups().asScala.map {

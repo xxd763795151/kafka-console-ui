@@ -21,6 +21,7 @@ import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.clients.admin.MemberDescription;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.ConsumerGroupState;
+import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
@@ -125,6 +126,11 @@ public class ConsumerServiceImpl implements ConsumerService {
 
     @Override public ResponseData resetOffsetToEndpoint(String groupId, String topic, OffsetResetStrategy strategy) {
         Tuple2<Object, String> tuple2 = consumerConsole.resetOffsetToEndpoint(groupId, topic, strategy);
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override public ResponseData resetPartitionToTargetOffset(String groupId, TopicPartition partition, long offset) {
+        Tuple2<Object, String> tuple2 = consumerConsole.resetPartitionToTargetOffset(groupId, partition, offset);
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 }

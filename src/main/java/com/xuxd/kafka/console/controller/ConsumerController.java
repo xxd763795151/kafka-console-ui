@@ -14,6 +14,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.ConsumerGroupState;
+import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -90,6 +91,14 @@ public class ConsumerController {
                 }
                 break;
             case ResetOffsetDTO.Level.PARTITION:
+                switch (offsetDTO.getType()) {
+                    case ResetOffsetDTO.Type
+                        .SPECIAL:
+                        res = consumerService.resetPartitionToTargetOffset(offsetDTO.getGroupId(), new TopicPartition(offsetDTO.getTopic(), offsetDTO.getPartition()), offsetDTO.getOffset());
+                        break;
+                    default:
+                        return ResponseData.create().failed("unknown type");
+                }
                 break;
             default:
                 return ResponseData.create().failed("unknown level");

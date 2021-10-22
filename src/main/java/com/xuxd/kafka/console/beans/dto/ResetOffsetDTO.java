@@ -23,6 +23,8 @@ public class ResetOffsetDTO {
 
     private int partition;
 
+    private long offset;
+
     public interface Level {
         int TOPIC = 1;
         int PARTITION = 2;
@@ -32,5 +34,6 @@ public class ResetOffsetDTO {
         int EARLIEST = 1;
         int LATEST = 2;
         int TIMESTAMP = 3;
+        int SPECIAL = 4;
     }
 }
