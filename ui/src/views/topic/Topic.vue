@@ -273,6 +273,7 @@ const columns = [
 .operation-row-button {
   height: 4%;
   text-align: left;
+  margin-bottom: 8px;
 }
 
 .operation-btn {

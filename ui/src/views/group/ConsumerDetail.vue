@@ -12,7 +12,37 @@
     <div>
       <a-spin :spinning="loading">
         <div v-for="(v, k) in data" :key="k">
-          <h4>Topic: {{ k }} | 积压: {{ v.lag }}</h4>
+          <strong>Topic: </strong><span class="color-font">{{ k }}</span
+          ><strong> | 积压: </strong><span class="color-font">{{ v.lag }}</span>
+          <strong> | 重置消费位点->: </strong>
+          <a-popconfirm
+            :title="
+              '重置topic下列所有分区: ' + k + '的消费位点为最小位点，从头消费？'
+            "
+            ok-text="确认"
+            cancel-text="取消"
+            @confirm="resetTopicOffsetToEndpoint(group, k, 1)"
+          >
+            <a-button size="small" type="danger" style="margin-right: 1%"
+              >最小位点
+            </a-button>
+          </a-popconfirm>
+          <a-popconfirm
+            :title="
+              '重置topic下列所有分区: ' + k + '的消费位点为最新位点，继续消费？'
+            "
+            ok-text="确认"
+            cancel-text="取消"
+            @confirm="resetTopicOffsetToEndpoint(group, k, 2)"
+          >
+            <a-button size="small" type="danger" style="margin-right: 1%"
+              >最新位点
+            </a-button>
+          </a-popconfirm>
+
+          <a-button size="small" type="danger" style="margin-right: 1%"
+            >时间戳
+          </a-button>
           <hr />
           <a-table
             :columns="columns"
@@ -23,6 +53,15 @@
             <span slot="clientId" slot-scope="text, record">
               <span v-if="text"> {{ text }}@{{ record.host }} </span>
             </span>
+            <div slot="operation" slot-scope="{}">
+              <a-button
+                type="primary"
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                >重置位点
+              </a-button>
+            </div>
           </a-table>
         </div>
       </a-spin>
@@ -85,6 +124,25 @@ export default {
       this.data = [];
       this.$emit("closeConsumerDetailDialog", {});
     },
+    resetTopicOffsetToEndpoint(groupId, topic, type) {
+      this.loading = true;
+      request({
+        url: KafkaConsumerApi.resetOffset.url,
+        method: KafkaConsumerApi.resetOffset.method,
+        data: { groupId: groupId, topic: topic, level: 1, type: type },
+      }).then((res) => {
+        this.loading = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          this.$message.success(res.msg);
+          this.getConsumerDetail();
+        }
+      });
+    },
   },
 };
 
@@ -115,7 +173,17 @@ const columns = [
     dataIndex: "lag",
     key: "lag",
   },
+  {
+    title: "操作",
+    key: "operation",
+    scopedSlots: { customRender: "operation" },
+    width: 500,
+  },
 ];
 </script>
 
-<style scoped></style>
+<style scoped>
+.color-font {
+  color: dodgerblue;
+}
+</style>

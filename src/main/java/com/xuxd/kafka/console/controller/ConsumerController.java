@@ -1,7 +1,9 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dto.AddSubscriptionDTO;
 import com.xuxd.kafka.console.beans.dto.QueryConsumerGroupDTO;
+import com.xuxd.kafka.console.beans.dto.ResetOffsetDTO;
 import com.xuxd.kafka.console.service.ConsumerService;
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -65,5 +68,33 @@ public class ConsumerController {
     @PostMapping("/subscription")
     public Object addSubscription(@RequestBody AddSubscriptionDTO subscriptionDTO) {
         return consumerService.addSubscription(subscriptionDTO.getGroupId(), subscriptionDTO.getTopic());
+    }
+
+    @PostMapping("/reset/offset")
+    public Object restOffset(@RequestBody ResetOffsetDTO offsetDTO) {
+        ResponseData res = ResponseData.create().failed("unknown");
+        switch (offsetDTO.getLevel()) {
+            case ResetOffsetDTO.Level.TOPIC:
+                switch (offsetDTO.getType()) {
+                    case ResetOffsetDTO.Type
+                        .EARLIEST:
+                        res = consumerService.resetOffsetToEndpoint(offsetDTO.getGroupId(), offsetDTO.getTopic(), OffsetResetStrategy.EARLIEST);
+                        break;
+                    case ResetOffsetDTO.Type.LATEST:
+                        res = consumerService.resetOffsetToEndpoint(offsetDTO.getGroupId(), offsetDTO.getTopic(), OffsetResetStrategy.LATEST);
+                        break;
+                    case ResetOffsetDTO.Type.TIMESTAMP:
+                        break;
+                    default:
+                        return ResponseData.create().failed("unknown type");
+                }
+                break;
+            case ResetOffsetDTO.Level.PARTITION:
+                break;
+            default:
+                return ResponseData.create().failed("unknown level");
+        }
+
+        return res;
     }
 }

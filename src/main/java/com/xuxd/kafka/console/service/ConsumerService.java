@@ -3,6 +3,7 @@ package com.xuxd.kafka.console.service;
 import com.xuxd.kafka.console.beans.ResponseData;
 import java.util.List;
 import java.util.Set;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.ConsumerGroupState;
 
 /**
@@ -22,4 +23,6 @@ public interface ConsumerService {
     ResponseData getConsumerDetail(String groupId);
 
     ResponseData addSubscription(String groupId, String topic);
+
+    ResponseData resetOffsetToEndpoint(String groupId, String topic, OffsetResetStrategy strategy);
 }

@@ -19,6 +19,7 @@ import kafka.console.ConsumerConsole;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.clients.admin.MemberDescription;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class ConsumerServiceImpl implements ConsumerService {
     private ConsumerConsole consumerConsole;
 
     @Override public ResponseData getConsumerGroupList(List<String> groupIds, Set<ConsumerGroupState> states) {
-        String simulateGroup = "inner_xxx_not_exit_group_###";
+        String simulateGroup = "inner_xxx_not_exit_group_###" + System.currentTimeMillis();
         Set<String> groupList = new HashSet<>();
         if (groupIds != null && !groupIds.isEmpty()) {
             if (states != null && !states.isEmpty()) {
@@ -119,6 +120,11 @@ public class ConsumerServiceImpl implements ConsumerService {
         // reset consume offset to earliest.
         Tuple2<Object, String> tuple2 = consumerConsole.resetOffsetToEarliest(groupId, topic);
 
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override public ResponseData resetOffsetToEndpoint(String groupId, String topic, OffsetResetStrategy strategy) {
+        Tuple2<Object, String> tuple2 = consumerConsole.resetOffsetToEndpoint(groupId, topic, strategy);
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 }

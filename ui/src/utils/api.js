@@ -104,6 +104,10 @@ export const KafkaConsumerApi = {
     url: "/consumer/subscription",
     method: "post",
   },
+  resetOffset: {
+    url: "/consumer/reset/offset",
+    method: "post",
+  },
 };
 
 export const KafkaClusterApi = {
