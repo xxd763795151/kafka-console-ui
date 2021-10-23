@@ -2,7 +2,7 @@
   <a-modal
     title="分区详情"
     :visible="show"
-    :width="1800"
+    :width="1500"
     :mask="false"
     :destroyOnClose="true"
     :footer="null"

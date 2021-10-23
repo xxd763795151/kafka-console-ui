@@ -2,7 +2,7 @@
   <a-modal
     :title="'消费组: ' + group"
     :visible="show"
-    :width="1800"
+    :width="1200"
     :mask="false"
     :destroyOnClose="true"
     :footer="null"

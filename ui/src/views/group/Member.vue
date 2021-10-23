@@ -2,7 +2,7 @@
   <a-modal
     title="消费端成员"
     :visible="show"
-    :width="1800"
+    :width="1500"
     :mask="false"
     :destroyOnClose="true"
     :footer="null"
