@@ -65,6 +65,10 @@ class KafkaConsole(config: KafkaConfig) {
         }
     }
 
+    protected def createAdminClient(props: Properties): Admin = {
+        Admin.create(props)
+    }
+
     private def createAdminClient(): Admin = {
         Admin.create(getProps())
     }

@@ -19,6 +19,7 @@
         >
           <a-form-item label="消费组">
             <a-select
+              @change="handleGroupChange"
               show-search
               option-filter-prop="children"
               v-decorator="[
@@ -58,9 +59,16 @@
               placeholder="输入待同步kafka地址"
             />
           </a-form-item>
-
+          <a-form-item label="kafka属性">
+            <a-textarea
+              rows="5"
+              placeholder="除了地址，其它kafka属性配置，如：
+request.timeout.ms=6000"
+              v-decorator="['properties']"
+            />
+          </a-form-item>
           <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
-            <a-button type="primary" html-type="submit"> 提交 </a-button>
+            <a-button type="primary" html-type="submit"> 提交</a-button>
           </a-form-item>
         </a-form>
       </a-spin>
@@ -70,8 +78,9 @@
 
 <script>
 import request from "@/utils/request";
-import { KafkaConsumerApi } from "@/utils/api";
+import { KafkaConsumerApi, KafkaOpApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
+
 export default {
   name: "SyncConsumerOffset",
   props: {
@@ -122,10 +131,30 @@ export default {
       e.preventDefault();
       this.form.validateFields((err, values) => {
         if (!err) {
+          if (values.properties) {
+            const properties = {};
+            values.properties.split("\n").forEach((e) => {
+              const c = e.split("=");
+              c.split;
+              if (c.length > 1) {
+                let k = c[0].trim(),
+                  v = c[1].trim();
+                for (let j = 2; j < c.length; j++) {
+                  v += ("=" + c[j]);
+                }
+                if (k && v) {
+                  properties[k] = v;
+                }
+              }
+            });
+            values.properties = properties;
+          } else {
+            values.properties = {};
+          }
           this.loading = true;
           request({
-            url: KafkaConsumerApi.addSubscription.url,
-            method: KafkaConsumerApi.addSubscription.method,
+            url: KafkaOpApi.syncConsumerOffset.url,
+            method: KafkaOpApi.syncConsumerOffset.method,
             data: values,
           }).then((res) => {
             this.loading = false;
@@ -143,8 +172,26 @@ export default {
       });
     },
     handleCancel() {
-      this.data = [];
+      this.groupIdList = [];
+      this.topicList = [];
       this.$emit("closeSyncConsumerOffsetDialog", { refresh: false });
+    },
+    handleGroupChange(groupId) {
+      this.loading = true;
+      request({
+        url: KafkaConsumerApi.getSubscribeTopicList.url + "?groupId=" + groupId,
+        method: KafkaConsumerApi.getSubscribeTopicList.method,
+      }).then((res) => {
+        this.loading = false;
+        if (res.code == 0) {
+          this.topicList = res.data;
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
     },
   },
 };

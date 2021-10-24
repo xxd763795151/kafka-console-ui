@@ -30,4 +30,6 @@ public interface ConsumerService {
     ResponseData resetPartitionToTargetOffset(String groupId, TopicPartition partition, long offset);
 
     ResponseData getGroupIdList();
+
+    ResponseData getSubscribeTopicList(String groupId);
 }

@@ -138,4 +138,8 @@ public class ConsumerServiceImpl implements ConsumerService {
         Set<String> stateGroup = consumerConsole.getConsumerGroupIdList(null);
         return ResponseData.create().data(stateGroup).success();
     }
+
+    @Override public ResponseData getSubscribeTopicList(String groupId) {
+        return ResponseData.create().data(consumerConsole.listSubscribeTopics(groupId).keySet()).success();
+    }
 }

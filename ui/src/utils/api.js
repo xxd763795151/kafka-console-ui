@@ -112,11 +112,22 @@ export const KafkaConsumerApi = {
     url: "/consumer/group/id/list",
     method: "get",
   },
+  getSubscribeTopicList: {
+    url: "/consumer/topic/list",
+    method: "get",
+  },
 };
 
 export const KafkaClusterApi = {
   getClusterInfo: {
     url: "/cluster",
     method: "get",
+  },
+};
+
+export const KafkaOpApi = {
+  syncConsumerOffset: {
+    url: "/op/sync/consumer/offset",
+    method: "post",
   },
 };
