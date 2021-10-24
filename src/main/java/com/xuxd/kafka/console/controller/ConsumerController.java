@@ -106,4 +106,9 @@ public class ConsumerController {
 
         return res;
     }
+
+    @GetMapping("/group/id/list")
+    public Object getGroupIdList() {
+        return consumerService.getGroupIdList();
+    }
 }

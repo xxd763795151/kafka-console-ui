@@ -133,4 +133,9 @@ public class ConsumerServiceImpl implements ConsumerService {
         Tuple2<Object, String> tuple2 = consumerConsole.resetPartitionToTargetOffset(groupId, partition, offset);
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
+
+    @Override public ResponseData getGroupIdList() {
+        Set<String> stateGroup = consumerConsole.getConsumerGroupIdList(null);
+        return ResponseData.create().data(stateGroup).success();
+    }
 }

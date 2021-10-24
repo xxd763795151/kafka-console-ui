@@ -108,6 +108,10 @@ export const KafkaConsumerApi = {
     url: "/consumer/reset/offset",
     method: "post",
   },
+  getGroupIdList: {
+    url: "/consumer/group/id/list",
+    method: "get",
+  },
 };
 
 export const KafkaClusterApi = {
