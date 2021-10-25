@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    title="同步消费位点"
+    title="最小位移对齐"
     :visible="show"
     :width="1000"
     :mask="false"
@@ -82,7 +82,7 @@ import { KafkaConsumerApi, KafkaOpApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
 
 export default {
-  name: "SyncConsumerOffset",
+  name: "MinOffsetAlignment",
   props: {
     topic: {
       type: String,
@@ -160,7 +160,7 @@ export default {
             this.loading = false;
             if (res.code == 0) {
               this.$message.success(res.msg);
-              this.$emit("closeSyncConsumerOffsetDialog", { refresh: true });
+              this.$emit("closeMinOffsetAlignmentDialog", { refresh: true });
             } else {
               notification.error({
                 message: "error",
@@ -174,7 +174,7 @@ export default {
     handleCancel() {
       this.groupIdList = [];
       this.topicList = [];
-      this.$emit("closeSyncConsumerOffsetDialog", { refresh: false });
+      this.$emit("closeMinOffsetAlignmentDialog", { refresh: false });
     },
     handleGroupChange(groupId) {
       this.loading = true;
