@@ -140,7 +140,7 @@ export default {
                 let k = c[0].trim(),
                   v = c[1].trim();
                 for (let j = 2; j < c.length; j++) {
-                  v += ("=" + c[j]);
+                  v += "=" + c[j];
                 }
                 if (k && v) {
                   properties[k] = v;
