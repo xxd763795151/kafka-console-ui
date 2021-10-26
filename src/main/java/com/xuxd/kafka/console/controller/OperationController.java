@@ -27,4 +27,10 @@ public class OperationController {
         dto.getProperties().put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, dto.getAddress());
         return operationService.syncConsumerOffset(dto.getGroupId(), dto.getTopic(), dto.getProperties());
     }
+
+    @PostMapping("/sync/min/offset/alignment")
+    public Object minOffsetAlignment(@RequestBody SyncDataDTO dto) {
+        dto.getProperties().put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, dto.getAddress());
+        return operationService.minOffsetAlignment(dto.getGroupId(), dto.getTopic(), dto.getProperties());
+    }
 }

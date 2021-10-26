@@ -130,4 +130,8 @@ export const KafkaOpApi = {
     url: "/op/sync/consumer/offset",
     method: "post",
   },
+  minOffsetAlignment: {
+    url: "/op/sync/min/offset/alignment",
+    method: "post",
+  },
 };

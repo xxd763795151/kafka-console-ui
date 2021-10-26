@@ -153,8 +153,8 @@ export default {
           }
           this.loading = true;
           request({
-            url: KafkaOpApi.syncConsumerOffset.url,
-            method: KafkaOpApi.syncConsumerOffset.method,
+            url: KafkaOpApi.minOffsetAlignment.url,
+            method: KafkaOpApi.minOffsetAlignment.method,
             data: values,
           }).then((res) => {
             this.loading = false;

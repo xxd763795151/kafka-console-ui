@@ -12,4 +12,6 @@ import java.util.Properties;
 public interface OperationService {
 
     ResponseData syncConsumerOffset(String groupId, String topic, Properties thatProps);
+
+    ResponseData minOffsetAlignment(String groupId, String topic, Properties thatProps);
 }
