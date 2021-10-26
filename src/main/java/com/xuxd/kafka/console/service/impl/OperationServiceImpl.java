@@ -7,6 +7,7 @@ import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.MinOffsetAlignmentDO;
 import com.xuxd.kafka.console.dao.MinOffsetAlignmentMapper;
 import com.xuxd.kafka.console.service.OperationService;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import kafka.console.OperationConsole;
@@ -37,8 +38,26 @@ public class OperationServiceImpl implements OperationService {
     }
 
     @Override public ResponseData syncConsumerOffset(String groupId, String topic, Properties thatProps) {
+        QueryWrapper<MinOffsetAlignmentDO> wrapper = new QueryWrapper<>();
+        wrapper.eq("group_id", groupId);
+        wrapper.eq("topic", topic);
+        MinOffsetAlignmentDO alignmentDO = minOffsetAlignmentMapper.selectOne(wrapper);
+        if (alignmentDO == null) {
+            return ResponseData.create().failed("No min offset info.");
+        }
 
-        Tuple2<Object, String> tuple2 = operationConsole.syncConsumerOffset(groupId, topic, thatProps);
+        Map<String, Object> thisOffset = gson.fromJson(alignmentDO.getThisOffset(), Map.class);
+        Map<String, Object> thatOffset = gson.fromJson(alignmentDO.getThatOffset(), Map.class);
+
+        Map<TopicPartition, Object> thisMinOffset = new HashMap<>(), thatMinOffset = new HashMap<>();
+        thisOffset.forEach((k, v)-> {
+            thisMinOffset.put(new TopicPartition(topic, Integer.valueOf(k)), Long.valueOf(v.toString()));
+        });
+        thatOffset.forEach((k, v)-> {
+            thatMinOffset.put(new TopicPartition(topic, Integer.valueOf(k)), Long.valueOf(v.toString()));
+        });
+
+        Tuple2<Object, String> tuple2 = operationConsole.syncConsumerOffset(groupId, topic, thatProps, thisMinOffset, thatMinOffset);
 
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
