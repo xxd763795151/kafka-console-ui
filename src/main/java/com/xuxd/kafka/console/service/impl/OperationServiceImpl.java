@@ -64,12 +64,12 @@ public class OperationServiceImpl implements OperationService {
 
     @Override public ResponseData minOffsetAlignment(String groupId, String topic, Properties thatProps) {
 
-        Tuple2<Map<TopicPartition, Object>, Map<TopicPartition, Object>> tuple2 = operationConsole.checkAndFetchMinOffset(groupId, topic, thatProps);
-        Map<TopicPartition, Object> thisMinOffset = tuple2._1();
+        Tuple2<Map<TopicPartition, Object>, Map<TopicPartition, Object>> tuple2 = operationConsole.checkAndFetchOffset(groupId, topic, thatProps);
+        Map<TopicPartition, Object> thisMaxOffset = tuple2._1();
         Map<TopicPartition, Object> thatMinOffset = tuple2._2();
 
         JsonObject thisJson = new JsonObject(), thatJson = new JsonObject();
-        thisMinOffset.forEach((k, v) -> {
+        thisMaxOffset.forEach((k, v) -> {
             thisJson.addProperty(String.valueOf(k.partition()), v.toString());
         });
         thatMinOffset.forEach((k, v) -> {
