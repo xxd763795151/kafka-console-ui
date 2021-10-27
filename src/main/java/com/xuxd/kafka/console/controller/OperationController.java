@@ -4,9 +4,12 @@ import com.xuxd.kafka.console.beans.dto.SyncDataDTO;
 import com.xuxd.kafka.console.service.OperationService;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -32,5 +35,15 @@ public class OperationController {
     public Object minOffsetAlignment(@RequestBody SyncDataDTO dto) {
         dto.getProperties().put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, dto.getAddress());
         return operationService.minOffsetAlignment(dto.getGroupId(), dto.getTopic(), dto.getProperties());
+    }
+
+    @GetMapping("/sync/alignment/list")
+    public Object getAlignmentList() {
+        return operationService.getAlignmentList();
+    }
+
+    @DeleteMapping("/sync/alignment")
+    public Object deleteAlignment(@RequestParam Long id) {
+        return operationService.deleteAlignmentById(id);
     }
 }

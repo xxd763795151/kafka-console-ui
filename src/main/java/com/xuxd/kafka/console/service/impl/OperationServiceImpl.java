@@ -5,9 +5,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.MinOffsetAlignmentDO;
+import com.xuxd.kafka.console.beans.vo.OffsetAlignmentVO;
 import com.xuxd.kafka.console.dao.MinOffsetAlignmentMapper;
 import com.xuxd.kafka.console.service.OperationService;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import kafka.console.OperationConsole;
@@ -50,10 +52,10 @@ public class OperationServiceImpl implements OperationService {
         Map<String, Object> thatOffset = gson.fromJson(alignmentDO.getThatOffset(), Map.class);
 
         Map<TopicPartition, Object> thisMinOffset = new HashMap<>(), thatMinOffset = new HashMap<>();
-        thisOffset.forEach((k, v)-> {
+        thisOffset.forEach((k, v) -> {
             thisMinOffset.put(new TopicPartition(topic, Integer.valueOf(k)), Long.valueOf(v.toString()));
         });
-        thatOffset.forEach((k, v)-> {
+        thatOffset.forEach((k, v) -> {
             thatMinOffset.put(new TopicPartition(topic, Integer.valueOf(k)), Long.valueOf(v.toString()));
         });
 
@@ -90,6 +92,19 @@ public class OperationServiceImpl implements OperationService {
         alignmentDO.setThisOffset(thisJson.toString());
         alignmentDO.setThatOffset(thatJson.toString());
         minOffsetAlignmentMapper.insert(alignmentDO);
+        return ResponseData.create().success();
+    }
+
+    @Override public ResponseData getAlignmentList() {
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.orderByDesc("update_time");
+        List<MinOffsetAlignmentDO> alignmentDOS = minOffsetAlignmentMapper.selectList(wrapper);
+
+        return ResponseData.create().data(alignmentDOS.stream().map(OffsetAlignmentVO::from)).success();
+    }
+
+    @Override public ResponseData deleteAlignmentById(Long id) {
+        minOffsetAlignmentMapper.deleteById(id);
         return ResponseData.create().success();
     }
 }

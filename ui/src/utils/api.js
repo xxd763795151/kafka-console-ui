@@ -134,4 +134,12 @@ export const KafkaOpApi = {
     url: "/op/sync/min/offset/alignment",
     method: "post",
   },
+  getOffsetAlignmentList: {
+    url: "/op/sync/alignment/list",
+    method: "get",
+  },
+  deleteAlignment: {
+    url: "/op/sync/alignment",
+    method: "delete",
+  },
 };

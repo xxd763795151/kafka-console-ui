@@ -26,7 +26,10 @@
           </a-button>
           <label>说明：</label>
           <span
-            >同步消费位点时需要获取两端集群中订阅分区的最小位移进行消费位点计算，如需后面同步消费位点，在进行数据同步前，先进行最小位移对齐</span
+            >同步消费位点时需要获取两端集群中订阅分区的最小位移进行消费位点计算，如需后面同步消费位点，在进行数据同步前，先进行最小位移对齐，
+            点击右侧查看：</span
+          ><a href="javascript:;" @click="openOffsetAlignmentInfoDialog"
+            >对齐信息</a
           >
         </p>
         <p>
@@ -50,20 +53,26 @@
       @closeMinOffsetAlignmentDialog="closeMinOffsetAlignmentDialog"
     >
     </MinOffsetAlignment>
+    <OffsetAlignmentTable
+      :visible="syncData.showOffsetAlignmentInfoDialog"
+      @closeOffsetAlignmentInfoDialog="closeOffsetAlignmentInfoDialog"
+    ></OffsetAlignmentTable>
   </div>
 </template>
 
 <script>
 import SyncConsumerOffset from "@/views/op/SyncConsumerOffset";
 import MinOffsetAlignment from "@/views/op/MinOffsetAlignment";
+import OffsetAlignmentTable from "@/views/op/OffsetAlignmentTable";
 export default {
   name: "Operation",
-  components: { SyncConsumerOffset, MinOffsetAlignment },
+  components: { SyncConsumerOffset, MinOffsetAlignment, OffsetAlignmentTable },
   data() {
     return {
       syncData: {
         showSyncConsumerOffsetDialog: false,
         showMinOffsetAlignmentDialog: false,
+        showOffsetAlignmentInfoDialog: false,
       },
     };
   },
@@ -79,6 +88,12 @@ export default {
     },
     closeMinOffsetAlignmentDialog() {
       this.syncData.showMinOffsetAlignmentDialog = false;
+    },
+    openOffsetAlignmentInfoDialog() {
+      this.syncData.showOffsetAlignmentInfoDialog = true;
+    },
+    closeOffsetAlignmentInfoDialog() {
+      this.syncData.showOffsetAlignmentInfoDialog = false;
     },
   },
 };
