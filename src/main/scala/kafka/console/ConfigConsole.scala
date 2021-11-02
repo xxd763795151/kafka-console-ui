@@ -28,6 +28,10 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
         getConfig(ConfigType.Topic, topic)
     }
 
+    def getBrokerConfig() : List[ConfigEntry] = {
+        getConfig(ConfigType.Broker, "0")
+    }
+
     def getConfig(entityType: String, entityName: String): List[ConfigEntry] = {
         getResourceConfig(entityType, entityName, true, false).asJava
     }
@@ -49,7 +53,7 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
                     (ConfigResource.Type.BROKER, Some(ConfigEntry.ConfigSource.DYNAMIC_DEFAULT_BROKER_CONFIG))
                 case _ =>
                     validateBrokerId()
-                    (ConfigResource.Type.BROKER, Some(ConfigEntry.ConfigSource.DYNAMIC_BROKER_CONFIG))
+                    (ConfigResource.Type.BROKER, Some(ConfigEntry.ConfigSource.STATIC_BROKER_CONFIG))
             }
             case BrokerLoggerConfigType =>
                 if (!entityName.isEmpty)
