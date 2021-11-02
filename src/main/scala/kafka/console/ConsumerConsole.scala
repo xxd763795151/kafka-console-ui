@@ -173,6 +173,10 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
         }).asInstanceOf[(Boolean, String)]
     }
 
+    /**
+     *
+     * @return k: topic, v: list[topic].
+     */
     def listSubscribeTopics(groupId: String): util.Map[String, util.List[TopicPartition]] = {
         val commitOffs = getCommittedOffsets(groupId)
         val map: util.Map[String, util.List[TopicPartition]] = new util.HashMap[String, util.List[TopicPartition]]()
@@ -183,6 +187,32 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
             map.get(t.topic()).add(t)
         }
         map
+    }
+
+    /**
+     *
+     * @return k: groupId, v: list[topic].
+     */
+    def listSubscribeTopics(groups: util.Set[String]): util.Map[String, util.List[TopicPartition]] = {
+        val map: util.Map[String, util.List[TopicPartition]] = new util.HashMap[String, util.List[TopicPartition]]()
+        withAdminClientAndCatchError(admin => {
+            for(groupId <- groups.asScala) {
+                val commitOffs = admin.listConsumerGroupOffsets(
+                    groupId
+                ).partitionsToOffsetAndMetadata.get.asScala
+
+                for (t <- commitOffs.keySet) {
+                    if (!map.containsKey(groupId)) {
+                        map.put(groupId, new util.ArrayList[TopicPartition]())
+                    }
+                    map.get(groupId).add(t)
+                }
+            }
+            map
+        }, e => {
+            log.error("listSubscribeTopics error.", e)
+            map
+        }).asInstanceOf[util.Map[String, util.List[TopicPartition]]]
     }
 
     private def describeConsumerGroups(groupIds: util.Set[String]): mutable.Map[String, ConsumerGroupDescription] = {

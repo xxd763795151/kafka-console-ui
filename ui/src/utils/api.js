@@ -116,6 +116,10 @@ export const KafkaConsumerApi = {
     url: "/consumer/topic/list",
     method: "get",
   },
+  getTopicSubscribedByGroups: {
+    url: "/consumer/topic/subscribed",
+    method: "get",
+  },
 };
 
 export const KafkaClusterApi = {

@@ -116,4 +116,9 @@ public class ConsumerController {
     public Object getSubscribeTopicList(@RequestParam String groupId) {
         return consumerService.getSubscribeTopicList(groupId);
     }
+
+    @GetMapping("/topic/subscribed")
+    public Object getTopicSubscribedByGroups(@RequestParam String topic) {
+        return consumerService.getTopicSubscribedByGroups(topic);
+    }
 }

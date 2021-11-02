@@ -77,6 +77,13 @@
               @click="openAddPartitionDialog(record.name)"
               >增加分区
             </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openConsumedDetailDialog(record.name)"
+              >消费详情
+            </a-button>
           </div>
         </a-table>
         <PartitionInfo
@@ -94,6 +101,12 @@
           :topic="selectDetail.resourceName"
           @closeAddPartitionDialog="closeAddPartitionDialog"
         ></AddPartition>
+        <ConsumedDetail
+          :visible="showConsumedDetailDialog"
+          :topic="selectDetail.resourceName"
+          @closeConsumedDetailDialog="closeConsumedDetailDialog"
+        >
+        </ConsumedDetail>
       </div>
     </a-spin>
   </div>
@@ -106,10 +119,11 @@ import notification from "ant-design-vue/es/notification";
 import PartitionInfo from "@/views/topic/PartitionInfo";
 import CreateTopic from "@/views/topic/CreateTopic";
 import AddPartition from "@/views/topic/AddPartition";
+import ConsumedDetail from "@/views/topic/ConsumedDetail";
 
 export default {
   name: "Topic",
-  components: { PartitionInfo, CreateTopic, AddPartition },
+  components: { PartitionInfo, CreateTopic, AddPartition, ConsumedDetail },
   data() {
     return {
       queryParam: { type: "normal" },
@@ -128,6 +142,7 @@ export default {
       loading: false,
       showCreateTopic: false,
       showAddPartition: false,
+      showConsumedDetailDialog: false,
     };
   },
   methods: {
@@ -193,6 +208,13 @@ export default {
       if (res.refresh) {
         this.getTopicList();
       }
+    },
+    openConsumedDetailDialog(topic) {
+      this.showConsumedDetailDialog = true;
+      this.selectDetail.resourceName = topic;
+    },
+    closeConsumedDetailDialog() {
+      this.showConsumedDetailDialog = false;
     },
   },
   created() {

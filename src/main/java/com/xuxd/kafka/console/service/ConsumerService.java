@@ -32,4 +32,6 @@ public interface ConsumerService {
     ResponseData getGroupIdList();
 
     ResponseData getSubscribeTopicList(String groupId);
+
+    ResponseData getTopicSubscribedByGroups(String topic);
 }
