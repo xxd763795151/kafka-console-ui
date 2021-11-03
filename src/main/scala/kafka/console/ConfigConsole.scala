@@ -5,9 +5,9 @@ import java.util.Collections
 import java.util.concurrent.TimeUnit
 
 import com.xuxd.kafka.console.config.KafkaConfig
-import kafka.admin.ConfigCommand.{BrokerDefaultEntityName, BrokerLoggerConfigType}
+import kafka.admin.ConfigCommand.BrokerLoggerConfigType
 import kafka.server.ConfigType
-import org.apache.kafka.clients.admin.{Admin, Config, ConfigEntry, DescribeConfigsOptions}
+import org.apache.kafka.clients.admin.{Config, ConfigEntry, DescribeConfigsOptions}
 import org.apache.kafka.common.config.ConfigResource
 import org.apache.kafka.common.internals.Topic
 
@@ -23,49 +23,38 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
 
     import java.util.List
 
-
-    def getTopicConfig(topic: String) : List[ConfigEntry] = {
+    def getTopicConfig(topic: String): List[ConfigEntry] = {
         getConfig(ConfigType.Topic, topic)
     }
 
-    def getBrokerConfig() : List[ConfigEntry] = {
-        getConfig(ConfigType.Broker, "0")
+    def getBrokerConfig(broker: String): List[ConfigEntry] = {
+        getConfig(ConfigType.Broker, broker)
     }
 
     def getConfig(entityType: String, entityName: String): List[ConfigEntry] = {
-        getResourceConfig(entityType, entityName, true, false).asJava
+        getResourceConfig(entityType, entityName, false).asJava
     }
 
-    private def getResourceConfig(entityType: String, entityName: String, includeSynonyms: Boolean,
-        describeAll: Boolean) = {
+    private def getResourceConfig(entityType: String, entityName: String, includeSynonyms: Boolean) = {
         def validateBrokerId(): Unit = try entityName.toInt catch {
             case _: NumberFormatException =>
                 throw new IllegalArgumentException(s"The entity name for $entityType must be a valid integer broker id, found: $entityName")
         }
 
-        val (configResourceType, dynamicConfigSource) = entityType match {
+        val configResourceType = entityType match {
             case ConfigType.Topic =>
                 if (!entityName.isEmpty)
                     Topic.validate(entityName)
-                (ConfigResource.Type.TOPIC, Some(ConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG))
-            case ConfigType.Broker => entityName match {
-                case BrokerDefaultEntityName =>
-                    (ConfigResource.Type.BROKER, Some(ConfigEntry.ConfigSource.DYNAMIC_DEFAULT_BROKER_CONFIG))
-                case _ =>
-                    validateBrokerId()
-                    (ConfigResource.Type.BROKER, Some(ConfigEntry.ConfigSource.STATIC_BROKER_CONFIG))
-            }
+                ConfigResource.Type.TOPIC
+            case ConfigType.Broker =>
+                validateBrokerId()
+                ConfigResource.Type.BROKER
             case BrokerLoggerConfigType =>
                 if (!entityName.isEmpty)
                     validateBrokerId()
-                (ConfigResource.Type.BROKER_LOGGER, None)
+                ConfigResource.Type.BROKER_LOGGER
             case entityType => throw new IllegalArgumentException(s"Invalid entity type: $entityType")
         }
-
-        val configSourceFilter = if (describeAll)
-            None
-        else
-            dynamicConfigSource
 
         val configResource = new ConfigResource(configResourceType, entityName)
         val describeOptions = new DescribeConfigsOptions().includeSynonyms(includeSynonyms)
@@ -78,11 +67,7 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
 
         configs match {
             case None => Seq.empty
-            case Some(c: util.Map[ConfigResource, Config]) => c.get(configResource).entries.asScala
-                .filter(entry => configSourceFilter match {
-                    case Some(configSource) => entry.source == configSource
-                    case None => true
-                }).toSeq
+            case Some(c: util.Map[ConfigResource, Config]) => c.get(configResource).entries.asScala.toSeq
         }
 
     }

@@ -5,7 +5,6 @@ import com.xuxd.kafka.console.config.KafkaConfig;
 import com.xuxd.kafka.console.service.ConfigService;
 import com.xuxd.kafka.console.utils.ConvertUtil;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +42,7 @@ public class ConfigController {
     }
 
     @GetMapping("/broker")
-    public Object getTopicConfig() {
-        return configService.getBrokerConfig();
+    public Object getBrokerConfig(String brokerId) {
+        return configService.getBrokerConfig(brokerId);
     }
 }

@@ -12,5 +12,5 @@ public interface ConfigService {
 
     ResponseData getTopicConfig(String topic);
 
-    ResponseData getBrokerConfig();
+    ResponseData getBrokerConfig(String brokerId);
 }

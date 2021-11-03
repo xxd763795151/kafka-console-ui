@@ -1,8 +1,10 @@
 package com.xuxd.kafka.console.service.impl;
 
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.vo.ConfigEntryVO;
 import com.xuxd.kafka.console.service.ConfigService;
 import java.util.List;
+import java.util.stream.Collectors;
 import kafka.console.ConfigConsole;
 import org.apache.kafka.clients.admin.ConfigEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +24,14 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override public ResponseData getTopicConfig(String topic) {
         List<ConfigEntry> configEntries = configConsole.getTopicConfig(topic);
-        return ResponseData.create().success();
+        List<ConfigEntryVO> vos = configEntries.stream().map(ConfigEntryVO::from).sorted().collect(Collectors.toList());
+        return ResponseData.create().data(vos).success();
     }
 
-    @Override public ResponseData getBrokerConfig() {
-        List<ConfigEntry> configEntries = configConsole.getBrokerConfig();
-        return ResponseData.create().success();
+    @Override public ResponseData getBrokerConfig(String brokerId) {
+        List<ConfigEntry> configEntries = configConsole.getBrokerConfig(brokerId);
+        List<ConfigEntryVO> vos = configEntries.stream().map(ConfigEntryVO::from).sorted().collect(Collectors.toList());
+        return ResponseData.create().data(vos).success();
     }
+
 }

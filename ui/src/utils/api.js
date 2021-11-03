@@ -54,6 +54,10 @@ export const KafkaConfigApi = {
     url: "/config",
     method: "get",
   },
+  getBrokerConfig: {
+    url: "/config/broker",
+    method: "get",
+  },
 };
 
 export const KafkaTopicApi = {
