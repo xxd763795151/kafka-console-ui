@@ -17,4 +17,6 @@ public interface ConfigService {
     ResponseData getBrokerConfig(String brokerId);
 
     ResponseData alterBrokerConfig(String brokerId, ConfigEntry entry, AlterType type);
+
+    ResponseData alterTopicConfig(String topic, ConfigEntry entry, AlterType type);
 }

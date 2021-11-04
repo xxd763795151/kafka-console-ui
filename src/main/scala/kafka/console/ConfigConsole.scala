@@ -39,6 +39,14 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
         alterConfig(ConfigType.Broker, broker, entry, AlterConfigOp.OpType.DELETE)
     }
 
+    def setTopicConfig(topic: String, entry: ConfigEntry): (Boolean, String) = {
+        alterConfig(ConfigType.Topic, topic, entry, AlterConfigOp.OpType.SET)
+    }
+
+    def deleteTopicConfig(topic: String, entry: ConfigEntry): (Boolean, String) = {
+        alterConfig(ConfigType.Topic, topic, entry, AlterConfigOp.OpType.DELETE)
+    }
+
     def getConfig(entityType: String, entityName: String): List[ConfigEntry] = {
         getResourceConfig(entityType, entityName, false).asJava
     }

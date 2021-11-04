@@ -46,6 +46,16 @@ public class ConfigController {
         return configService.getTopicConfig(topic);
     }
 
+    @PostMapping("/topic")
+    public Object setTopicConfig(@RequestBody AlterConfigDTO dto) {
+        return configService.alterTopicConfig(dto.getEntity(), dto.to(), AlterType.SET);
+    }
+
+    @DeleteMapping("/topic")
+    public Object deleteTopicConfig(@RequestBody AlterConfigDTO dto) {
+        return configService.alterTopicConfig(dto.getEntity(), dto.to(), AlterType.DELETE);
+    }
+
     @GetMapping("/broker")
     public Object getBrokerConfig(String brokerId) {
         return configService.getBrokerConfig(brokerId);

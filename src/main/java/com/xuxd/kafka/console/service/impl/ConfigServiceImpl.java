@@ -49,4 +49,18 @@ public class ConfigServiceImpl implements ConfigService {
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
+    @Override
+    public ResponseData alterTopicConfig(String topic, ConfigEntry entry, AlterType type) {
+        Tuple2<Object, String> tuple2 = null;
+        switch (type) {
+            case SET:
+                tuple2 = configConsole.setTopicConfig(topic, entry);
+                break;
+            case DELETE:
+                tuple2 = configConsole.deleteTopicConfig(topic, entry);
+                break;
+        }
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
 }
