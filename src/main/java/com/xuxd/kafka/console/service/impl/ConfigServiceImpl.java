@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.service.impl;
 
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.enums.AlterType;
 import com.xuxd.kafka.console.beans.vo.ConfigEntryVO;
 import com.xuxd.kafka.console.service.ConfigService;
 import java.util.List;
@@ -9,6 +10,7 @@ import kafka.console.ConfigConsole;
 import org.apache.kafka.clients.admin.ConfigEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import scala.Tuple2;
 
 /**
  * kafka-console-ui.
@@ -32,6 +34,19 @@ public class ConfigServiceImpl implements ConfigService {
         List<ConfigEntry> configEntries = configConsole.getBrokerConfig(brokerId);
         List<ConfigEntryVO> vos = configEntries.stream().map(ConfigEntryVO::from).sorted().collect(Collectors.toList());
         return ResponseData.create().data(vos).success();
+    }
+
+    @Override public ResponseData alterBrokerConfig(String brokerId, ConfigEntry entry, AlterType type) {
+        Tuple2<Object, String> tuple2 = null;
+        switch (type) {
+            case SET:
+                tuple2 = configConsole.setBrokerConfig(brokerId, entry);
+                break;
+            case DELETE:
+                tuple2 = configConsole.deleteBrokerConfig(brokerId, entry);
+                break;
+        }
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
 }

@@ -26,7 +26,7 @@
       </div>
       <BrokerConfig
         :visible="showBrokerConfigDialog"
-        :id="this.select.id"
+        :id="this.select.idString"
         @closeBrokerConfigDialog="closeBrokerConfigDialog"
       ></BrokerConfig>
     </a-spin>

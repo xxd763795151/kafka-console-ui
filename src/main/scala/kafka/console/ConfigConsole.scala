@@ -7,11 +7,11 @@ import java.util.concurrent.TimeUnit
 import com.xuxd.kafka.console.config.KafkaConfig
 import kafka.admin.ConfigCommand.BrokerLoggerConfigType
 import kafka.server.ConfigType
-import org.apache.kafka.clients.admin.{Config, ConfigEntry, DescribeConfigsOptions}
+import org.apache.kafka.clients.admin.{AlterConfigOp, Config, ConfigEntry, DescribeConfigsOptions}
 import org.apache.kafka.common.config.ConfigResource
 import org.apache.kafka.common.internals.Topic
 
-import scala.jdk.CollectionConverters.{CollectionHasAsScala, SeqHasAsJava}
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, MapHasAsJava, SeqHasAsJava}
 
 /**
  * kafka-console-ui.
@@ -31,11 +31,52 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
         getConfig(ConfigType.Broker, broker)
     }
 
+    def setBrokerConfig(broker: String, entry: ConfigEntry): (Boolean, String) = {
+        alterConfig(ConfigType.Broker, broker, entry, AlterConfigOp.OpType.SET)
+    }
+
+    def deleteBrokerConfig(broker: String, entry: ConfigEntry): (Boolean, String) = {
+        alterConfig(ConfigType.Broker, broker, entry, AlterConfigOp.OpType.DELETE)
+    }
+
     def getConfig(entityType: String, entityName: String): List[ConfigEntry] = {
         getResourceConfig(entityType, entityName, false).asJava
     }
 
+    def alterConfig(entityType: String, entityName: String, entry: ConfigEntry,
+        opType: AlterConfigOp.OpType): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            val configResource = new ConfigResource(getResourceTypeAndValidate(entityType, entityName), entityName)
+
+            val config = Map(configResource -> Collections.singletonList(new AlterConfigOp(entry, opType)).asInstanceOf[util.Collection[AlterConfigOp]])
+            admin.incrementalAlterConfigs(config.asJava).all().get(timeoutMs, TimeUnit.MILLISECONDS)
+            (true, "")
+        }, e => {
+            log.error("alter config error.", e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
+    }
+
     private def getResourceConfig(entityType: String, entityName: String, includeSynonyms: Boolean) = {
+        val configResourceType = getResourceTypeAndValidate(entityType, entityName)
+
+        val configResource = new ConfigResource(configResourceType, entityName)
+        val describeOptions = new DescribeConfigsOptions().includeSynonyms(includeSynonyms)
+        val configs = withAdminClientAndCatchError(admin => Some(admin.describeConfigs(Collections.singleton(configResource), describeOptions)
+            .all.get(30, TimeUnit.SECONDS)),
+            e => {
+                log.error("describeConfigs error.", e)
+                None
+            })
+
+        configs match {
+            case None => Seq.empty
+            case Some(c: util.Map[ConfigResource, Config]) => c.get(configResource).entries.asScala.toSeq
+        }
+
+    }
+
+    private def getResourceTypeAndValidate(entityType: String, entityName: String): ConfigResource.Type = {
         def validateBrokerId(): Unit = try entityName.toInt catch {
             case _: NumberFormatException =>
                 throw new IllegalArgumentException(s"The entity name for $entityType must be a valid integer broker id, found: $entityName")
@@ -55,20 +96,6 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
                 ConfigResource.Type.BROKER_LOGGER
             case entityType => throw new IllegalArgumentException(s"Invalid entity type: $entityType")
         }
-
-        val configResource = new ConfigResource(configResourceType, entityName)
-        val describeOptions = new DescribeConfigsOptions().includeSynonyms(includeSynonyms)
-        val configs = withAdminClientAndCatchError(admin => Some(admin.describeConfigs(Collections.singleton(configResource), describeOptions)
-            .all.get(30, TimeUnit.SECONDS)),
-            e => {
-                log.error("describeConfigs error.", e)
-                None
-            })
-
-        configs match {
-            case None => Seq.empty
-            case Some(c: util.Map[ConfigResource, Config]) => c.get(configResource).entries.asScala.toSeq
-        }
-
+        configResourceType
     }
 }

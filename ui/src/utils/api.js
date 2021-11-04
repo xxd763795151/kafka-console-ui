@@ -58,6 +58,14 @@ export const KafkaConfigApi = {
     url: "/config/broker",
     method: "get",
   },
+  setBrokerConfig: {
+    url: "/config/broker",
+    method: "post",
+  },
+  deleteBrokerConfig: {
+    url: "/config/broker",
+    method: "delete",
+  },
 };
 
 export const KafkaTopicApi = {

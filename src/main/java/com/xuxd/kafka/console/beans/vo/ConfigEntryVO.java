@@ -50,11 +50,12 @@ public class ConfigEntryVO implements Comparable {
 
         ConfigEntryVO that = (ConfigEntryVO) o;
 
-        if (!this.source.equals(that.source)) {
-            return ORDER_DICTIONARY.get(this.source) - ORDER_DICTIONARY.get(that.source);
-        }
         if (this.readOnly != that.readOnly) {
             return this.readOnly ? 1 : -1;
+        }
+
+        if (!this.source.equals(that.source)) {
+            return ORDER_DICTIONARY.get(this.source) - ORDER_DICTIONARY.get(that.source);
         }
 
         return this.name.compareTo(that.name);
