@@ -54,6 +54,7 @@
           :visible="showEditConfigDialog"
           :record="selectData"
           :broker-id="id"
+          :is-logger-config="isLoggerConfig"
           @closeEditConfigDialog="closeEditConfigDialog"
         ></EditConfig>
       </a-spin>
@@ -83,6 +84,10 @@ export default {
       type: String,
       default: "",
     },
+    isLoggerConfig: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -107,9 +112,12 @@ export default {
   methods: {
     getBrokerConfig() {
       this.loading = true;
+      const api = this.isLoggerConfig
+        ? KafkaConfigApi.getBrokerLoggerConfig
+        : KafkaConfigApi.getBrokerConfig;
       request({
-        url: KafkaConfigApi.getBrokerConfig.url + "?brokerId=" + this.id,
-        method: KafkaConfigApi.getBrokerConfig.method,
+        url: api.url + "?brokerId=" + this.id,
+        method: api.method,
       }).then((res) => {
         this.loading = false;
         if (res.code != 0) {
@@ -126,9 +134,12 @@ export default {
     deleteBrokerConfig(record) {
       this.selectData = record;
       this.loading = true;
+      const api = this.isLoggerConfig
+        ? KafkaConfigApi.deleteBrokerLoggerConfig
+        : KafkaConfigApi.deleteBrokerConfig;
       request({
-        url: KafkaConfigApi.deleteBrokerConfig.url,
-        method: KafkaConfigApi.deleteBrokerConfig.method,
+        url: api.url,
+        method: api.method,
         data: {
           name: record.name,
           value: record.value,

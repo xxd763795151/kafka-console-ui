@@ -36,6 +36,12 @@ public class ConfigServiceImpl implements ConfigService {
         return ResponseData.create().data(vos).success();
     }
 
+    @Override public ResponseData getBrokerLoggerConfig(String brokerId) {
+        List<ConfigEntry> configEntries = configConsole.getBrokerLoggerConfig(brokerId);
+        List<ConfigEntryVO> vos = configEntries.stream().map(ConfigEntryVO::from).sorted().collect(Collectors.toList());
+        return ResponseData.create().data(vos).success();
+    }
+
     @Override public ResponseData alterBrokerConfig(String brokerId, ConfigEntry entry, AlterType type) {
         Tuple2<Object, String> tuple2 = null;
         switch (type) {
@@ -44,6 +50,19 @@ public class ConfigServiceImpl implements ConfigService {
                 break;
             case DELETE:
                 tuple2 = configConsole.deleteBrokerConfig(brokerId, entry);
+                break;
+        }
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override public ResponseData alterBrokerLoggerConfig(String brokerId, ConfigEntry entry, AlterType type) {
+        Tuple2<Object, String> tuple2 = null;
+        switch (type) {
+            case SET:
+                tuple2 = configConsole.setBrokerLoggerConfig(brokerId, entry);
+                break;
+            case DELETE:
+                tuple2 = configConsole.deleteBrokerLoggerConfig(brokerId, entry);
                 break;
         }
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());

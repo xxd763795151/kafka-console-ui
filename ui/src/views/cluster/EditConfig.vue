@@ -67,6 +67,10 @@ export default {
       type: String,
       default: "",
     },
+    isLoggerConfig: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -87,9 +91,12 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true;
+          const api = this.isLoggerConfig
+            ? KafkaConfigApi.setBrokerLoggerConfig
+            : KafkaConfigApi.setBrokerConfig;
           request({
-            url: KafkaConfigApi.setBrokerConfig.url,
-            method: KafkaConfigApi.setBrokerConfig.method,
+            url: api.url,
+            method: api.method,
             data: Object.assign({ entity: this.brokerId }, values),
           }).then((res) => {
             this.loading = false;

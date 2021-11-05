@@ -70,4 +70,19 @@ public class ConfigController {
     public Object deleteBrokerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerConfig(dto.getEntity(), dto.to(), AlterType.DELETE);
     }
+
+    @GetMapping("/broker/logger")
+    public Object getBrokerLoggerConfig(String brokerId) {
+        return configService.getBrokerLoggerConfig(brokerId);
+    }
+
+    @PostMapping("/broker/logger")
+    public Object setBrokerLoggerConfig(@RequestBody AlterConfigDTO dto) {
+        return configService.alterBrokerLoggerConfig(dto.getEntity(), dto.to(), AlterType.SET);
+    }
+
+    @DeleteMapping("/broker/logger")
+    public Object deleteBrokerLoggerConfig(@RequestBody AlterConfigDTO dto) {
+        return configService.alterBrokerLoggerConfig(dto.getEntity(), dto.to(), AlterType.DELETE);
+    }
 }

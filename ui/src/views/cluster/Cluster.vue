@@ -18,8 +18,15 @@
               size="small"
               href="javascript:;"
               class="operation-btn"
-              @click="openBrokerConfigDialog(record)"
+              @click="openBrokerConfigDialog(record, false)"
               >属性配置
+            </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openBrokerConfigDialog(record, true)"
+              >日志配置
             </a-button>
           </div>
         </a-table>
@@ -27,6 +34,7 @@
       <BrokerConfig
         :visible="showBrokerConfigDialog"
         :id="this.select.idString"
+        :is-logger-config="isLoggerConfig"
         @closeBrokerConfigDialog="closeBrokerConfigDialog"
       ></BrokerConfig>
     </a-spin>
@@ -49,6 +57,7 @@ export default {
       clusterId: "",
       showBrokerConfigDialog: false,
       select: {},
+      isLoggerConfig: false,
     };
   },
   methods: {
@@ -63,9 +72,10 @@ export default {
         this.clusterId = res.data.clusterId;
       });
     },
-    openBrokerConfigDialog(record) {
+    openBrokerConfigDialog(record, isLoggerConfig) {
       this.select = record;
       this.showBrokerConfigDialog = true;
+      this.isLoggerConfig = isLoggerConfig;
     },
     closeBrokerConfigDialog() {
       this.showBrokerConfigDialog = false;

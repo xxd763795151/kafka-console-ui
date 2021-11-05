@@ -5,7 +5,7 @@ import java.util.Collections
 import java.util.concurrent.TimeUnit
 
 import com.xuxd.kafka.console.config.KafkaConfig
-import kafka.admin.ConfigCommand.BrokerLoggerConfigType
+import kafka.console.ConfigConsole.BrokerLoggerConfigType
 import kafka.server.ConfigType
 import org.apache.kafka.clients.admin.{AlterConfigOp, Config, ConfigEntry, DescribeConfigsOptions}
 import org.apache.kafka.common.config.ConfigResource
@@ -31,6 +31,10 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
         getConfig(ConfigType.Broker, broker)
     }
 
+    def getBrokerLoggerConfig(broker: String): List[ConfigEntry] = {
+        getConfig(BrokerLoggerConfigType, broker)
+    }
+
     def setBrokerConfig(broker: String, entry: ConfigEntry): (Boolean, String) = {
         alterConfig(ConfigType.Broker, broker, entry, AlterConfigOp.OpType.SET)
     }
@@ -45,6 +49,14 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
 
     def deleteTopicConfig(topic: String, entry: ConfigEntry): (Boolean, String) = {
         alterConfig(ConfigType.Topic, topic, entry, AlterConfigOp.OpType.DELETE)
+    }
+
+    def setBrokerLoggerConfig(topic: String, entry: ConfigEntry): (Boolean, String) = {
+        alterConfig(BrokerLoggerConfigType, topic, entry, AlterConfigOp.OpType.SET)
+    }
+
+    def deleteBrokerLoggerConfig(topic: String, entry: ConfigEntry): (Boolean, String) = {
+        alterConfig(BrokerLoggerConfigType, topic, entry, AlterConfigOp.OpType.DELETE)
     }
 
     def getConfig(entityType: String, entityName: String): List[ConfigEntry] = {
@@ -106,4 +118,8 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
         }
         configResourceType
     }
+}
+
+object ConfigConsole {
+    val BrokerLoggerConfigType = "broker-loggers"
 }

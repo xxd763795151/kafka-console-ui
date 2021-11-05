@@ -58,12 +58,24 @@ export const KafkaConfigApi = {
     url: "/config/broker",
     method: "get",
   },
+  getBrokerLoggerConfig: {
+    url: "/config/broker/logger",
+    method: "get",
+  },
   setBrokerConfig: {
     url: "/config/broker",
     method: "post",
   },
   deleteBrokerConfig: {
     url: "/config/broker",
+    method: "delete",
+  },
+  setBrokerLoggerConfig: {
+    url: "/config/broker/logger",
+    method: "post",
+  },
+  deleteBrokerLoggerConfig: {
+    url: "/config/broker/logger",
     method: "delete",
   },
 };
