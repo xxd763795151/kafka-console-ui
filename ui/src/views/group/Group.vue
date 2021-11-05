@@ -97,6 +97,13 @@
               size="small"
               href="javascript:;"
               class="operation-btn"
+              @click="openConsumerMemberDialog(record.groupId)"
+              >消费端
+            </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
               @click="openConsumerDetailDialog(record.groupId)"
               >消费详情
             </a-button>

@@ -74,6 +74,13 @@
               size="small"
               href="javascript:;"
               class="operation-btn"
+              @click="openPartitionInfoDialog(record.name)"
+              >分区详情
+            </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
               @click="openAddPartitionDialog(record.name)"
               >增加分区
             </a-button>
