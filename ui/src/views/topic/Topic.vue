@@ -91,6 +91,13 @@
               @click="openConsumedDetailDialog(record.name)"
               >消费详情
             </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openTopicConfigDialog(record.name)"
+              >属性配置
+            </a-button>
           </div>
         </a-table>
         <PartitionInfo
@@ -114,6 +121,11 @@
           @closeConsumedDetailDialog="closeConsumedDetailDialog"
         >
         </ConsumedDetail>
+        <TopicConfig
+          :visible="showTopicConfigDialog"
+          :topic="selectDetail.resourceName"
+          @closeTopicConfigDialog="closeTopicConfigDialog"
+        ></TopicConfig>
       </div>
     </a-spin>
   </div>
@@ -127,10 +139,17 @@ import PartitionInfo from "@/views/topic/PartitionInfo";
 import CreateTopic from "@/views/topic/CreateTopic";
 import AddPartition from "@/views/topic/AddPartition";
 import ConsumedDetail from "@/views/topic/ConsumedDetail";
+import TopicConfig from "@/views/topic/TopicConfig";
 
 export default {
   name: "Topic",
-  components: { PartitionInfo, CreateTopic, AddPartition, ConsumedDetail },
+  components: {
+    PartitionInfo,
+    CreateTopic,
+    AddPartition,
+    ConsumedDetail,
+    TopicConfig,
+  },
   data() {
     return {
       queryParam: { type: "normal" },
@@ -150,6 +169,7 @@ export default {
       showCreateTopic: false,
       showAddPartition: false,
       showConsumedDetailDialog: false,
+      showTopicConfigDialog: false,
     };
   },
   methods: {
@@ -222,6 +242,13 @@ export default {
     },
     closeConsumedDetailDialog() {
       this.showConsumedDetailDialog = false;
+    },
+    openTopicConfigDialog(topic) {
+      this.showTopicConfigDialog = true;
+      this.selectDetail.resourceName = topic;
+    },
+    closeTopicConfigDialog() {
+      this.showTopicConfigDialog = false;
     },
   },
   created() {

@@ -29,7 +29,7 @@ spring:
     name: kafka-console-ui
   # h2 database
   datasource:
-    url: jdbc:h2:file:${data.dir:${user.dir}}/data/db/kafak-console
+    url: jdbc:h2:file:${data.dir:${user.dir}}/data/db/kafka-console
 #    url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
     username: kafka
@@ -40,7 +40,8 @@ spring:
   h2:
     console:
       enabled: true
-
+#      settings:
+#        web-allow-others: true
 
 logging:
   home: ./
