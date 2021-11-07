@@ -25,6 +25,8 @@ public class ResetOffsetDTO {
 
     private long offset;
 
+    private String dateStr;
+
     public interface Level {
         int TOPIC = 1;
         int PARTITION = 2;

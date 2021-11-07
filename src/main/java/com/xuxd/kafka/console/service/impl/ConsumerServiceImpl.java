@@ -6,6 +6,7 @@ import com.xuxd.kafka.console.beans.vo.ConsumerDetailVO;
 import com.xuxd.kafka.console.beans.vo.ConsumerGroupVO;
 import com.xuxd.kafka.console.beans.vo.ConsumerMemberVO;
 import com.xuxd.kafka.console.service.ConsumerService;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,6 +23,7 @@ import org.apache.kafka.clients.admin.MemberDescription;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
@@ -128,6 +130,19 @@ public class ConsumerServiceImpl implements ConsumerService {
 
     @Override public ResponseData resetOffsetToEndpoint(String groupId, String topic, OffsetResetStrategy strategy) {
         Tuple2<Object, String> tuple2 = consumerConsole.resetOffsetToEndpoint(groupId, topic, strategy);
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override public ResponseData resetOffsetByDate(String groupId, String topic, String dateStr) {
+        long timestamp = -1L;
+        try {
+            StringBuilder sb = new StringBuilder(dateStr.replace(" ", "T")).append(".000");
+            timestamp = Utils.getDateTime(sb.toString());
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(e);
+        }
+        List<TopicPartition> partitions = consumerConsole.listSubscribeTopics(groupId).get(topic);
+        Tuple2<Object, String> tuple2 = consumerConsole.resetOffsetByTimestamp(groupId, partitions, timestamp);
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 

@@ -85,6 +85,7 @@ public class ConsumerController {
                         res = consumerService.resetOffsetToEndpoint(offsetDTO.getGroupId(), offsetDTO.getTopic(), OffsetResetStrategy.LATEST);
                         break;
                     case ResetOffsetDTO.Type.TIMESTAMP:
+                        res = consumerService.resetOffsetByDate(offsetDTO.getGroupId(), offsetDTO.getTopic(), offsetDTO.getDateStr());
                         break;
                     default:
                         return ResponseData.create().failed("unknown type");

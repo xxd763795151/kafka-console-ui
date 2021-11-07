@@ -27,6 +27,8 @@ public interface ConsumerService {
 
     ResponseData resetOffsetToEndpoint(String groupId, String topic, OffsetResetStrategy strategy);
 
+    ResponseData resetOffsetByDate(String groupId, String topic, String dateStr);
+
     ResponseData resetPartitionToTargetOffset(String groupId, TopicPartition partition, long offset);
 
     ResponseData getGroupIdList();

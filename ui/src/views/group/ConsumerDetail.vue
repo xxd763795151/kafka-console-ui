@@ -40,7 +40,11 @@
             </a-button>
           </a-popconfirm>
 
-          <a-button size="small" type="danger" style="margin-right: 1%"
+          <a-button
+            size="small"
+            type="danger"
+            style="margin-right: 1%"
+            @click="openResetOffsetByTimeDialog(k)"
             >时间戳
           </a-button>
           <hr />
@@ -103,6 +107,12 @@
             </a-form-item>
           </a-form>
         </a-modal>
+        <ResetOffsetByTime
+          :visible="showResetOffsetByTimeDialog"
+          :group="group"
+          :topic="select.topic"
+          @closeResetOffsetByTimeDialog="closeResetOffsetByTimeDialog"
+        ></ResetOffsetByTime>
       </a-spin>
     </div>
   </a-modal>
@@ -112,9 +122,11 @@
 import request from "@/utils/request";
 import { KafkaConsumerApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
+import ResetOffsetByTime from "@/views/group/ResetOffsetByTime";
 
 export default {
   name: "ConsumerDetail",
+  components: { ResetOffsetByTime },
   props: {
     group: {
       type: String,
@@ -139,6 +151,7 @@ export default {
       resetPartitionOffsetForm: this.$form.createForm(this, {
         name: "resetPartitionOffsetForm",
       }),
+      showResetOffsetByTimeDialog: false,
     };
   },
   watch: {
@@ -220,6 +233,16 @@ export default {
           this.requestResetOffset(data, this.closeResetPartitionOffsetDialog());
         }
       });
+    },
+    openResetOffsetByTimeDialog(topic) {
+      this.select.topic = topic;
+      this.showResetOffsetByTimeDialog = true;
+    },
+    closeResetOffsetByTimeDialog(params) {
+      this.showResetOffsetByTimeDialog = false;
+      if (params.refresh) {
+        this.getConsumerDetail();
+      }
     },
   },
 };

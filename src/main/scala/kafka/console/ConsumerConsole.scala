@@ -7,12 +7,13 @@ import java.util.{Collections, Properties, Set}
 
 import com.xuxd.kafka.console.config.KafkaConfig
 import org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo
-import org.apache.kafka.clients.admin.{ConsumerGroupDescription, DeleteConsumerGroupsOptions, ListConsumerGroupsOptions, OffsetSpec}
+import org.apache.kafka.clients.admin._
 import org.apache.kafka.clients.consumer.{ConsumerConfig, OffsetAndMetadata, OffsetResetStrategy}
+import org.apache.kafka.common.requests.ListOffsetsResponse
 import org.apache.kafka.common.{ConsumerGroupState, TopicPartition}
 
 import scala.beans.BeanProperty
-import scala.collection.{Map, mutable}
+import scala.collection.{Map, Seq, mutable}
 import scala.jdk.CollectionConverters._
 
 /**
@@ -173,6 +174,19 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
         }).asInstanceOf[(Boolean, String)]
     }
 
+    def resetOffsetByTimestamp(groupId: String, topicPartitions: util.List[TopicPartition],
+        timestamp: java.lang.Long): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            val logOffsets = getLogTimestampOffsets(admin, groupId, topicPartitions.asScala, timestamp)
+
+            admin.alterConsumerGroupOffsets(groupId, logOffsets.asJava).all().get(timeoutMs, TimeUnit.MILLISECONDS)
+            (true, "")
+        }, e => {
+            log.error("resetOffsetByTimestamp error.", e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
+    }
+
     /**
      *
      * @return k: topic, v: list[topic].
@@ -196,7 +210,7 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
     def listSubscribeTopics(groups: util.Set[String]): util.Map[String, util.List[TopicPartition]] = {
         val map: util.Map[String, util.List[TopicPartition]] = new util.HashMap[String, util.List[TopicPartition]]()
         withAdminClientAndCatchError(admin => {
-            for(groupId <- groups.asScala) {
+            for (groupId <- groups.asScala) {
                 val commitOffs = admin.listConsumerGroupOffsets(
                     groupId
                 ).partitionsToOffsetAndMetadata.get.asScala
@@ -235,6 +249,49 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
             log.error("describeConsumerGroups error.", e)
             mutable.Map.empty
         }).asInstanceOf[Map[TopicPartition, OffsetAndMetadata]]
+    }
+
+    private def getLogTimestampOffsets(admin: Admin, groupId: String, topicPartitions: Seq[TopicPartition],
+        timestamp: java.lang.Long): Map[TopicPartition, OffsetAndMetadata] = {
+        val timestampOffsets = topicPartitions.map { topicPartition =>
+            topicPartition -> OffsetSpec.forTimestamp(timestamp)
+        }.toMap
+        val offsets = admin.listOffsets(
+            timestampOffsets.asJava,
+            new ListOffsetsOptions().timeoutMs(timeoutMs)
+        ).all.get
+        val (successfulOffsetsForTimes, unsuccessfulOffsetsForTimes) =
+            offsets.asScala.partition(_._2.offset != ListOffsetsResponse.UNKNOWN_OFFSET)
+
+        val successfulLogTimestampOffsets = successfulOffsetsForTimes.map {
+            case (topicPartition, listOffsetsResultInfo) => topicPartition -> new OffsetAndMetadata(listOffsetsResultInfo.offset)
+        }.toMap
+
+        unsuccessfulOffsetsForTimes.foreach { entry =>
+            log.warn(s"\nWarn: Partition " + entry._1.partition() + " from topic " + entry._1.topic() +
+                " is empty. Falling back to latest known offset.")
+        }
+
+        successfulLogTimestampOffsets ++ getLogEndOffsets(admin, unsuccessfulOffsetsForTimes.keySet.toSeq)
+    }
+
+    private def getLogEndOffsets(admin: Admin,
+        topicPartitions: Seq[TopicPartition]): Predef.Map[TopicPartition, OffsetAndMetadata] = {
+        val endOffsets = topicPartitions.map { topicPartition =>
+            topicPartition -> OffsetSpec.latest
+        }.toMap
+        val offsets = admin.listOffsets(
+            endOffsets.asJava,
+            new ListOffsetsOptions().timeoutMs(timeoutMs)
+        ).all.get
+        val res = topicPartitions.map { topicPartition =>
+            Option(offsets.get(topicPartition)) match {
+                case Some(listOffsetsResultInfo) => topicPartition -> new OffsetAndMetadata(listOffsetsResultInfo.offset)
+                case _ =>
+                    throw new IllegalArgumentException
+            }
+        }.toMap
+        res
     }
 
     class TopicPartitionConsumeInfo {
