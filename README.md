@@ -11,6 +11,7 @@
 * 消费组管理
 * 基于SASL_SCRAM认证授权管理
 * 运维
+![功能特性](./document/功能特性.png)
 ## 技术栈
 * spring boot 
 * java、scala 
