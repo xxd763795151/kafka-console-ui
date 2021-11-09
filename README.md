@@ -31,12 +31,17 @@
 ```
 git clone https://github.com/xxd763795151/kafka-console-ui.git
 cd kafka-console-ui
+# linux或mac执行
 sh package.sh
+# windows执行
+./package.bat
 ```
-打包成功，输出文件：target/kafka-console-ui.tar.gz
+打包成功，输出文件(以下2种归档类型)：  
+* target/kafka-console-ui.tar.gz  
+* target/kafka-console-ui.zip  
 ## 部署
 ```
-# 解压缩
+# 解压缩(以tar.gz为例)
 tar -zxvf kafka-console-ui.tar.gz
 # 进入解压缩后的目录
 cd kafka-console-ui
@@ -47,6 +52,29 @@ sh bin/start.sh
 # 停止
 sh bin/shutdown.sh
 ```
+启动完成，访问：http://127.0.0.1:7766  
+## windows平台启动测试
+上面的操作步骤主要是针对类unix系统，如果是windows平台，有以下两种方式：  
+### idea启动
+查看最下面的本地开发配置，本地开发环境配置完成，直接使用idea启动  
+### 命令行启动
+如果觉得idea配置麻烦，只想启动一下测试看效果，可以通过命令行方式：
+  
+1.先将代码clone或下载下来  
+2.进入工程目录  
+3.修改配置（如kafka集群地址），配置文件：`src/main/resources/application.yml`  
+4.打包，打包命令如下  
+```shell script
+# 执行打包脚本
+./package.bat
+# 或者执行下面这个命令打包（脚本里也是这一条命令）
+mvn clean scala:compile compile package -Dmaven.test.skip=true -Pdeploy
+```
+5.启动  
+```shell script
+java -jar target/kafka-console-ui.jar
+```
+6.启动完成，访问：http://127.0.0.1:7766  
 # 开发环境
 * jdk 8
 * idea
