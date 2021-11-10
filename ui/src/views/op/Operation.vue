@@ -3,7 +3,9 @@
     <div class="content-module">
       <a-card title="副本管理" style="width: 100%; text-align: left">
         <p>
-          <a-button type="primary"> 首选副本作为leader </a-button>
+          <a-button type="primary" @click="openElectPreferredLeaderDialog">
+            首选副本作为leader
+          </a-button>
           <label>说明：</label>
           <span>将集群中所有分区leader副本设置为首选副本</span>
         </p>
@@ -11,15 +13,11 @@
     </div>
     <div class="content-module">
       <a-card title="数据同步" style="width: 100%; text-align: left">
-        <!--        <p>-->
-        <!--          <a-button type="primary" @click="openSyncConsumerOffsetDialog">-->
-        <!--            数据同步方案-->
-        <!--          </a-button>-->
-        <!--          <label>说明：</label>-->
-        <!--          <span-->
-        <!--          >数据同步方案</span-->
-        <!--          >-->
-        <!--        </p>-->
+        <p v-show="false">
+          <a-button type="primary"> 数据同步方案 </a-button>
+          <label>说明：</label>
+          <span>新老集群迁移、数据同步解决方案</span>
+        </p>
         <p>
           <a-button type="primary" @click="openMinOffsetAlignmentDialog">
             最小位移对齐
@@ -57,6 +55,10 @@
       :visible="syncData.showOffsetAlignmentInfoDialog"
       @closeOffsetAlignmentInfoDialog="closeOffsetAlignmentInfoDialog"
     ></OffsetAlignmentTable>
+    <ElectPreferredLeader
+      :visible="replicationManager.showElectPreferredLeaderDialog"
+      @closeElectPreferredLeaderDialog="closeElectPreferredLeaderDialog"
+    ></ElectPreferredLeader>
   </div>
 </template>
 
@@ -64,15 +66,24 @@
 import SyncConsumerOffset from "@/views/op/SyncConsumerOffset";
 import MinOffsetAlignment from "@/views/op/MinOffsetAlignment";
 import OffsetAlignmentTable from "@/views/op/OffsetAlignmentTable";
+import ElectPreferredLeader from "@/views/op/ElectPreferredLeader";
 export default {
   name: "Operation",
-  components: { SyncConsumerOffset, MinOffsetAlignment, OffsetAlignmentTable },
+  components: {
+    SyncConsumerOffset,
+    MinOffsetAlignment,
+    OffsetAlignmentTable,
+    ElectPreferredLeader,
+  },
   data() {
     return {
       syncData: {
         showSyncConsumerOffsetDialog: false,
         showMinOffsetAlignmentDialog: false,
         showOffsetAlignmentInfoDialog: false,
+      },
+      replicationManager: {
+        showElectPreferredLeaderDialog: false,
       },
     };
   },
@@ -94,6 +105,12 @@ export default {
     },
     closeOffsetAlignmentInfoDialog() {
       this.syncData.showOffsetAlignmentInfoDialog = false;
+    },
+    openElectPreferredLeaderDialog() {
+      this.replicationManager.showElectPreferredLeaderDialog = true;
+    },
+    closeElectPreferredLeaderDialog() {
+      this.replicationManager.showElectPreferredLeaderDialog = false;
     },
   },
 };

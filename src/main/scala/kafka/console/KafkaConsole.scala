@@ -5,7 +5,7 @@ import java.util.Properties
 import com.xuxd.kafka.console.config.KafkaConfig
 import kafka.zk.{AdminZkClient, KafkaZkClient}
 import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.admin.{Admin, AdminClientConfig}
+import org.apache.kafka.clients.admin.{AbstractOptions, Admin, AdminClientConfig}
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
@@ -67,6 +67,10 @@ class KafkaConsole(config: KafkaConfig) {
 
     protected def createAdminClient(props: Properties): Admin = {
         Admin.create(props)
+    }
+
+    protected def withTimeoutMs[T <: AbstractOptions[T]](options: T) = {
+        options.timeoutMs(timeoutMs)
     }
 
     private def createAdminClient(): Admin = {

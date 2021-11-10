@@ -18,4 +18,6 @@ public interface OperationService {
     ResponseData getAlignmentList();
 
     ResponseData deleteAlignmentById(Long id);
+
+    ResponseData electPreferredLeader(String topic, int partition);
 }

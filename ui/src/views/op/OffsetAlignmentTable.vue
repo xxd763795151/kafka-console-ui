@@ -11,7 +11,12 @@
   >
     <div>
       <a-spin :spinning="loading">
-        <a-table :columns="columns" bordered :data-source="data" :rowKey="id">
+        <a-table
+          :columns="columns"
+          bordered
+          :data-source="data"
+          :rowKey="(record) => record.id"
+        >
           <ul slot="thisOffset" slot-scope="text">
             <ol v-for="(v, k) in text" :key="k">
               {{

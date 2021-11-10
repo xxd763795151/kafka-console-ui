@@ -182,4 +182,8 @@ export const KafkaOpApi = {
     url: "/op/sync/alignment",
     method: "delete",
   },
+  electPreferredLeader: {
+    url: "/op/replication/preferred",
+    method: "post",
+  },
 };

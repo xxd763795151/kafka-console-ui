@@ -4,11 +4,12 @@ import java.util.concurrent.TimeUnit
 import java.util.{Collections, Properties}
 
 import com.xuxd.kafka.console.config.KafkaConfig
+import org.apache.kafka.clients.admin.ElectLeadersOptions
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
+import org.apache.kafka.common.{ElectionType, TopicPartition}
 
-import scala.jdk.CollectionConverters.{CollectionHasAsScala, ListHasAsScala, MapHasAsScala, SeqHasAsJava, SetHasAsScala}
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, ListHasAsScala, MapHasAsScala, SeqHasAsJava, SetHasAsJava, SetHasAsScala}
 
 /**
  * kafka-console-ui.
@@ -193,5 +194,20 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
             thatAdmin.close()
             thatConsumer.close()
         }
+    }
+
+    def electPreferredLeader(partitions: util.Set[TopicPartition]): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            admin.electLeaders(ElectionType.PREFERRED, partitions, withTimeoutMs(new ElectLeadersOptions)).all().get()
+            (true, "")
+        }, e => {
+            log.error("alter config error.", e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
+    }
+
+    def getTopicPartitions(topic: String): util.Set[TopicPartition] = {
+        val topicList = topicConsole.getTopicList(Collections.singleton(topic))
+        topicList.asScala.flatMap(_.partitions().asScala.map(t => new TopicPartition(topic, t.partition()))).toSet.asJava
     }
 }

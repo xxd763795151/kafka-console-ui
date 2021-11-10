@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.dto.ReplicationDTO;
 import com.xuxd.kafka.console.beans.dto.SyncDataDTO;
 import com.xuxd.kafka.console.service.OperationService;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -45,5 +46,10 @@ public class OperationController {
     @DeleteMapping("/sync/alignment")
     public Object deleteAlignment(@RequestParam Long id) {
         return operationService.deleteAlignmentById(id);
+    }
+
+    @PostMapping("/replication/preferred")
+    public Object electPreferredLeader(@RequestBody ReplicationDTO dto) {
+        return operationService.electPreferredLeader(dto.getTopic(), dto.getPartition());
     }
 }

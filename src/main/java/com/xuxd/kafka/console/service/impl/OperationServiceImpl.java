@@ -9,9 +9,11 @@ import com.xuxd.kafka.console.beans.vo.OffsetAlignmentVO;
 import com.xuxd.kafka.console.dao.MinOffsetAlignmentMapper;
 import com.xuxd.kafka.console.service.OperationService;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import kafka.console.OperationConsole;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.ObjectProvider;
@@ -106,5 +108,18 @@ public class OperationServiceImpl implements OperationService {
     @Override public ResponseData deleteAlignmentById(Long id) {
         minOffsetAlignmentMapper.deleteById(id);
         return ResponseData.create().success();
+    }
+
+    @Override public ResponseData electPreferredLeader(String topic, int partition) {
+        Set<TopicPartition> partitions = new HashSet<>();
+        if (partition != -1) {
+            partitions.add(new TopicPartition(topic, partition));
+        } else {
+
+            partitions.addAll(operationConsole.getTopicPartitions(topic));
+        }
+        Tuple2<Object, String> tuple2 = operationConsole.electPreferredLeader(partitions);
+
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 }
