@@ -201,7 +201,7 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
             admin.electLeaders(ElectionType.PREFERRED, partitions, withTimeoutMs(new ElectLeadersOptions)).all().get()
             (true, "")
         }, e => {
-            log.error("alter config error.", e)
+            log.error("electLeaders error.", e)
             (false, e.getMessage)
         }).asInstanceOf[(Boolean, String)]
     }
