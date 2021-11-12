@@ -14,7 +14,9 @@
     <div class="content-module">
       <a-card title="数据同步" style="width: 100%; text-align: left">
         <p v-show="false">
-          <a-button type="primary"> 数据同步方案 </a-button>
+          <a-button type="primary" @click="openDataSyncSchemeDialog">
+            数据同步方案
+          </a-button>
           <label>说明：</label>
           <span>新老集群迁移、数据同步解决方案</span>
         </p>
@@ -59,6 +61,11 @@
       :visible="replicationManager.showElectPreferredLeaderDialog"
       @closeElectPreferredLeaderDialog="closeElectPreferredLeaderDialog"
     ></ElectPreferredLeader>
+    <DataSyncScheme
+      :visible="syncData.showDataSyncSchemeDialog"
+      @closeDataSyncSchemeDialog="closeDataSyncSchemeDialog"
+    >
+    </DataSyncScheme>
   </div>
 </template>
 
@@ -67,6 +74,7 @@ import SyncConsumerOffset from "@/views/op/SyncConsumerOffset";
 import MinOffsetAlignment from "@/views/op/MinOffsetAlignment";
 import OffsetAlignmentTable from "@/views/op/OffsetAlignmentTable";
 import ElectPreferredLeader from "@/views/op/ElectPreferredLeader";
+import DataSyncScheme from "@/views/op/DataSyncScheme";
 export default {
   name: "Operation",
   components: {
@@ -74,6 +82,7 @@ export default {
     MinOffsetAlignment,
     OffsetAlignmentTable,
     ElectPreferredLeader,
+    DataSyncScheme,
   },
   data() {
     return {
@@ -81,6 +90,7 @@ export default {
         showSyncConsumerOffsetDialog: false,
         showMinOffsetAlignmentDialog: false,
         showOffsetAlignmentInfoDialog: false,
+        showDataSyncSchemeDialog: false,
       },
       replicationManager: {
         showElectPreferredLeaderDialog: false,
@@ -105,6 +115,12 @@ export default {
     },
     closeOffsetAlignmentInfoDialog() {
       this.syncData.showOffsetAlignmentInfoDialog = false;
+    },
+    openDataSyncSchemeDialog() {
+      this.syncData.showDataSyncSchemeDialog = true;
+    },
+    closeDataSyncSchemeDialog() {
+      this.syncData.showDataSyncSchemeDialog = false;
     },
     openElectPreferredLeaderDialog() {
       this.replicationManager.showElectPreferredLeaderDialog = true;
