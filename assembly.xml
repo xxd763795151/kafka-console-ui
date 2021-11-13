@@ -22,6 +22,7 @@
             <lineEnding>unix</lineEnding>
             <includes>
                 <include>*.sh</include>
+                <include>*.bat</include>
             </includes>
             <outputDirectory>bin</outputDirectory>
             <fileMode>0755</fileMode>
