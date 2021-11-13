@@ -13,7 +13,7 @@
     </div>
     <div class="content-module">
       <a-card title="数据同步" style="width: 100%; text-align: left">
-        <p v-show="false">
+        <p v-show="true">
           <a-button type="primary" @click="openDataSyncSchemeDialog">
             数据同步方案
           </a-button>

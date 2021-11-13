@@ -34,7 +34,7 @@ cd kafka-console-ui
 # linux或mac执行
 sh package.sh
 # windows执行
-./package.bat
+package.bat
 ```
 打包成功，输出文件(以下2种归档类型)：  
 * target/kafka-console-ui.tar.gz  
