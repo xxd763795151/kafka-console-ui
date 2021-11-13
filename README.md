@@ -60,11 +60,6 @@ sh bin/shutdown.sh
 
 启动完成，访问：http://127.0.0.1:7766  
 
-5.启动  
-```shell script
-java -jar target/kafka-console-ui.jar
-```
-6.启动完成，访问：http://127.0.0.1:7766  
 # 开发环境
 * jdk 8
 * idea
