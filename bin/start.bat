@@ -4,4 +4,5 @@ set JAVA_CMD=%JAVA_HOME%\bin\java
 set JAVA_OPTS=-Xmx512m -Xms512m -Xmn256m -Xss256k
 set CONFIG_FILE=../config/application.yml
 set TARGET=../lib/kafka-console-ui.jar
-%JAVA_CMD% -jar %TARGET% --spring.config.location=%CONFIG_FILE%
+set DATA_DIR=..
+%JAVA_CMD% -jar %TARGET% --spring.config.location=%CONFIG_FILE% --data.dir=%DATA_DIR%
