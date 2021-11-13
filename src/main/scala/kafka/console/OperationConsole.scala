@@ -85,7 +85,7 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
             }
             (true, "")
         } catch {
-            case ex => {
+            case ex: Throwable => {
                 log.error("syncConsumerOffset error.", ex)
                 (false, ex.getMessage)
             }
@@ -155,7 +155,7 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
             }
             (true, "")
         } catch {
-            case ex => {
+            case ex: Throwable => {
                 log.error("syncConsumerOffset error.", ex)
                 (false, ex.getMessage)
             }
