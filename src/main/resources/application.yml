@@ -8,7 +8,7 @@ kafka:
   config:
     # kafka broker地址，多个以逗号分隔
     bootstrap-server: 'localhost:9092'
-    request-timeout-ms: 60000
+    request-timeout-ms: 5000
     # 服务端是否启用acl，如果不启用，下面的所有配置都忽略即可，只用配置上面的Kafka集群地址就行了
     enable-acl: false
     # 只支持2种安全协议SASL_PLAINTEXT和PLAINTEXT，启用acl则设置为SASL_PLAINTEXT，不启用acl不需关心这个配置
@@ -17,7 +17,7 @@ kafka:
     # 超级管理员用户名，在broker上已经配置为超级管理员
     admin-username: admin
     # 超级管理员密码
-    admin-password: admin!QAZ
+    admin-password: admin
     # 启动自动创建配置的超级管理员用户
     admin-create: false
     # broker连接的zk地址，如果启动自动创建配置的超级管理员用户则必须配置，否则忽略
@@ -35,7 +35,7 @@ spring:
     username: kafka
     password: 1234567890
     schema: classpath:db/schema-h2.sql
-#    data: classpath:db/data-h2.sql
+#    data: classpath:db/data-h2.sqldata.dir
     initialization-mode: always
   h2:
     console:

@@ -19,7 +19,7 @@ import org.apache.kafka.common.utils.Time
  * */
 class KafkaConsole(config: KafkaConfig) {
 
-    protected val timeoutMs: Int = 3000
+    protected val timeoutMs: Int = config.getRequestTimeoutMs
 
     protected def withAdminClient(f: Admin => Any): Any = {
 

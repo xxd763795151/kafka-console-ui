@@ -41,7 +41,7 @@ class KafkaConfigConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
                 adminClient.alterUserScramCredentials(util.Arrays.asList(
                     new UserScramCredentialUpsertion(name,
                         new ScramCredentialInfo(ScramMechanism.fromMechanismName(config.getSaslMechanism), defaultIterations), pass)))
-                    .all().get(3000, TimeUnit.MILLISECONDS)
+                    .all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 true
             } catch {
                 case ex: Exception => log.error("addOrUpdateUser error", ex)
@@ -98,13 +98,13 @@ class KafkaConfigConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
             try {
                 //                adminClient.alterUserScramCredentials(util.Arrays.asList(
                 //                    new UserScramCredentialDeletion(name, ScramMechanism.fromMechanismName(config.getSaslMechanism))))
-                //                    .all().get(3000, TimeUnit.MILLISECONDS)
+                //                    .all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 // all delete
                 val userDetail = getUserDetailList(util.Collections.singletonList(name))
                 userDetail.values().asScala.foreach(u => {
                     adminClient.alterUserScramCredentials(u.credentialInfos().asScala.map(s => new UserScramCredentialDeletion(u.name(), s.mechanism())
                         .asInstanceOf[UserScramCredentialAlteration]).toList.asJava)
-                        .all().get(3000, TimeUnit.MILLISECONDS)
+                        .all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 })
 
                 (true, null)

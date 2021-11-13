@@ -21,15 +21,15 @@ class ClusterConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
         withAdminClientAndCatchError(admin => {
             val clusterResult: DescribeClusterResult = admin.describeCluster()
             val clusterInfo = new ClusterInfo
-            clusterInfo.setClusterId(clusterResult.clusterId().get(3000, TimeUnit.MILLISECONDS))
-            val acls = clusterResult.authorizedOperations().get(3000, TimeUnit.MILLISECONDS)
+            clusterInfo.setClusterId(clusterResult.clusterId().get(timeoutMs, TimeUnit.MILLISECONDS))
+            val acls = clusterResult.authorizedOperations().get(timeoutMs, TimeUnit.MILLISECONDS)
             if (acls != null) {
                 clusterInfo.setAuthorizedOperations(acls.asScala.map(_.toString).toSet[String].asJava)
             } else {
                 clusterInfo.setAuthorizedOperations(Collections.emptySet())
             }
-            clusterInfo.setNodes(clusterResult.nodes().get(3000, TimeUnit.MILLISECONDS).asScala.map(BrokerNode.fromNode(_)).toSet[BrokerNode].asJava)
-            val id = clusterResult.controller().get(3000, TimeUnit.MILLISECONDS).id()
+            clusterInfo.setNodes(clusterResult.nodes().get(timeoutMs, TimeUnit.MILLISECONDS).asScala.map(BrokerNode.fromNode(_)).toSet[BrokerNode].asJava)
+            val id = clusterResult.controller().get(timeoutMs, TimeUnit.MILLISECONDS).id()
             clusterInfo.getNodes.asScala.foreach(n => {
                 if (n.getId == id) {
                     n.setController(true)

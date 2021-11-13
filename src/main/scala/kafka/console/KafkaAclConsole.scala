@@ -58,7 +58,7 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
     def addAcl(acls: List[AclBinding]): Boolean = {
         withAdminClient(adminClient => {
             try {
-                adminClient.createAcls(acls).all().get(3000, TimeUnit.MILLISECONDS)
+                adminClient.createAcls(acls).all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 true
             } catch {
                 case e: Exception => log.error("addAcl error", e)
@@ -100,7 +100,7 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
     def deleteAcl(entry: AclEntry, allResource: Boolean, allPrincipal: Boolean, allOperation: Boolean): Boolean = {
         withAdminClient(adminClient => {
             try {
-                val result = adminClient.deleteAcls(Collections.singleton(entry.toAclBindingFilter(allResource, allPrincipal, allOperation))).all().get(3000, TimeUnit.MILLISECONDS)
+                val result = adminClient.deleteAcls(Collections.singleton(entry.toAclBindingFilter(allResource, allPrincipal, allOperation))).all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 log.info("delete acl: {}", result)
                 true
             } catch {
@@ -113,7 +113,7 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
     def deleteAcl(filters: util.Collection[AclBindingFilter]): Boolean = {
         withAdminClient(adminClient => {
             try {
-                val result = adminClient.deleteAcls(filters).all().get(3000, TimeUnit.MILLISECONDS)
+                val result = adminClient.deleteAcls(filters).all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 log.info("delete acl: {}", result)
                 true
             } catch {

@@ -25,7 +25,7 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
      */
     def getTopicNameList(internal: Boolean = true): Set[String] = {
         withAdminClientAndCatchError(admin => admin.listTopics(new ListTopicsOptions().listInternal(internal)).names()
-            .get(3000, TimeUnit.MILLISECONDS),
+            .get(timeoutMs, TimeUnit.MILLISECONDS),
             e => {
                 log.error("listTopics error.", e)
                 Collections.emptySet()
@@ -39,7 +39,7 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
      */
     def getInternalTopicNameList(): Set[String] = {
         withAdminClientAndCatchError(admin => admin.listTopics(new ListTopicsOptions().listInternal(true)).listings()
-            .get(3000, TimeUnit.MILLISECONDS).asScala.filter(_.isInternal).map(_.name()).toSet[String].asJava,
+            .get(timeoutMs, TimeUnit.MILLISECONDS).asScala.filter(_.isInternal).map(_.name()).toSet[String].asJava,
             e => {
                 log.error("listInternalTopics error.", e)
                 Collections.emptySet()

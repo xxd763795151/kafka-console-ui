@@ -3,7 +3,7 @@
 为了开发的省事，没有多语言支持，只支持中文展示。  
 用过rocketmq-console吧，对，前端展示风格跟那个有点类似。
 ## 安装包下载
-* 点击下载：[kafka-console-ui.tar.gz](http://43.128.31.53/kafka-console-ui.tar.gz)  
+* 点击下载：[kafka-console-ui.tar.gz](http://43.128.31.53/kafka-console-ui.tar.gz) 或 [kafka-console-ui.zip](http://43.128.31.53/kafka-console-ui.zip)
 * 参考下面的打包部署，下载源码重新打包  
 ## 功能支持
 * 集群信息
@@ -25,7 +25,7 @@
 # 打包、部署
 ## 打包
 环境要求  
-* maven 3+
+* maven 3.6+
 * jdk 8
 * git  
 ```
@@ -90,3 +90,5 @@ java -jar target/kafka-console-ui.jar
 3. 打开idea的Project Structure(Settings) -> Libraries 添加scala sdk，然后选择本地下载的scala 2.13的目录，确定添加进来
 ## 前端
 前端代码在工程的ui目录下，找个前端开发的ide打开进行开发即可。
+## 注意
+前后分离，直接启动后端如果未编译前端代码是没有前端页面的，可以先打包进行编译`sh package.sh`，然后再用idea启动，或者前端部分单独启动  
