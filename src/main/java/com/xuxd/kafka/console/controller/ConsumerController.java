@@ -122,4 +122,9 @@ public class ConsumerController {
     public Object getTopicSubscribedByGroups(@RequestParam String topic) {
         return consumerService.getTopicSubscribedByGroups(topic);
     }
+
+    @GetMapping("/offset/partition")
+    public Object getOffsetPartition(@RequestParam String groupId) {
+        return consumerService.getOffsetPartition(groupId);
+    }
 }

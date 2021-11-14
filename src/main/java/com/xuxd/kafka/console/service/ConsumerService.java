@@ -36,4 +36,6 @@ public interface ConsumerService {
     ResponseData getSubscribeTopicList(String groupId);
 
     ResponseData getTopicSubscribedByGroups(String topic);
+
+    ResponseData getOffsetPartition(String groupId);
 }

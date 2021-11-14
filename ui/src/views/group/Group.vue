@@ -107,6 +107,13 @@
               @click="openConsumerDetailDialog(record.groupId)"
               >消费详情
             </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openOffsetPartitionDialog(record.groupId)"
+              >位移分区
+            </a-button>
           </div>
         </a-table>
         <Member
@@ -125,6 +132,11 @@
           @closeAddSubscriptionDialog="closeAddSubscriptionDialog"
         >
         </AddSupscription>
+        <OffsetTopicPartition
+          :visible="showOffsetPartitionDialog"
+          :group="selectDetail.resourceName"
+          @closeOffsetPartitionDialog="closeOffsetPartitionDialog"
+        ></OffsetTopicPartition>
       </div>
     </a-spin>
   </div>
@@ -137,10 +149,11 @@ import notification from "ant-design-vue/es/notification";
 import Member from "@/views/group/Member";
 import ConsumerDetail from "@/views/group/ConsumerDetail";
 import AddSupscription from "@/views/group/AddSupscription";
+import OffsetTopicPartition from "@/views/group/OffsetTopicPartition";
 
 export default {
   name: "ConsumerGroup",
-  components: { Member, ConsumerDetail, AddSupscription },
+  components: { Member, ConsumerDetail, AddSupscription, OffsetTopicPartition },
   data() {
     return {
       queryParam: {},
@@ -161,6 +174,7 @@ export default {
       showConsumerGroupDialog: false,
       showConsumerDetailDialog: false,
       showAddSubscriptionDialog: false,
+      showOffsetPartitionDialog: false,
     };
   },
   methods: {
@@ -225,6 +239,13 @@ export default {
       if (res.refresh) {
         this.getConsumerGroupList();
       }
+    },
+    openOffsetPartitionDialog(groupId) {
+      this.showOffsetPartitionDialog = true;
+      this.selectDetail.resourceName = groupId;
+    },
+    closeOffsetPartitionDialog() {
+      this.showOffsetPartitionDialog = false;
     },
   },
   created() {

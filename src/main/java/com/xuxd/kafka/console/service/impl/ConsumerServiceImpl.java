@@ -17,12 +17,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import kafka.console.ConsumerConsole;
+import kafka.console.TopicConsole;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.clients.admin.MemberDescription;
+import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.internals.Topic;
 import org.apache.kafka.common.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +44,9 @@ public class ConsumerServiceImpl implements ConsumerService {
     private ConsumerConsole consumerConsole;
 
     private TopicSubscribedInfo topicSubscribedInfo = new TopicSubscribedInfo();
+
+    @Autowired
+    private TopicConsole topicConsole;
 
     @Override public ResponseData getConsumerGroupList(List<String> groupIds, Set<ConsumerGroupState> states) {
         String simulateGroup = "inner_xxx_not_exit_group_###" + System.currentTimeMillis();
@@ -195,6 +201,15 @@ public class ConsumerServiceImpl implements ConsumerService {
         });
 
         return ResponseData.create().data(res).success();
+    }
+
+    @Override public ResponseData getOffsetPartition(String groupId) {
+        List<TopicDescription> topicList = topicConsole.getTopicList(Collections.singleton(Topic.GROUP_METADATA_TOPIC_NAME));
+        if (topicList.isEmpty()) {
+            return ResponseData.create().failed(Topic.GROUP_METADATA_TOPIC_NAME + " is null.");
+        }
+        int size = topicList.get(0).partitions().size();
+        return ResponseData.create().data(Utils.abs(groupId.hashCode()) % size);
     }
 
     class TopicSubscribedInfo {

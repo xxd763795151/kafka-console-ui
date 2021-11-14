@@ -156,6 +156,10 @@ export const KafkaConsumerApi = {
     url: "/consumer/topic/subscribed",
     method: "get",
   },
+  getOffsetPartition: {
+    url: "/consumer/offset/partition",
+    method: "get",
+  },
 };
 
 export const KafkaClusterApi = {
