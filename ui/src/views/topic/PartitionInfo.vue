@@ -34,6 +34,24 @@
               }}
             </ol>
           </ul>
+          <div slot="operation" slot-scope="record" v-show="!record.internal">
+            <a-popconfirm
+              :title="
+                'topic: ' +
+                topic +
+                '，分区:' +
+                record.partition +
+                '，确认选择第一个副本作为leader？'
+              "
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="electPreferredLeader(record)"
+            >
+              <a-button size="small" href="javascript:;" class="operation-btn"
+                >首选副本作为leader
+              </a-button>
+            </a-popconfirm>
+          </div>
         </a-table>
       </a-spin>
     </div>
@@ -42,7 +60,7 @@
 
 <script>
 import request from "@/utils/request";
-import { KafkaTopicApi } from "@/utils/api";
+import { KafkaOpApi, KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
 export default {
   name: "PartitionInfo",
@@ -94,6 +112,25 @@ export default {
       this.data = [];
       this.$emit("closePartitionInfoDialog", {});
     },
+    electPreferredLeader(record) {
+      this.loading = true;
+      request({
+        url: KafkaOpApi.electPreferredLeader.url,
+        method: KafkaOpApi.electPreferredLeader.method,
+        data: { topic: this.topic, partition: record.partition },
+      }).then((res) => {
+        this.loading = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          this.$message.success(res.msg);
+          this.getPartitionInfo();
+        }
+      });
+    },
   },
 };
 
@@ -134,6 +171,11 @@ const columns = [
     title: "消息总数",
     dataIndex: "diff",
     key: "diff",
+  },
+  {
+    title: "操作",
+    key: "operation",
+    scopedSlots: { customRender: "operation" },
   },
 ];
 </script>
