@@ -3,7 +3,7 @@
 为了开发的省事，没有多语言支持，只支持中文展示。  
 用过rocketmq-console吧，对，前端展示风格跟那个有点类似。
 ## 安装包下载
-* 点击下载：[kafka-console-ui.tar.gz](http://43.128.31.53/kafka-console-ui.tar.gz) 或 [kafka-console-ui.zip](http://43.128.31.53/kafka-console-ui.zip)
+* 点击下载：[kafka-console-ui.tar.gz](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.0/kafka-console-ui.tar.gz) 或 [kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.0/kafka-console-ui.zip)
 * 参考下面的打包部署，下载源码重新打包  
 ## 功能支持
 * 集群信息
