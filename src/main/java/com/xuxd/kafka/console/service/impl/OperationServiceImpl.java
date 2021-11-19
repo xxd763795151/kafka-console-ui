@@ -8,6 +8,7 @@ import com.xuxd.kafka.console.beans.dos.MinOffsetAlignmentDO;
 import com.xuxd.kafka.console.beans.vo.OffsetAlignmentVO;
 import com.xuxd.kafka.console.dao.MinOffsetAlignmentMapper;
 import com.xuxd.kafka.console.service.OperationService;
+import com.xuxd.kafka.console.utils.GsonUtil;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +31,7 @@ import scala.Tuple2;
 @Service
 public class OperationServiceImpl implements OperationService {
 
-    private Gson gson = new Gson();
+    private Gson gson = GsonUtil.INSTANCE.get();
 
     @Autowired
     private OperationConsole operationConsole;

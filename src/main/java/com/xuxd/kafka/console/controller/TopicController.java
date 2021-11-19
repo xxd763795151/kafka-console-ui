@@ -71,4 +71,8 @@ public class TopicController {
 
         return topicService.addPartitions(topic, addNum, assignment);
     }
+    @GetMapping("/replica/assignment")
+    public Object getCurrentReplicaAssignment(@RequestParam String topic) {
+        return topicService.getCurrentReplicaAssignment(topic);
+    }
 }

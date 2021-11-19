@@ -1,14 +1,17 @@
 package kafka.console
 
-import java.util
-import java.util.concurrent.TimeUnit
-import java.util.{Collections, List, Set}
-
 import com.xuxd.kafka.console.config.KafkaConfig
+import kafka.admin.ReassignPartitionsCommand.compareTopicPartitions
+import kafka.utils.Json
 import org.apache.kafka.clients.admin._
-import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.errors.UnknownTopicOrPartitionException
+import org.apache.kafka.common.{TopicPartition, TopicPartitionReplica}
 
-import scala.jdk.CollectionConverters.{CollectionHasAsScala, SetHasAsJava}
+import java.util
+import java.util.concurrent.{ExecutionException, TimeUnit}
+import java.util.{Collections, List, Set}
+import scala.collection.{Map, Seq}
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, MapHasAsJava, MapHasAsScala, SeqHasAsJava, SetHasAsJava}
 
 /**
  * kafka-console-ui.
@@ -120,5 +123,62 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
             log.error("create partition error, ", e)
             (false, e.getMessage)
         }).asInstanceOf[(Boolean, String)]
+    }
+
+    def getCurrentReplicaAssignmentJson(topic: String): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            val json = formatAsReassignmentJson(getReplicaAssignmentForTopics(admin, Seq(topic)), Map.empty)
+            (true, json)
+        }, e => {
+            log.error("getCurrentReplicaAssignmentJson error, ", e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
+    }
+
+    /**
+     * Get the current replica assignments for some topics.
+     *
+     * @param adminClient The AdminClient to use.
+     * @param topics      The topics to get information about.
+     * @return A map from partitions to broker assignments.
+     *         If any topic can't be found, an exception will be thrown.
+     */
+    private def getReplicaAssignmentForTopics(adminClient: Admin,
+        topics: Seq[String])
+    : Map[TopicPartition, Seq[Int]] = {
+        describeTopics(adminClient, topics.toSet.asJava).flatMap {
+            case (topicName, topicDescription) => topicDescription.partitions.asScala.map { info =>
+                (new TopicPartition(topicName, info.partition), info.replicas.asScala.map(_.id).toSeq)
+            }
+        }
+    }
+
+    private def formatAsReassignmentJson(partitionsToBeReassigned: Map[TopicPartition, Seq[Int]],
+        replicaLogDirAssignment: Map[TopicPartitionReplica, String]): String = {
+        Json.encodeAsString(Map(
+            "version" -> 1,
+            "partitions" -> partitionsToBeReassigned.keySet.toBuffer.sortWith(compareTopicPartitions).map {
+                tp =>
+                    val replicas = partitionsToBeReassigned(tp)
+                    Map(
+                        "topic" -> tp.topic,
+                        "partition" -> tp.partition,
+                        "replicas" -> replicas.asJava
+                    ).asJava
+            }.asJava
+        ).asJava)
+    }
+
+    private def describeTopics(adminClient: Admin,
+        topics: Set[String])
+    : Map[String, TopicDescription] = {
+        adminClient.describeTopics(topics).values.asScala.map { case (topicName, topicDescriptionFuture) =>
+            try topicName -> topicDescriptionFuture.get
+            catch {
+                case t: ExecutionException if t.getCause.isInstanceOf[UnknownTopicOrPartitionException] =>
+                    throw new ExecutionException(
+                        new UnknownTopicOrPartitionException(s"Topic $topicName not found."))
+            }
+        }
     }
 }

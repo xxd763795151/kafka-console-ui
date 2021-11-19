@@ -117,6 +117,10 @@ export const KafkaTopicApi = {
     url: "/topic/partition/new",
     method: "post",
   },
+  getCurrentReplicaAssignment: {
+    url: "/topic/replica/assignment",
+    method: "get",
+  },
 };
 
 export const KafkaConsumerApi = {

@@ -26,4 +26,6 @@ public interface TopicService {
     ResponseData createTopic(NewTopic topic);
 
     ResponseData addPartitions(String topic, int addNum, List<List<Integer>> newAssignmentst);
+
+    ResponseData getCurrentReplicaAssignment(String topic);
 }

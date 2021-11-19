@@ -1,10 +1,13 @@
 package com.xuxd.kafka.console.service.impl;
 
+import com.google.gson.Gson;
+import com.xuxd.kafka.console.beans.ReplicaAssignment;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.enums.TopicType;
 import com.xuxd.kafka.console.beans.vo.TopicDescriptionVO;
 import com.xuxd.kafka.console.beans.vo.TopicPartitionVO;
 import com.xuxd.kafka.console.service.TopicService;
+import com.xuxd.kafka.console.utils.GsonUtil;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -37,6 +40,8 @@ public class TopicServiceImpl implements TopicService {
 
     @Autowired
     private TopicConsole topicConsole;
+
+    private Gson gson = GsonUtil.INSTANCE.get();
 
     @Override public ResponseData getTopicNameList(boolean internal) {
         return ResponseData.create().data(topicConsole.getTopicNameList(internal)).success();
@@ -129,5 +134,12 @@ public class TopicServiceImpl implements TopicService {
         boolean success = (boolean) tuple2._1();
 
         return success ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override public ResponseData getCurrentReplicaAssignment(String topic) {
+        Tuple2<Object, String> tuple2 = topicConsole.getCurrentReplicaAssignmentJson(topic);
+        boolean success = (boolean) tuple2._1();
+
+        return success ? ResponseData.create().data(gson.fromJson(tuple2._2(), ReplicaAssignment.class)).success() : ResponseData.create().failed(tuple2._2());
     }
 }

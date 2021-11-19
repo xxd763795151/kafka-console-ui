@@ -98,6 +98,27 @@
               @click="openTopicConfigDialog(record.name)"
               >属性配置
             </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openUpdateReplicaDialog(record.name)"
+              >变更副本
+            </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openMessageStatsDialog"
+              >发送统计
+            </a-button>
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openThrottleDialog"
+              >限流
+            </a-button>
           </div>
         </a-table>
         <PartitionInfo
@@ -126,6 +147,11 @@
           :topic="selectDetail.resourceName"
           @closeTopicConfigDialog="closeTopicConfigDialog"
         ></TopicConfig>
+        <UpdateReplica
+          :visible="showUpdateReplicaDialog"
+          :topic="selectDetail.resourceName"
+          @closeUpdateReplicaDialog="closeUpdateReplicaDialog"
+        ></UpdateReplica>
       </div>
     </a-spin>
   </div>
@@ -140,6 +166,7 @@ import CreateTopic from "@/views/topic/CreateTopic";
 import AddPartition from "@/views/topic/AddPartition";
 import ConsumedDetail from "@/views/topic/ConsumedDetail";
 import TopicConfig from "@/views/topic/TopicConfig";
+import UpdateReplica from "@/views/topic/UpdateReplica";
 
 export default {
   name: "Topic",
@@ -149,6 +176,7 @@ export default {
     AddPartition,
     ConsumedDetail,
     TopicConfig,
+    UpdateReplica,
   },
   data() {
     return {
@@ -170,6 +198,7 @@ export default {
       showAddPartition: false,
       showConsumedDetailDialog: false,
       showTopicConfigDialog: false,
+      showUpdateReplicaDialog: false,
     };
   },
   methods: {
@@ -250,6 +279,19 @@ export default {
     closeTopicConfigDialog() {
       this.showTopicConfigDialog = false;
     },
+    openUpdateReplicaDialog(topic) {
+      this.showUpdateReplicaDialog = true;
+      this.selectDetail.resourceName = topic;
+    },
+    closeUpdateReplicaDialog() {
+      this.showUpdateReplicaDialog = false;
+    },
+    openMessageStatsDialog() {
+      this.$message.info("此功能尚不支持");
+    },
+    openThrottleDialog() {
+      this.$message.info("此功能尚不支持");
+    },
   },
   created() {
     this.getTopicList();
@@ -281,7 +323,7 @@ const columns = [
     title: "操作",
     key: "operation",
     scopedSlots: { customRender: "operation" },
-    width: 500,
+    width: 800,
   },
 ];
 </script>
