@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.ReplicaAssignment;
 import com.xuxd.kafka.console.beans.dto.AddPartitionDTO;
 import com.xuxd.kafka.console.beans.dto.NewTopicDTO;
 import com.xuxd.kafka.console.beans.enums.TopicType;
@@ -71,8 +72,14 @@ public class TopicController {
 
         return topicService.addPartitions(topic, addNum, assignment);
     }
+
     @GetMapping("/replica/assignment")
     public Object getCurrentReplicaAssignment(@RequestParam String topic) {
         return topicService.getCurrentReplicaAssignment(topic);
+    }
+
+    @PostMapping("/replica/assignment")
+    public Object updateReplicaAssignment(@RequestBody ReplicaAssignment assignment) {
+        return "topicService.getCurrentReplicaAssignment(topic)";
     }
 }
