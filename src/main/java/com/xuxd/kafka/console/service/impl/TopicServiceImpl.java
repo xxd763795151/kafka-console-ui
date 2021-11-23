@@ -142,4 +142,10 @@ public class TopicServiceImpl implements TopicService {
 
         return success ? ResponseData.create().data(gson.fromJson(tuple2._2(), ReplicaAssignment.class)).success() : ResponseData.create().failed(tuple2._2());
     }
+
+    @Override public ResponseData updateReplicaAssignment(ReplicaAssignment assignment) {
+        Tuple2<Object, String> tuple2 = topicConsole.updateReplicas(gson.toJson(assignment), assignment.getInterBrokerThrottle());
+        boolean success = (boolean) tuple2._1();
+        return success ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
 }

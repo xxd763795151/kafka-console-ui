@@ -16,6 +16,8 @@ public class ReplicaAssignment {
 
     private List<Partition> partitions;
 
+    private long interBrokerThrottle = -1;
+
     @Data
     static class Partition {
         private String topic;

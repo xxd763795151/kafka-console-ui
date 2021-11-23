@@ -80,6 +80,6 @@ public class TopicController {
 
     @PostMapping("/replica/assignment")
     public Object updateReplicaAssignment(@RequestBody ReplicaAssignment assignment) {
-        return "topicService.getCurrentReplicaAssignment(topic)";
+        return topicService.updateReplicaAssignment(assignment);
     }
 }

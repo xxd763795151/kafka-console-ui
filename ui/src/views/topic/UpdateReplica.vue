@@ -14,7 +14,7 @@
     <div>
       <a-spin :spinning="loading">
         <div class="replica-box">
-          <label>副本数：</label
+          <label>设置副本数：</label
           ><a-input-number
             id="inputNumber"
             v-model="replicaNums"
@@ -22,6 +22,19 @@
             :max="brokerSize"
             @change="onChange"
           />
+        </div>
+        <div class="replica-box">
+          <label>是否要限流：</label
+          ><a-input-number
+            id="inputNumber"
+            v-model="data.interBrokerThrottle"
+            :min="-1"
+            :max="102400"
+          />
+          <strong>
+            |说明：broker之间副本同步带宽限制，默认值为-1表示不限制，不是-1表示限制，该值并不表示流速，至于流速配置，在
+            <span style="color: red">运维->配置限流</span> 处进行操作.</strong
+          >
         </div>
         <a-table
           :columns="columns"
@@ -39,6 +52,11 @@
             </span>
           </div>
         </a-table>
+        <p>
+          *正在进行即尚未完成的副本变更的任务，可以在
+          <span style="color: red">运维->副本变更详情</span>
+          处查看，也可以在那里将正在进行的任务取消。
+        </p>
       </a-spin>
     </div>
   </a-modal>
@@ -121,6 +139,9 @@ export default {
       this.$emit("closeUpdateReplicaDialog", { refresh: false });
     },
     onChange(value) {
+      if (value < 1 || value > this.brokerSize) {
+        return false;
+      }
       if (this.data.partitions.length > 0) {
         this.data.partitions.forEach((p) => {
           if (value > p.replicas.length) {
@@ -130,7 +151,9 @@ export default {
             }
           }
           if (value < p.replicas.length) {
-            p.replicas.pop();
+            for (let i = p.replicas.length; i > value; i--) {
+              p.replicas.pop();
+            }
           }
         });
       }
@@ -145,6 +168,7 @@ export default {
         this.loading = false;
         if (res.code == 0) {
           this.$message.success(res.msg);
+          this.$emit("closeUpdateReplicaDialog", { refresh: false });
         } else {
           notification.error({
             message: "error",

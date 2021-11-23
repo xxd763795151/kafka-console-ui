@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.service;
 
+import com.xuxd.kafka.console.beans.ReplicaAssignment;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.enums.TopicType;
 import java.util.List;
@@ -28,4 +29,6 @@ public interface TopicService {
     ResponseData addPartitions(String topic, int addNum, List<List<Integer>> newAssignmentst);
 
     ResponseData getCurrentReplicaAssignment(String topic);
+
+    ResponseData updateReplicaAssignment(ReplicaAssignment assignment);
 }

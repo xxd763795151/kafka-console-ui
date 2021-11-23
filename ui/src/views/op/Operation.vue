@@ -1,6 +1,22 @@
 <template>
   <div class="content">
     <div class="content-module">
+      <a-card title="Broker管理" style="width: 100%; text-align: left">
+        <p>
+          <a-button type="primary"> 配置限流 </a-button>
+          <label>说明：</label>
+          <span
+            >设置指定broker上的topic的副本之间数据同步占用的带宽，这个设置是broker级别的，但是设置后还要去对应的topic上进行限流配置，指定对这个topic的相关副本进行限制</span
+          >
+        </p>
+        <p>
+          <a-button type="primary"> 解除限流 </a-button>
+          <label>说明：</label>
+          <span>解除指定broker上的topic副本之间数据同步占用的带宽限制</span>
+        </p>
+      </a-card>
+    </div>
+    <div class="content-module">
       <a-card title="副本管理" style="width: 100%; text-align: left">
         <p>
           <a-button type="primary" @click="openElectPreferredLeaderDialog">
@@ -8,6 +24,11 @@
           </a-button>
           <label>说明：</label>
           <span>将集群中所有分区leader副本设置为首选副本</span>
+        </p>
+        <p>
+          <a-button type="primary"> 副本变更详情 </a-button>
+          <label>说明：</label>
+          <span>查看正在进行副本变更/重分配的任务，或者将其取消</span>
         </p>
       </a-card>
     </div>
