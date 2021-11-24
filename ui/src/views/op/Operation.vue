@@ -3,7 +3,9 @@
     <div class="content-module">
       <a-card title="Broker管理" style="width: 100%; text-align: left">
         <p>
-          <a-button type="primary"> 配置限流 </a-button>
+          <a-button type="primary" @click="openConfigThrottleDialog">
+            配置限流
+          </a-button>
           <label>说明：</label>
           <span
             >设置指定broker上的topic的副本之间数据同步占用的带宽，这个设置是broker级别的，但是设置后还要去对应的topic上进行限流配置，指定对这个topic的相关副本进行限制</span
@@ -87,6 +89,11 @@
       @closeDataSyncSchemeDialog="closeDataSyncSchemeDialog"
     >
     </DataSyncScheme>
+    <ConfigThrottle
+      :visible="brokerManager.showConfigThrottleDialog"
+      @closeConfigThrottleDialog="closeConfigThrottleDialog"
+    >
+    </ConfigThrottle>
   </div>
 </template>
 
@@ -96,6 +103,7 @@ import MinOffsetAlignment from "@/views/op/MinOffsetAlignment";
 import OffsetAlignmentTable from "@/views/op/OffsetAlignmentTable";
 import ElectPreferredLeader from "@/views/op/ElectPreferredLeader";
 import DataSyncScheme from "@/views/op/DataSyncScheme";
+import ConfigThrottle from "@/views/op/ConfigThrottle";
 export default {
   name: "Operation",
   components: {
@@ -104,6 +112,7 @@ export default {
     OffsetAlignmentTable,
     ElectPreferredLeader,
     DataSyncScheme,
+    ConfigThrottle,
   },
   data() {
     return {
@@ -115,6 +124,9 @@ export default {
       },
       replicationManager: {
         showElectPreferredLeaderDialog: false,
+      },
+      brokerManager: {
+        showConfigThrottleDialog: false,
       },
     };
   },
@@ -148,6 +160,12 @@ export default {
     },
     closeElectPreferredLeaderDialog() {
       this.replicationManager.showElectPreferredLeaderDialog = false;
+    },
+    openConfigThrottleDialog() {
+      this.brokerManager.showConfigThrottleDialog = true;
+    },
+    closeConfigThrottleDialog() {
+      this.brokerManager.showConfigThrottleDialog = false;
     },
   },
 };

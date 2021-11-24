@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.dto.BrokerThrottleDTO;
 import com.xuxd.kafka.console.beans.dto.ReplicationDTO;
 import com.xuxd.kafka.console.beans.dto.SyncDataDTO;
 import com.xuxd.kafka.console.service.OperationService;
@@ -51,5 +52,10 @@ public class OperationController {
     @PostMapping("/replication/preferred")
     public Object electPreferredLeader(@RequestBody ReplicationDTO dto) {
         return operationService.electPreferredLeader(dto.getTopic(), dto.getPartition());
+    }
+
+    @PostMapping("/broker/throttle")
+    public Object configThrottle(@RequestBody BrokerThrottleDTO dto) {
+        return operationService.configThrottle(dto.getBrokerList(), dto.getUnit().toKb(dto.getThrottle()));
     }
 }

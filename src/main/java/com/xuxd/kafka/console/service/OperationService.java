@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.service;
 
 import com.xuxd.kafka.console.beans.ResponseData;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -20,4 +21,6 @@ public interface OperationService {
     ResponseData deleteAlignmentById(Long id);
 
     ResponseData electPreferredLeader(String topic, int partition);
+
+    ResponseData configThrottle(List<Integer> brokerList, long size);
 }

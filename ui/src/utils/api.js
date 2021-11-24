@@ -198,4 +198,8 @@ export const KafkaOpApi = {
     url: "/op/replication/preferred",
     method: "post",
   },
+  configThrottle: {
+    url: "/op/broker/throttle",
+    method: "post",
+  },
 };

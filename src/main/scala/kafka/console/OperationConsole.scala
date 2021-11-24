@@ -1,14 +1,14 @@
 package kafka.console
 
-import java.util.concurrent.TimeUnit
-import java.util.{Collections, Properties}
-
 import com.xuxd.kafka.console.config.KafkaConfig
+import kafka.admin.ReassignPartitionsCommand
 import org.apache.kafka.clients.admin.ElectLeadersOptions
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.{ElectionType, TopicPartition}
 
+import java.util.concurrent.TimeUnit
+import java.util.{Collections, Properties}
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, ListHasAsScala, MapHasAsScala, SeqHasAsJava, SetHasAsJava, SetHasAsScala}
 
 /**
@@ -209,5 +209,16 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
     def getTopicPartitions(topic: String): util.Set[TopicPartition] = {
         val topicList = topicConsole.getTopicList(Collections.singleton(topic))
         topicList.asScala.flatMap(_.partitions().asScala.map(t => new TopicPartition(topic, t.partition()))).toSet.asJava
+    }
+
+    def modifyInterBrokerThrottle(reassigningBrokers: util.Set[Int],
+        interBrokerThrottle: Long): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            ReassignPartitionsCommand.modifyInterBrokerThrottle(admin, reassigningBrokers.asScala.toSet, interBrokerThrottle)
+            (true, "")
+        }, e => {
+            log.error("modifyInterBrokerThrottle error.", e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
     }
 }
