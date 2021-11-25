@@ -129,4 +129,10 @@ public class OperationServiceImpl implements OperationService {
 
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
+
+    @Override public ResponseData removeThrottle(List<Integer> brokerList) {
+        Tuple2<Object, String> tuple2 = operationConsole.clearBrokerLevelThrottles(new HashSet<>(brokerList));
+
+        return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
 }

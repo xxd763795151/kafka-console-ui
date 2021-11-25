@@ -12,6 +12,7 @@
     <div>
       <a-spin :spinning="loading">
         <a-table
+          bordered
           :columns="columns"
           :data-source="data"
           :rowKey="
@@ -21,19 +22,15 @@
           "
         >
           <ul slot="replicas" slot-scope="text">
-            <ol v-for="i in text" :key="i">
-              {{
-                i
-              }}
-            </ol>
+            <li v-for="i in text" :key="i">
+              {{ i }}
+            </li>
           </ul>
-          <ul slot="isr" slot-scope="text">
-            <ol v-for="i in text" :key="i">
-              {{
-                i
-              }}
-            </ol>
-          </ul>
+          <div slot="isr" slot-scope="text">
+            <span v-for="i in text" :key="i">
+              {{ i }}
+            </span>
+          </div>
           <div slot="operation" slot-scope="record" v-show="!record.internal">
             <a-popconfirm
               :title="

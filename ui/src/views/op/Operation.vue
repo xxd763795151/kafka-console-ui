@@ -12,7 +12,9 @@
           >
         </p>
         <p>
-          <a-button type="primary"> 解除限流 </a-button>
+          <a-button type="primary" @click="openRemoveThrottleDialog">
+            解除限流
+          </a-button>
           <label>说明：</label>
           <span>解除指定broker上的topic副本之间数据同步占用的带宽限制</span>
         </p>
@@ -94,6 +96,11 @@
       @closeConfigThrottleDialog="closeConfigThrottleDialog"
     >
     </ConfigThrottle>
+    <RemoveThrottle
+      :visible="brokerManager.showRemoveThrottleDialog"
+      @closeRemoveThrottleDialog="closeRemoveThrottleDialog"
+    >
+    </RemoveThrottle>
   </div>
 </template>
 
@@ -104,6 +111,7 @@ import OffsetAlignmentTable from "@/views/op/OffsetAlignmentTable";
 import ElectPreferredLeader from "@/views/op/ElectPreferredLeader";
 import DataSyncScheme from "@/views/op/DataSyncScheme";
 import ConfigThrottle from "@/views/op/ConfigThrottle";
+import RemoveThrottle from "@/views/op/RemoveThrottle";
 export default {
   name: "Operation",
   components: {
@@ -113,6 +121,7 @@ export default {
     ElectPreferredLeader,
     DataSyncScheme,
     ConfigThrottle,
+    RemoveThrottle,
   },
   data() {
     return {
@@ -127,6 +136,7 @@ export default {
       },
       brokerManager: {
         showConfigThrottleDialog: false,
+        showRemoveThrottleDialog: false,
       },
     };
   },
@@ -166,6 +176,12 @@ export default {
     },
     closeConfigThrottleDialog() {
       this.brokerManager.showConfigThrottleDialog = false;
+    },
+    openRemoveThrottleDialog() {
+      this.brokerManager.showRemoveThrottleDialog = true;
+    },
+    closeRemoveThrottleDialog() {
+      this.brokerManager.showRemoveThrottleDialog = false;
     },
   },
 };

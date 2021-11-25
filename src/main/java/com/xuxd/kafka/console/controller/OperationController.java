@@ -58,4 +58,9 @@ public class OperationController {
     public Object configThrottle(@RequestBody BrokerThrottleDTO dto) {
         return operationService.configThrottle(dto.getBrokerList(), dto.getUnit().toKb(dto.getThrottle()));
     }
+
+    @DeleteMapping("/broker/throttle")
+    public Object removeThrottle(@RequestBody BrokerThrottleDTO dto) {
+        return operationService.removeThrottle(dto.getBrokerList());
+    }
 }

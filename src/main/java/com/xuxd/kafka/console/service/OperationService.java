@@ -23,4 +23,6 @@ public interface OperationService {
     ResponseData electPreferredLeader(String topic, int partition);
 
     ResponseData configThrottle(List<Integer> brokerList, long size);
+
+    ResponseData removeThrottle(List<Integer> brokerList);
 }

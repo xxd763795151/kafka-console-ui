@@ -33,8 +33,8 @@ public class TopicPartitionVO {
         TopicPartitionVO partitionVO = new TopicPartitionVO();
         partitionVO.setPartition(partitionInfo.partition());
         partitionVO.setLeader(partitionInfo.leader().toString());
-        partitionVO.setReplicas(partitionInfo.replicas().stream().map(Node::toString).collect(Collectors.toList()));
-        partitionVO.setIsr(partitionInfo.isr().stream().map(Node::toString).collect(Collectors.toList()));
+        partitionVO.setReplicas(partitionInfo.replicas().stream().map(node -> node.host() + ":" + node.port() + " (id: " + node.idString() + ")").collect(Collectors.toList()));
+        partitionVO.setIsr(partitionInfo.isr().stream().map(Node::idString).collect(Collectors.toList()));
         return partitionVO;
     }
 }

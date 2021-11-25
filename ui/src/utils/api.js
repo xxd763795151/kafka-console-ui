@@ -202,4 +202,8 @@ export const KafkaOpApi = {
     url: "/op/broker/throttle",
     method: "post",
   },
+  removeThrottle: {
+    url: "/op/broker/throttle",
+    method: "delete",
+  },
 };

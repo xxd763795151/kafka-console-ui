@@ -221,4 +221,14 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
             (false, e.getMessage)
         }).asInstanceOf[(Boolean, String)]
     }
+
+    def clearBrokerLevelThrottles(brokers: util.Set[Int]): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            ReassignPartitionsCommand.clearBrokerLevelThrottles(admin, brokers.asScala.toSet)
+            (true, "")
+        }, e => {
+            log.error("clearBrokerLevelThrottles error.", e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
+    }
 }
