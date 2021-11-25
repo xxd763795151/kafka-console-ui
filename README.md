@@ -4,7 +4,7 @@
 用过rocketmq-console吧，对，前端展示风格跟那个有点类似。
 ## 安装包下载
 * 点击下载：[kafka-console-ui.tar.gz](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.0/kafka-console-ui.tar.gz) 或 [kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.0/kafka-console-ui.zip)
-* 参考下面的打包部署，下载源码重新打包  
+* 参考下面的打包部署，下载源码重新打包(最新功能特性)  
 ## 功能支持
 * 集群信息
 * Topic管理
@@ -77,3 +77,8 @@ sh bin/shutdown.sh
 前端代码在工程的ui目录下，找个前端开发的ide打开进行开发即可。
 ## 注意
 前后分离，直接启动后端如果未编译前端代码是没有前端页面的，可以先打包进行编译`sh package.sh`，然后再用idea启动，或者前端部分单独启动  
+# 页面示例
+![集群](./document/集群.png)  
+![Topic](./document/Topic.png)  
+![消费组](./document/消费组.png)  
+![运维](./document/运维.png)  
