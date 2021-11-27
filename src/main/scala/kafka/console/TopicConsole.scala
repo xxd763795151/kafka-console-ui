@@ -224,6 +224,16 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
         }).asInstanceOf[(Boolean, String)]
     }
 
+    def clearThrottle(topic: String): (Boolean, String) = {
+        withAdminClientAndCatchError(admin => {
+            clearTopicLevelThrottles(admin, Collections.singleton(topic).asScala.toSet)
+            (true, "")
+        }, e => {
+            log.error("clearThrottle error, ", e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
+    }
+
     /**
      * Get the current replica assignments for some topics.
      *

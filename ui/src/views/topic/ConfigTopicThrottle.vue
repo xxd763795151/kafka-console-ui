@@ -18,7 +18,23 @@
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
         >
-          <a-form-item label="选择分区">
+          <a-form-item label="操作">
+            <a-radio-group
+              @change="onChange"
+              v-decorator="[
+                'operation',
+                {
+                  initialValue: 'ON',
+                  rules: [{ required: true, message: '请选择一个操作!' }],
+                },
+              ]"
+            >
+              <a-radio value="ON"> 配置限流 </a-radio>
+              <a-radio value="OFF"> 移除所有分区限流配置 </a-radio>
+            </a-radio-group>
+          </a-form-item>
+
+          <a-form-item label="选择分区" v-show="showPartition">
             <a-select
               mode="multiple"
               option-filter-prop="children"
@@ -35,20 +51,6 @@
                 <span v-if="v == -1">全部</span> <span v-else>{{ v }}</span>
               </a-select-option>
             </a-select>
-          </a-form-item>
-          <a-form-item label="操作">
-            <a-radio-group
-              v-decorator="[
-                'operation',
-                {
-                  initialValue: 'ON',
-                  rules: [{ required: true, message: '请选择一个操作!' }],
-                },
-              ]"
-            >
-              <a-radio value="ON"> 开启限流配置 </a-radio>
-              <a-radio value="OFF"> 移除限流配置 </a-radio>
-            </a-radio-group>
           </a-form-item>
         </a-form>
         <hr />
@@ -93,6 +95,7 @@ export default {
       loading: false,
       form: this.$form.createForm(this, { name: "RemoveThrottleForm" }),
       partitions: [],
+      showPartition: true,
     };
   },
   watch: {
@@ -100,6 +103,7 @@ export default {
       this.show = v;
       if (this.show) {
         this.getPartitionInfo();
+        this.showPartition = true;
       }
     },
   },
@@ -128,7 +132,7 @@ export default {
     ok() {
       this.form.validateFields((err, values) => {
         if (!err) {
-          const data = Object.assign({}, values, {topic: this.topic});
+          const data = Object.assign({}, values, { topic: this.topic });
           this.loading = true;
           request({
             url: KafkaTopicApi.configThrottle.url,
@@ -148,6 +152,9 @@ export default {
           });
         }
       });
+    },
+    onChange(e) {
+      this.showPartition = !(e.target.value == "OFF");
     },
   },
 };

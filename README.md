@@ -78,6 +78,8 @@ sh bin/shutdown.sh
 ## 注意
 前后分离，直接启动后端如果未编译前端代码是没有前端页面的，可以先打包进行编译`sh package.sh`，然后再用idea启动，或者前端部分单独启动  
 # 页面示例
+如果未启用ACL配置，不会显示ACL的菜单页面，所以导航栏上没有Acl这一项  
+
 ![集群](./document/集群.png)  
 ![Topic](./document/Topic.png)  
 ![消费组](./document/消费组.png)  

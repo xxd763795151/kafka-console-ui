@@ -157,6 +157,7 @@ public class TopicServiceImpl implements TopicService {
                 tuple2 = topicConsole.configThrottle(topic, partitions);
                 break;
             case OFF:
+                tuple2 = topicConsole.clearThrottle(topic);
                 break;
             default:
                 throw new IllegalArgumentException("switch is unknown.");
