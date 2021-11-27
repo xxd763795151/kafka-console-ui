@@ -125,6 +125,10 @@ export const KafkaTopicApi = {
     url: "/topic/replica/assignment",
     method: "post",
   },
+  configThrottle: {
+    url: "/topic/replica/throttle",
+    method: "post",
+  },
 };
 
 export const KafkaConsumerApi = {

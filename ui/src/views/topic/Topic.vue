@@ -116,7 +116,7 @@
               size="small"
               href="javascript:;"
               class="operation-btn"
-              @click="openThrottleDialog"
+              @click="openThrottleDialog(record.name)"
               >限流
             </a-button>
           </div>
@@ -152,6 +152,11 @@
           :topic="selectDetail.resourceName"
           @closeUpdateReplicaDialog="closeUpdateReplicaDialog"
         ></UpdateReplica>
+        <ConfigTopicThrottle
+          :visible="showThrottleDialog"
+          :topic="selectDetail.resourceName"
+          @closeThrottleDialog="closeThrottleDialog"
+        ></ConfigTopicThrottle>
       </div>
     </a-spin>
   </div>
@@ -167,6 +172,7 @@ import AddPartition from "@/views/topic/AddPartition";
 import ConsumedDetail from "@/views/topic/ConsumedDetail";
 import TopicConfig from "@/views/topic/TopicConfig";
 import UpdateReplica from "@/views/topic/UpdateReplica";
+import ConfigTopicThrottle from "@/views/topic/ConfigTopicThrottle";
 
 export default {
   name: "Topic",
@@ -177,6 +183,7 @@ export default {
     ConsumedDetail,
     TopicConfig,
     UpdateReplica,
+    ConfigTopicThrottle,
   },
   data() {
     return {
@@ -199,6 +206,7 @@ export default {
       showConsumedDetailDialog: false,
       showTopicConfigDialog: false,
       showUpdateReplicaDialog: false,
+      showThrottleDialog: false,
     };
   },
   methods: {
@@ -289,8 +297,12 @@ export default {
     openMessageStatsDialog() {
       this.$message.info("此功能尚不支持");
     },
-    openThrottleDialog() {
-      this.$message.info("此功能尚不支持");
+    openThrottleDialog(topic) {
+      this.showThrottleDialog = true;
+      this.selectDetail.resourceName = topic;
+    },
+    closeThrottleDialog() {
+      this.showThrottleDialog = false;
     },
   },
   created() {

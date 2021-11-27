@@ -3,6 +3,7 @@ package com.xuxd.kafka.console.controller;
 import com.xuxd.kafka.console.beans.ReplicaAssignment;
 import com.xuxd.kafka.console.beans.dto.AddPartitionDTO;
 import com.xuxd.kafka.console.beans.dto.NewTopicDTO;
+import com.xuxd.kafka.console.beans.dto.TopicThrottleDTO;
 import com.xuxd.kafka.console.beans.enums.TopicType;
 import com.xuxd.kafka.console.service.TopicService;
 import java.util.ArrayList;
@@ -81,5 +82,10 @@ public class TopicController {
     @PostMapping("/replica/assignment")
     public Object updateReplicaAssignment(@RequestBody ReplicaAssignment assignment) {
         return topicService.updateReplicaAssignment(assignment);
+    }
+
+    @PostMapping("/replica/throttle")
+    public Object configThrottle(@RequestBody TopicThrottleDTO dto) {
+        return topicService.configThrottle(dto.getTopic(), dto.getPartitions(), dto.getOperation());
     }
 }

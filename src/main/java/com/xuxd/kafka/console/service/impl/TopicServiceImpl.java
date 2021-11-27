@@ -3,6 +3,7 @@ package com.xuxd.kafka.console.service.impl;
 import com.google.gson.Gson;
 import com.xuxd.kafka.console.beans.ReplicaAssignment;
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.enums.TopicThrottleSwitch;
 import com.xuxd.kafka.console.beans.enums.TopicType;
 import com.xuxd.kafka.console.beans.vo.TopicDescriptionVO;
 import com.xuxd.kafka.console.beans.vo.TopicPartitionVO;
@@ -145,6 +146,21 @@ public class TopicServiceImpl implements TopicService {
 
     @Override public ResponseData updateReplicaAssignment(ReplicaAssignment assignment) {
         Tuple2<Object, String> tuple2 = topicConsole.updateReplicas(gson.toJson(assignment), assignment.getInterBrokerThrottle());
+        boolean success = (boolean) tuple2._1();
+        return success ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override public ResponseData configThrottle(String topic, List<Integer> partitions, TopicThrottleSwitch throttleSwitch) {
+        Tuple2<Object, String> tuple2 = null;
+        switch (throttleSwitch) {
+            case ON:
+                tuple2 = topicConsole.configThrottle(topic, partitions);
+                break;
+            case OFF:
+                break;
+            default:
+                throw new IllegalArgumentException("switch is unknown.");
+        }
         boolean success = (boolean) tuple2._1();
         return success ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }

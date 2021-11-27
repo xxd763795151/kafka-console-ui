@@ -2,6 +2,7 @@ package com.xuxd.kafka.console.service;
 
 import com.xuxd.kafka.console.beans.ReplicaAssignment;
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.enums.TopicThrottleSwitch;
 import com.xuxd.kafka.console.beans.enums.TopicType;
 import java.util.List;
 import java.util.Map;
@@ -31,4 +32,6 @@ public interface TopicService {
     ResponseData getCurrentReplicaAssignment(String topic);
 
     ResponseData updateReplicaAssignment(ReplicaAssignment assignment);
+
+    ResponseData configThrottle(String topic, List<Integer> partitions,  TopicThrottleSwitch throttleSwitch);
 }
