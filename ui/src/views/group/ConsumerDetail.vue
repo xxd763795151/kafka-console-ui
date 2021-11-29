@@ -70,6 +70,11 @@
               </a-button>
             </div>
           </a-table>
+          <p>
+            <strong style="color: red"
+              >注意：重置位点时，要求当前没有正在运行的消费端，否则重置的时候会报错，返回失败信息</strong
+            >
+          </p>
         </div>
 
         <a-modal

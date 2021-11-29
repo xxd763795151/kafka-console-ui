@@ -295,7 +295,7 @@ export default {
       this.showUpdateReplicaDialog = false;
     },
     openMessageStatsDialog() {
-      this.$message.info("此功能尚不支持");
+      this.$message.info("此功能尚不支持，下个版本支持");
     },
     openThrottleDialog(topic) {
       this.showThrottleDialog = true;

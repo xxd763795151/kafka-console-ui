@@ -142,7 +142,7 @@ public class ConsumerServiceImpl implements ConsumerService {
     @Override public ResponseData resetOffsetByDate(String groupId, String topic, String dateStr) {
         long timestamp = -1L;
         try {
-            StringBuilder sb = new StringBuilder(dateStr.replace(" ", "T")).append(".000");
+            StringBuilder sb = new StringBuilder(dateStr.replace(" ", "T")).append(".000+08:00");//固定为utc+08:00东8区来计算
             timestamp = Utils.getDateTime(sb.toString());
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);

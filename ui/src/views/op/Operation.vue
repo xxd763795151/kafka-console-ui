@@ -30,7 +30,9 @@
           <span>将集群中所有分区leader副本设置为首选副本</span>
         </p>
         <p>
-          <a-button type="primary"> 副本变更详情 </a-button>
+          <a-button type="primary" @click="openReplicaReassignmentDetailDialog">
+            副本变更详情
+          </a-button>
           <label>说明：</label>
           <span>查看正在进行副本变更/重分配的任务，或者将其取消</span>
         </p>
@@ -182,6 +184,9 @@ export default {
     },
     closeRemoveThrottleDialog() {
       this.brokerManager.showRemoveThrottleDialog = false;
+    },
+    openReplicaReassignmentDetailDialog() {
+      this.$message.info("此功能尚不支持，下个版本支持");
     },
   },
 };
