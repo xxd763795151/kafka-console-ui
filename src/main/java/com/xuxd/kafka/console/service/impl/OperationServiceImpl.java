@@ -5,17 +5,21 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.MinOffsetAlignmentDO;
+import com.xuxd.kafka.console.beans.vo.CurrentReassignmentVO;
 import com.xuxd.kafka.console.beans.vo.OffsetAlignmentVO;
 import com.xuxd.kafka.console.dao.MinOffsetAlignmentMapper;
 import com.xuxd.kafka.console.service.OperationService;
 import com.xuxd.kafka.console.utils.GsonUtil;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 import kafka.console.OperationConsole;
+import org.apache.kafka.clients.admin.PartitionReassignment;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,5 +138,28 @@ public class OperationServiceImpl implements OperationService {
         Tuple2<Object, String> tuple2 = operationConsole.clearBrokerLevelThrottles(new HashSet<>(brokerList));
 
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override public ResponseData currentReassignments() {
+        Map<TopicPartition, PartitionReassignment> reassignmentMap = operationConsole.currentReassignments();
+        List<CurrentReassignmentVO> vos = reassignmentMap.entrySet().stream().map(entry -> {
+            TopicPartition partition = entry.getKey();
+            PartitionReassignment reassignment = entry.getValue();
+            return new CurrentReassignmentVO(partition.topic(),
+                partition.partition(), reassignment.replicas(), reassignment.addingReplicas(), reassignment.removingReplicas());
+        }).collect(Collectors.toList());
+        return ResponseData.create().data(vos).success();
+    }
+
+    @Override public ResponseData cancelReassignment(TopicPartition partition) {
+        Map<TopicPartition, Throwable> res = operationConsole.cancelPartitionReassignments(Collections.singleton(partition));
+        if (!res.isEmpty()) {
+            StringBuilder sb = new StringBuilder("Failed: ");
+            res.forEach((p, t) -> {
+                sb.append(p.toString()).append(": ").append(t.getMessage()).append(System.lineSeparator());
+            });
+            return ResponseData.create().failed(sb.toString());
+        }
+        return ResponseData.create().success();
     }
 }

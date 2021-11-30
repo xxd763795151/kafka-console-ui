@@ -2,14 +2,14 @@ package kafka.console
 
 import com.xuxd.kafka.console.config.KafkaConfig
 import kafka.admin.ReassignPartitionsCommand
-import org.apache.kafka.clients.admin.ElectLeadersOptions
+import org.apache.kafka.clients.admin.{ElectLeadersOptions, ListPartitionReassignmentsOptions, PartitionReassignment}
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.{ElectionType, TopicPartition}
 
 import java.util.concurrent.TimeUnit
 import java.util.{Collections, Properties}
-import scala.jdk.CollectionConverters.{CollectionHasAsScala, ListHasAsScala, MapHasAsScala, SeqHasAsJava, SetHasAsJava, SetHasAsScala}
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, ListHasAsScala, MapHasAsJava, MapHasAsScala, SeqHasAsJava, SetHasAsJava, SetHasAsScala}
 
 /**
  * kafka-console-ui.
@@ -230,5 +230,27 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
             log.error("clearBrokerLevelThrottles error.", e)
             (false, e.getMessage)
         }).asInstanceOf[(Boolean, String)]
+    }
+
+    /**
+     * current reassigning is active.
+     */
+    def currentReassignments(): util.Map[TopicPartition, PartitionReassignment] = {
+        withAdminClientAndCatchError(admin => {
+            admin.listPartitionReassignments(withTimeoutMs(new ListPartitionReassignmentsOptions)).reassignments().get()
+        }, e => {
+            Collections.emptyMap()
+            log.error("listPartitionReassignments error.", e)
+        }).asInstanceOf[util.Map[TopicPartition, PartitionReassignment]]
+    }
+
+    def cancelPartitionReassignments(reassignments: util.Set[TopicPartition]): util.Map[TopicPartition, Throwable] = {
+        withAdminClientAndCatchError(admin => {
+            val res = ReassignPartitionsCommand.cancelPartitionReassignments(admin, reassignments.asScala.toSet)
+            res.asJava
+        }, e => {
+            log.error("cancelPartitionReassignments error.", e)
+            throw e
+        }).asInstanceOf[util.Map[TopicPartition, Throwable]]
     }
 }

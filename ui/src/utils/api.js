@@ -214,4 +214,12 @@ export const KafkaOpApi = {
     url: "/op/broker/throttle",
     method: "delete",
   },
+  currentReassignments: {
+    url: "/op/replication/reassignments",
+    method: "get",
+  },
+  cancelReassignment: {
+    url: "/op/replication/reassignments",
+    method: "delete",
+  },
 };

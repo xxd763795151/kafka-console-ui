@@ -30,7 +30,7 @@
           <span>将集群中所有分区leader副本设置为首选副本</span>
         </p>
         <p>
-          <a-button type="primary" @click="openReplicaReassignmentDetailDialog">
+          <a-button type="primary" @click="openCurrentReassignmentsDialog">
             副本变更详情
           </a-button>
           <label>说明：</label>
@@ -103,6 +103,10 @@
       @closeRemoveThrottleDialog="closeRemoveThrottleDialog"
     >
     </RemoveThrottle>
+    <CurrentReassignments
+      :visible="replicationManager.showCurrentReassignmentsDialog"
+      @closeCurrentReassignmentsDialog="closeCurrentReassignmentsDialog"
+    ></CurrentReassignments>
   </div>
 </template>
 
@@ -114,6 +118,7 @@ import ElectPreferredLeader from "@/views/op/ElectPreferredLeader";
 import DataSyncScheme from "@/views/op/DataSyncScheme";
 import ConfigThrottle from "@/views/op/ConfigThrottle";
 import RemoveThrottle from "@/views/op/RemoveThrottle";
+import CurrentReassignments from "@/views/op/CurrentReassignments";
 export default {
   name: "Operation",
   components: {
@@ -124,6 +129,7 @@ export default {
     DataSyncScheme,
     ConfigThrottle,
     RemoveThrottle,
+    CurrentReassignments,
   },
   data() {
     return {
@@ -135,6 +141,7 @@ export default {
       },
       replicationManager: {
         showElectPreferredLeaderDialog: false,
+        showCurrentReassignmentsDialog: false,
       },
       brokerManager: {
         showConfigThrottleDialog: false,
@@ -185,8 +192,11 @@ export default {
     closeRemoveThrottleDialog() {
       this.brokerManager.showRemoveThrottleDialog = false;
     },
-    openReplicaReassignmentDetailDialog() {
-      this.$message.info("此功能尚不支持，下个版本支持");
+    openCurrentReassignmentsDialog() {
+      this.replicationManager.showCurrentReassignmentsDialog = true;
+    },
+    closeCurrentReassignmentsDialog() {
+      this.replicationManager.showCurrentReassignmentsDialog = false;
     },
   },
 };

@@ -3,6 +3,7 @@ package com.xuxd.kafka.console.service;
 import com.xuxd.kafka.console.beans.ResponseData;
 import java.util.List;
 import java.util.Properties;
+import org.apache.kafka.common.TopicPartition;
 
 /**
  * kafka-console-ui.
@@ -25,4 +26,8 @@ public interface OperationService {
     ResponseData configThrottle(List<Integer> brokerList, long size);
 
     ResponseData removeThrottle(List<Integer> brokerList);
+
+    ResponseData currentReassignments();
+
+    ResponseData cancelReassignment(TopicPartition partition);
 }

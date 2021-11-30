@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.TopicPartition;
 import com.xuxd.kafka.console.beans.dto.BrokerThrottleDTO;
 import com.xuxd.kafka.console.beans.dto.ReplicationDTO;
 import com.xuxd.kafka.console.beans.dto.SyncDataDTO;
@@ -62,5 +63,15 @@ public class OperationController {
     @DeleteMapping("/broker/throttle")
     public Object removeThrottle(@RequestBody BrokerThrottleDTO dto) {
         return operationService.removeThrottle(dto.getBrokerList());
+    }
+
+    @GetMapping("/replication/reassignments")
+    public Object currentReassignments() {
+        return operationService.currentReassignments();
+    }
+
+    @DeleteMapping("/replication/reassignments")
+    public Object cancelReassignment(@RequestBody TopicPartition partition) {
+        return operationService.cancelReassignment(new org.apache.kafka.common.TopicPartition(partition.getTopic(), partition.getPartition()));
     }
 }

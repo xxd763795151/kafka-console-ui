@@ -47,6 +47,15 @@
             @click="openResetOffsetByTimeDialog(k)"
             >时间戳
           </a-button>
+          <a-button
+            type="primary"
+            icon="reload"
+            size="small"
+            style="float: right"
+            @click="getConsumerDetail"
+          >
+            刷新
+          </a-button>
           <hr />
           <a-table
             :columns="columns"
