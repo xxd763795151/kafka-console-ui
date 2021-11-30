@@ -109,7 +109,7 @@
               size="small"
               href="javascript:;"
               class="operation-btn"
-              @click="openMessageStatsDialog"
+              @click="openMessageStatsDialog(record.name)"
               >发送统计
             </a-button>
             <a-button
@@ -157,6 +157,11 @@
           :topic="selectDetail.resourceName"
           @closeThrottleDialog="closeThrottleDialog"
         ></ConfigTopicThrottle>
+        <SendStats
+          :visible="showSendStatsDialog"
+          :topic="selectDetail.resourceName"
+          @closeMessageStatsDialog="closeMessageStatsDialog"
+        ></SendStats>
       </div>
     </a-spin>
   </div>
@@ -173,6 +178,7 @@ import ConsumedDetail from "@/views/topic/ConsumedDetail";
 import TopicConfig from "@/views/topic/TopicConfig";
 import UpdateReplica from "@/views/topic/UpdateReplica";
 import ConfigTopicThrottle from "@/views/topic/ConfigTopicThrottle";
+import SendStats from "@/views/topic/SendStats";
 
 export default {
   name: "Topic",
@@ -184,6 +190,7 @@ export default {
     TopicConfig,
     UpdateReplica,
     ConfigTopicThrottle,
+    SendStats,
   },
   data() {
     return {
@@ -207,6 +214,7 @@ export default {
       showTopicConfigDialog: false,
       showUpdateReplicaDialog: false,
       showThrottleDialog: false,
+      showSendStatsDialog: false,
     };
   },
   methods: {
@@ -294,8 +302,12 @@ export default {
     closeUpdateReplicaDialog() {
       this.showUpdateReplicaDialog = false;
     },
-    openMessageStatsDialog() {
-      this.$message.info("此功能尚不支持，下个版本支持");
+    openMessageStatsDialog(topic) {
+      this.showSendStatsDialog = true;
+      this.selectDetail.resourceName = topic;
+    },
+    closeMessageStatsDialog() {
+      this.showSendStatsDialog = false;
     },
     openThrottleDialog(topic) {
       this.showThrottleDialog = true;

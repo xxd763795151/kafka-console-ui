@@ -234,6 +234,21 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
         }).asInstanceOf[(Boolean, String)]
     }
 
+    def getOffsetForTimestamp(topic: String, timestamp: java.lang.Long): util.Map[TopicPartition, java.lang.Long] = {
+        withAdminClientAndCatchError(admin => {
+            val partitions = describeTopics(admin, Collections.singleton(topic)).get(topic) match {
+                case Some(topicDescription: TopicDescription) => topicDescription.partitions()
+                    .asScala.map(info => new TopicPartition(topic, info.partition())).toSeq
+                case None => throw new IllegalArgumentException("topic is not exist.")
+            }
+            val offsetMap = KafkaConsole.getLogTimestampOffsets(admin, partitions, timestamp, timeoutMs)
+            offsetMap.map(tuple2 => (tuple2._1, tuple2._2.offset())).toMap.asJava
+        }, e => {
+            log.error("clearThrottle error, ", e)
+            Collections.emptyMap()
+        }).asInstanceOf[util.Map[TopicPartition, java.lang.Long]]
+    }
+
     /**
      * Get the current replica assignments for some topics.
      *

@@ -88,4 +88,9 @@ public class TopicController {
     public Object configThrottle(@RequestBody TopicThrottleDTO dto) {
         return topicService.configThrottle(dto.getTopic(), dto.getPartitions(), dto.getOperation());
     }
+
+    @GetMapping("/send/stats")
+    public Object sendStats(@RequestParam String topic) {
+        return topicService.sendStats(topic);
+    }
 }

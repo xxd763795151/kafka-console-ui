@@ -1,15 +1,20 @@
 package kafka.console
 
-import java.util.Properties
-
 import com.xuxd.kafka.console.config.KafkaConfig
 import kafka.zk.{AdminZkClient, KafkaZkClient}
 import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.admin.{AbstractOptions, Admin, AdminClientConfig}
-import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
+import org.apache.kafka.clients.admin._
+import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer, OffsetAndMetadata}
+import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.config.SaslConfigs
+import org.apache.kafka.common.requests.ListOffsetsResponse
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.utils.Time
+import org.slf4j.{Logger, LoggerFactory}
+
+import java.util.Properties
+import scala.collection.{Map, Seq}
+import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
 
 /**
  * kafka-console-ui.
@@ -87,5 +92,59 @@ class KafkaConsole(config: KafkaConfig) {
             props.put(SaslConfigs.SASL_JAAS_CONFIG, config.getSaslJaasConfig())
         }
         props
+    }
+}
+
+object KafkaConsole {
+    val log: Logger = LoggerFactory.getLogger(this.getClass)
+
+    def getCommittedOffsets(admin: Admin, groupId: String,
+        timeoutMs: Integer): Map[TopicPartition, OffsetAndMetadata] = {
+        admin.listConsumerGroupOffsets(
+            groupId, new ListConsumerGroupOffsetsOptions().timeoutMs(timeoutMs)
+        ).partitionsToOffsetAndMetadata.get.asScala
+    }
+
+    def getLogTimestampOffsets(admin: Admin, topicPartitions: Seq[TopicPartition],
+        timestamp: java.lang.Long, timeoutMs: Integer): Map[TopicPartition, OffsetAndMetadata] = {
+        val timestampOffsets = topicPartitions.map { topicPartition =>
+            topicPartition -> OffsetSpec.forTimestamp(timestamp)
+        }.toMap
+        val offsets = admin.listOffsets(
+            timestampOffsets.asJava,
+            new ListOffsetsOptions().timeoutMs(timeoutMs)
+        ).all.get
+        val (successfulOffsetsForTimes, unsuccessfulOffsetsForTimes) =
+            offsets.asScala.partition(_._2.offset != ListOffsetsResponse.UNKNOWN_OFFSET)
+
+        val successfulLogTimestampOffsets = successfulOffsetsForTimes.map {
+            case (topicPartition, listOffsetsResultInfo) => topicPartition -> new OffsetAndMetadata(listOffsetsResultInfo.offset)
+        }.toMap
+
+        unsuccessfulOffsetsForTimes.foreach { entry =>
+            log.warn(s"\nWarn: Partition " + entry._1.partition() + " from topic " + entry._1.topic() +
+                " is empty. Falling back to latest known offset.")
+        }
+
+        successfulLogTimestampOffsets ++ getLogEndOffsets(admin, unsuccessfulOffsetsForTimes.keySet.toSeq, timeoutMs)
+    }
+
+    def getLogEndOffsets(admin: Admin,
+        topicPartitions: Seq[TopicPartition], timeoutMs: Integer): Predef.Map[TopicPartition, OffsetAndMetadata] = {
+        val endOffsets = topicPartitions.map { topicPartition =>
+            topicPartition -> OffsetSpec.latest
+        }.toMap
+        val offsets = admin.listOffsets(
+            endOffsets.asJava,
+            new ListOffsetsOptions().timeoutMs(timeoutMs)
+        ).all.get
+        val res = topicPartitions.map { topicPartition =>
+            Option(offsets.get(topicPartition)) match {
+                case Some(listOffsetsResultInfo) => topicPartition -> new OffsetAndMetadata(listOffsetsResultInfo.offset)
+                case _ =>
+                    throw new IllegalArgumentException
+            }
+        }.toMap
+        res
     }
 }

@@ -9,6 +9,7 @@ import com.xuxd.kafka.console.beans.vo.TopicDescriptionVO;
 import com.xuxd.kafka.console.beans.vo.TopicPartitionVO;
 import com.xuxd.kafka.console.service.TopicService;
 import com.xuxd.kafka.console.utils.GsonUtil;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import kafka.console.TopicConsole;
 import lombok.extern.slf4j.Slf4j;
@@ -150,7 +152,8 @@ public class TopicServiceImpl implements TopicService {
         return success ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
-    @Override public ResponseData configThrottle(String topic, List<Integer> partitions, TopicThrottleSwitch throttleSwitch) {
+    @Override
+    public ResponseData configThrottle(String topic, List<Integer> partitions, TopicThrottleSwitch throttleSwitch) {
         Tuple2<Object, String> tuple2 = null;
         switch (throttleSwitch) {
             case ON:
@@ -164,5 +167,63 @@ public class TopicServiceImpl implements TopicService {
         }
         boolean success = (boolean) tuple2._1();
         return success ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override public ResponseData sendStats(String topic) {
+        Calendar calendar = Calendar.getInstance();
+        long current = calendar.getTimeInMillis();
+
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long today = calendar.getTimeInMillis();
+
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        long yesterday = calendar.getTimeInMillis();
+
+        Map<TopicPartition, Long> currentOffset = topicConsole.getOffsetForTimestamp(topic, current);
+        Map<TopicPartition, Long> todayOffset = topicConsole.getOffsetForTimestamp(topic, today);
+        Map<TopicPartition, Long> yesterdayOffset = topicConsole.getOffsetForTimestamp(topic, yesterday);
+
+        Map<String, Object> res = new HashMap<>();
+
+        // 昨天的消息数是今天减去昨天的
+        AtomicLong yesterdayTotal = new AtomicLong(0L), todayTotal = new AtomicLong(0L);
+        Map<Integer, Long> yesterdayDetail = new HashMap<>(), todayDetail = new HashMap<>();
+        todayOffset.forEach(((partition, aLong) -> {
+            Long last = yesterdayOffset.get(partition);
+            long diff = last == null ? aLong : aLong - last;
+            yesterdayDetail.put(partition.partition(), diff);
+            yesterdayTotal.addAndGet(diff);
+        }));
+        currentOffset.forEach(((partition, aLong) -> {
+            Long last = todayOffset.get(partition);
+            long diff = last == null ? aLong : aLong - last;
+            todayDetail.put(partition.partition(), diff);
+            todayTotal.addAndGet(diff);
+        }));
+
+        Map<String, Object> yes = new HashMap<>(), to = new HashMap<>();
+        yes.put("detail", convertList(yesterdayDetail));
+        yes.put("total", yesterdayTotal.get());
+        to.put("detail", convertList(todayDetail));
+        to.put("total", todayTotal.get());
+
+        res.put("yesterday", yes);
+        res.put("today", to);
+        // 今天的消息数是现在减去今天0时的
+        return ResponseData.create().data(res).success();
+    }
+
+    private List<Map<String, Object>> convertList(Map<Integer, Long> source) {
+        List<Map<String, Object>> collect = source.entrySet().stream().map(entry -> {
+            Map<String, Object> map = new HashMap<>(3, 1.0f);
+            map.put("partition", entry.getKey());
+            map.put("num", entry.getValue());
+            return map;
+        }).collect(Collectors.toList());
+
+        return collect;
     }
 }

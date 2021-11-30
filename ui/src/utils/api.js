@@ -129,6 +129,10 @@ export const KafkaTopicApi = {
     url: "/topic/replica/throttle",
     method: "post",
   },
+  sendStats: {
+    url: "/topic/send/stats",
+    method: "get",
+  },
 };
 
 export const KafkaConsumerApi = {
