@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <div id="nav">
+      <h2 class="logo">Kafka 控制台</h2>
       <router-link to="/" class="pad-l-r">主页</router-link>
       <span>|</span
       ><router-link to="/cluster-page" class="pad-l-r">集群</router-link>
@@ -80,5 +81,11 @@ export default {
   padding-right: 2%;
   height: 90%;
   width: 100%;
+}
+.logo {
+  float: left;
+  left: 1%;
+  top: 1%;
+  position: absolute;
 }
 </style>
