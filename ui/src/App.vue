@@ -9,6 +9,8 @@
       ><router-link to="/topic-page" class="pad-l-r">Topic</router-link>
       <span>|</span
       ><router-link to="/group-page" class="pad-l-r">消费组</router-link>
+      <span>|</span
+      ><router-link to="/message-page" class="pad-l-r">消息</router-link>
       <span v-show="config.enableAcl">|</span
       ><router-link to="/acl-page" class="pad-l-r" v-show="config.enableAcl"
         >Acl</router-link
@@ -45,7 +47,6 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
 }
 
@@ -60,6 +61,7 @@ export default {
   padding-top: 1%;
   padding-bottom: 1%;
   margin-bottom: 1%;
+  text-align: center;
 }
 
 #nav a {

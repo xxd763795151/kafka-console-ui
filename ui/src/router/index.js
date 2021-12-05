@@ -43,6 +43,12 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "cluster" */ "../views/cluster/Cluster.vue"),
   },
+  {
+    path: "/message-page",
+    name: "Message",
+    component: () =>
+      import(/* webpackChunkName: "cluster" */ "../views/message/Message.vue"),
+  },
 ];
 
 const router = new VueRouter({
