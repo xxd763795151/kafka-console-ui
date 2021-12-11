@@ -25,4 +25,9 @@ public class MessageController {
     public Object searchByTime(@RequestBody QueryMessageDTO dto) {
         return messageService.searchByTime(dto.toQueryMessage());
     }
+
+    @PostMapping("/search/offset")
+    public Object searchByOffset(@RequestBody QueryMessageDTO dto) {
+        return messageService.searchByOffset(dto.toQueryMessage());
+    }
 }

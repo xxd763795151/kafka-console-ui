@@ -8,7 +8,7 @@ import java.time.Duration
 import java.util
 import java.util.Properties
 import scala.collection.immutable
-import scala.jdk.CollectionConverters.CollectionHasAsScala
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, MapHasAsScala}
 
 /**
  * kafka-console-ui.
@@ -84,6 +84,61 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
             })
         }
 
+        res
+    }
+
+    def searchBy(
+        tp2o: util.Map[TopicPartition, Long]): util.Map[TopicPartition, ConsumerRecord[Array[Byte], Array[Byte]]] = {
+        val props = new Properties()
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
+        val res = new util.HashMap[TopicPartition, ConsumerRecord[Array[Byte], Array[Byte]]]()
+        withConsumerAndCatchError(consumer => {
+            var tpSet = tp2o.keySet()
+            val tpSetCopy = new util.HashSet[TopicPartition](tpSet)
+            val endOffsets = consumer.endOffsets(tpSet)
+            val beginOffsets = consumer.beginningOffsets(tpSet)
+            for ((tp, off) <- tp2o.asScala) {
+                val endOff = endOffsets.get(tp)
+                //                if (endOff <= off) {
+                //                    consumer.seek(tp, endOff)
+                //                    tpSetCopy.remove(tp)
+                //                } else {
+                //                    consumer.seek(tp, off)
+                //                }
+                val beginOff = beginOffsets.get(tp)
+                if (off < beginOff || off >= endOff) {
+                    tpSetCopy.remove(tp)
+                }
+            }
+
+            tpSet = tpSetCopy
+            consumer.assign(tpSet)
+            tpSet.asScala.foreach(tp => {
+                consumer.seek(tp, tp2o.get(tp))
+            })
+
+            var terminate = tpSet.isEmpty
+            while (!terminate) {
+                val records = consumer.poll(Duration.ofMillis(timeoutMs))
+                val tps = new util.HashSet(tpSet).asScala
+                for (tp <- tps) {
+                    if (!res.containsKey(tp)) {
+                        val recordList = records.records(tp)
+                        if (!recordList.isEmpty) {
+                            val record = recordList.get(0)
+                            res.put(tp, record)
+                            tpSet.remove(tp)
+                        }
+                    }
+                    if (tpSet.isEmpty) {
+                        terminate = true
+                    }
+                }
+            }
+
+        }, e => {
+            log.error("searchBy offset error.", e)
+        })
         res
     }
 }

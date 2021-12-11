@@ -6,7 +6,7 @@
           <SearchByTime :topic-list="topicList"></SearchByTime>
         </a-tab-pane>
         <a-tab-pane key="2" tab="根据位移查询消息" force-render>
-          根据位移查询消息
+          <SearchByOffset :topic-list="topicList"></SearchByOffset>
         </a-tab-pane>
         <a-tab-pane key="3" tab="消息发送"> 消息发送1 </a-tab-pane>
       </a-tabs>
@@ -16,12 +16,13 @@
 
 <script>
 import SearchByTime from "@/views/message/SearchByTime";
+import SearchByOffset from "@/views/message/SearchByOffset";
 import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
 export default {
   name: "Message",
-  components: { SearchByTime },
+  components: { SearchByTime, SearchByOffset },
   data() {
     return {
       loading: false,

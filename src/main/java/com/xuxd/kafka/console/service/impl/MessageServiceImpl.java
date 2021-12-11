@@ -38,6 +38,29 @@ public class MessageServiceImpl implements MessageService {
     @Override public ResponseData searchByTime(QueryMessage queryMessage) {
         int maxNums = 10000;
 
+        Set<TopicPartition> partitions = getPartitions(queryMessage);
+        List<ConsumerRecord<byte[], byte[]>> records = messageConsole.searchBy(partitions, queryMessage.getStartTime(), queryMessage.getEndTime(), maxNums);
+        List<ConsumerRecordVO> vos = records.stream().filter(record -> record.timestamp() <= queryMessage.getEndTime())
+            .map(ConsumerRecordVO::fromConsumerRecord).collect(Collectors.toList());
+        Map<String, Object> res = new HashMap<>();
+        res.put("maxNum", maxNums);
+        res.put("realNum", vos.size());
+        res.put("data", vos.subList(0, Math.min(maxNums, vos.size())));
+        return ResponseData.create().data(res).success();
+    }
+
+    @Override public ResponseData searchByOffset(QueryMessage queryMessage) {
+        Set<TopicPartition> partitions = getPartitions(queryMessage);
+        Map<TopicPartition, Object> offsetTable = new HashMap<>();
+        partitions.forEach(tp -> {
+            offsetTable.put(tp, queryMessage.getOffset());
+        });
+        Map<TopicPartition, ConsumerRecord<byte[], byte[]>> recordMap = messageConsole.searchBy(offsetTable);
+
+        return ResponseData.create().data(recordMap.values().stream().map(ConsumerRecordVO::fromConsumerRecord).collect(Collectors.toList())).success();
+    }
+
+    private Set<TopicPartition> getPartitions(QueryMessage queryMessage) {
         Set<TopicPartition> partitions = new HashSet<>();
         if (queryMessage.getPartition() != -1) {
             partitions.add(new TopicPartition(queryMessage.getTopic(), queryMessage.getPartition()));
@@ -50,13 +73,6 @@ public class MessageServiceImpl implements MessageService {
                 .map(tp -> new TopicPartition(queryMessage.getTopic(), tp.partition())).collect(Collectors.toSet());
             partitions.addAll(set);
         }
-        List<ConsumerRecord<byte[], byte[]>> records = messageConsole.searchBy(partitions, queryMessage.getStartTime(), queryMessage.getEndTime(), maxNums);
-        List<ConsumerRecordVO> vos = records.stream().filter(record -> record.timestamp() <= queryMessage.getEndTime())
-            .map(ConsumerRecordVO::fromConsumerRecord).collect(Collectors.toList());
-        Map<String, Object> res = new HashMap<>();
-        res.put("maxNum", maxNums);
-        res.put("realNum", vos.size());
-        res.put("data", vos.subList(0, Math.min(maxNums, vos.size())));
-        return ResponseData.create().data(res).success();
+        return partitions;
     }
 }

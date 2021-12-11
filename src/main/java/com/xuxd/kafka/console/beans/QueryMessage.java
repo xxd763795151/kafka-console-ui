@@ -18,4 +18,6 @@ public class QueryMessage {
     private long startTime;
 
     private long endTime;
+
+    private long offset;
 }

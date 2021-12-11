@@ -45,11 +45,15 @@
               </a-form-item>
             </a-col>
             <a-col :span="10">
-              <a-form-item label="时间">
-                <a-range-picker
-                  v-decorator="['time', rangeConfig]"
-                  show-time
-                  format="YYYY-MM-DD HH:mm:ss"
+              <a-form-item label="偏移">
+                <a-input
+                  v-decorator="[
+                    'offset',
+                    {
+                      rules: [{ required: true, message: '请输入消息偏移!' }],
+                    },
+                  ]"
+                  placeholder="消息偏移"
                 />
               </a-form-item>
             </a-col>
@@ -61,14 +65,7 @@
           </a-row>
         </a-form>
       </div>
-      <p style="margin-top: 1%">
-        <strong
-          >检索条数：{{ data.realNum }}，允许返回的最大条数：{{
-            data.maxNum
-          }}</strong
-        >
-      </p>
-      <MessageList :data="data.data"></MessageList>
+      <MessageList :data="data"></MessageList>
     </a-spin>
   </div>
 </template>
@@ -80,7 +77,7 @@ import notification from "ant-design-vue/lib/notification";
 import MessageList from "@/views/message/MessageList";
 
 export default {
-  name: "SearchByTime",
+  name: "SearchByOffset",
   components: { MessageList },
   props: {
     topicList: {
@@ -106,12 +103,10 @@ export default {
           const data = Object.assign({}, values, {
             partition: this.selectPartition,
           });
-          data.startTime = values.time[0].valueOf();
-          data.endTime = values.time[1];
           this.loading = true;
           request({
-            url: KafkaMessageApi.searchByTime.url,
-            method: KafkaMessageApi.searchByTime.method,
+            url: KafkaMessageApi.searchByOffset.url,
+            method: KafkaMessageApi.searchByOffset.method,
             data: data,
           }).then((res) => {
             this.loading = false;

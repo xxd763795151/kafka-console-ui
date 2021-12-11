@@ -21,12 +21,22 @@ public class QueryMessageDTO {
 
     private Date endTime;
 
+    private Long offset;
+
     public QueryMessage toQueryMessage() {
         QueryMessage queryMessage = new QueryMessage();
         queryMessage.setTopic(topic);
         queryMessage.setPartition(partition);
-        queryMessage.setStartTime(startTime.getTime());
-        queryMessage.setEndTime(endTime.getTime());
+        if (startTime != null) {
+            queryMessage.setStartTime(startTime.getTime());
+        }
+        if (endTime != null) {
+            queryMessage.setEndTime(endTime.getTime());
+        }
+
+        if (offset != null) {
+            queryMessage.setOffset(offset);
+        }
 
         return queryMessage;
     }

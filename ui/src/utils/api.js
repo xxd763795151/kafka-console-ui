@@ -228,4 +228,8 @@ export const KafkaMessageApi = {
     url: "/message/search/time",
     method: "post",
   },
+  searchByOffset: {
+    url: "/message/search/offset",
+    method: "post",
+  },
 };

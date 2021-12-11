@@ -12,4 +12,6 @@ import com.xuxd.kafka.console.beans.ResponseData;
 public interface MessageService {
 
     ResponseData searchByTime(QueryMessage queryMessage);
+
+    ResponseData searchByOffset(QueryMessage queryMessage);
 }
