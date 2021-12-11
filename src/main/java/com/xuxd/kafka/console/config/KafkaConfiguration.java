@@ -5,6 +5,7 @@ import kafka.console.ConfigConsole;
 import kafka.console.ConsumerConsole;
 import kafka.console.KafkaAclConsole;
 import kafka.console.KafkaConfigConsole;
+import kafka.console.MessageConsole;
 import kafka.console.OperationConsole;
 import kafka.console.TopicConsole;
 import org.springframework.context.annotation.Bean;
@@ -53,5 +54,10 @@ public class KafkaConfiguration {
     public OperationConsole operationConsole(KafkaConfig config, TopicConsole topicConsole,
         ConsumerConsole consumerConsole) {
         return new OperationConsole(config, topicConsole, consumerConsole);
+    }
+
+    @Bean
+    public MessageConsole messageConsole(KafkaConfig config) {
+        return new MessageConsole(config);
     }
 }
