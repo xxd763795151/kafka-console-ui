@@ -61,14 +61,36 @@
           </a-row>
         </a-form>
       </div>
+      <!--      <div class="operation-row-button">-->
+      <!--      </div>-->
+      <p style="margin-top: 1%">
+        <strong
+          >检索条数：{{ data.realNum }}，允许返回的最大条数：{{
+            data.maxNum
+          }}</strong
+        >
+      </p>
+      <a-table
+        :columns="columns"
+        :data-source="data.data"
+        bordered
+        row-key="(record,index)=>{return index}"
+      >
+        <div slot="operation" slot-scope="{}">
+          <a-button size="small" href="javascript:;" class="operation-btn"
+            >消息详情
+          </a-button>
+        </div>
+      </a-table>
     </a-spin>
   </div>
 </template>
 
 <script>
 import request from "@/utils/request";
-import { KafkaTopicApi } from "@/utils/api";
+import { KafkaMessageApi, KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
+import moment from "moment";
 
 export default {
   name: "SearchByTime",
@@ -87,10 +109,39 @@ export default {
       rangeConfig: {
         rules: [{ type: "array", required: true, message: "请选择时间!" }],
       },
+      data: defaultData,
+      columns: columns,
     };
   },
   methods: {
-    handleSearch() {},
+    handleSearch() {
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          const data = Object.assign({}, values, {
+            partition: this.selectPartition,
+          });
+          data.startTime = values.time[0].valueOf();
+          data.endTime = values.time[1];
+          this.loading = true;
+          request({
+            url: KafkaMessageApi.searchByTime.url,
+            method: KafkaMessageApi.searchByTime.method,
+            data: data,
+          }).then((res) => {
+            this.loading = false;
+            if (res.code == 0) {
+              this.$message.success(res.msg);
+              this.data = res.data;
+            } else {
+              notification.error({
+                message: "error",
+                description: res.msg,
+              });
+            }
+          });
+        }
+      });
+    },
     getPartitionInfo(topic) {
       this.loading = true;
       request({
@@ -115,6 +166,42 @@ export default {
     },
   },
 };
+
+const columns = [
+  {
+    title: "topic",
+    dataIndex: "topic",
+    key: "topic",
+    width: 300,
+  },
+  {
+    title: "分区",
+    dataIndex: "partition",
+    key: "partition",
+  },
+  {
+    title: "偏移",
+    dataIndex: "offset",
+    key: "offset",
+  },
+  {
+    title: "时间",
+    dataIndex: "timestamp",
+    key: "timestamp",
+    slots: { title: "timestamp" },
+    scopedSlots: { customRender: "timestamp" },
+    customRender: (text) => {
+      return moment(text).format("YYYY-MM-DD HH:mm:ss:SSS");
+    },
+  },
+  {
+    title: "操作",
+    key: "operation",
+    scopedSlots: { customRender: "operation" },
+    width: 200,
+  },
+];
+const defaultData = { realNum: 0, maxNum: 0 };
 </script>
 
 <style scoped>

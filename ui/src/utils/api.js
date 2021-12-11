@@ -223,3 +223,9 @@ export const KafkaOpApi = {
     method: "delete",
   },
 };
+export const KafkaMessageApi = {
+  searchByTime: {
+    url: "/message/search/time",
+    method: "post",
+  },
+};
