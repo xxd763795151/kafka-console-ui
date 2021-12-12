@@ -5,10 +5,10 @@
         <a-tab-pane key="1" tab="根据时间查询消息">
           <SearchByTime :topic-list="topicList"></SearchByTime>
         </a-tab-pane>
-        <a-tab-pane key="2" tab="根据位移查询消息" force-render>
+        <a-tab-pane key="2" tab="根据偏移查询消息" force-render>
           <SearchByOffset :topic-list="topicList"></SearchByOffset>
         </a-tab-pane>
-        <a-tab-pane key="3" tab="消息发送"> 消息发送1 </a-tab-pane>
+        <!--        <a-tab-pane key="3" tab="消息发送"> 消息发送1 </a-tab-pane>-->
       </a-tabs>
     </a-spin>
   </div>

@@ -29,10 +29,19 @@ public class MessageDetailVO {
 
     private Object value;
 
+    private List<ConsumerVO> consumers;
+
     @Data
     public static class HeaderVO {
         String key;
 
         String value;
+    }
+
+    @Data
+    public static class ConsumerVO {
+        String groupId;
+
+        String status;
     }
 }

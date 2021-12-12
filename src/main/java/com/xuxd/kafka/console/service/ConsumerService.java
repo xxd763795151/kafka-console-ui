@@ -38,4 +38,6 @@ public interface ConsumerService {
     ResponseData getTopicSubscribedByGroups(String topic);
 
     ResponseData getOffsetPartition(String groupId);
+
+    ResponseData<Set<String>> getSubscribedGroups(String topic);
 }

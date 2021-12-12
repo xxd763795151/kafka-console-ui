@@ -92,6 +92,21 @@
             </p>
           </div>
         </div>
+        <div>
+          <h4>消费信息</h4>
+          <hr />
+          <a-table
+            :columns="columns"
+            :data-source="data.consumers"
+            bordered
+            row-key="groupId"
+          >
+            <div slot="status" slot-scope="text">
+              <span v-if="text == 'consumed'">已消费</span
+              ><span v-else style="color: red">未消费</span>
+            </div>
+          </a-table>
+        </div>
       </a-spin>
     </div>
   </a-modal>
@@ -120,6 +135,8 @@ export default {
       deserializerList: [],
       keyDeserializer: "String",
       valueDeserializer: "String",
+      consumerDetail: [],
+      columns,
     };
   },
   watch: {
@@ -184,6 +201,19 @@ export default {
     },
   },
 };
+const columns = [
+  {
+    title: "消费组",
+    dataIndex: "groupId",
+    key: "groupId",
+  },
+  {
+    title: "消费情况",
+    dataIndex: "status",
+    key: "status",
+    scopedSlots: { customRender: "status" },
+  },
+];
 </script>
 
 <style scoped>

@@ -85,3 +85,5 @@ sh bin/shutdown.sh
 ![Topic](./document/Topic.png)  
 ![消费组](./document/消费组.png)  
 ![运维](./document/运维.png)  
+增加消息检索页面
+![消息](./document/消息.png)  

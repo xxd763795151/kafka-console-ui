@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import kafka.console.ConsumerConsole;
 import kafka.console.TopicConsole;
@@ -47,6 +48,8 @@ public class ConsumerServiceImpl implements ConsumerService {
 
     @Autowired
     private TopicConsole topicConsole;
+
+    private ReentrantLock lock = new ReentrantLock();
 
     @Override public ResponseData getConsumerGroupList(List<String> groupIds, Set<ConsumerGroupState> states) {
         String simulateGroup = "inner_xxx_not_exit_group_###" + System.currentTimeMillis();
@@ -167,25 +170,7 @@ public class ConsumerServiceImpl implements ConsumerService {
     }
 
     @Override public ResponseData getTopicSubscribedByGroups(String topic) {
-        if (topicSubscribedInfo.isNeedRefresh(topic)) {
-            Set<String> groupIdList = consumerConsole.getConsumerGroupIdList(Collections.emptySet());
-            Map<String, Set<String>> cache = new HashMap<>();
-            Map<String, List<TopicPartition>> subscribeTopics = consumerConsole.listSubscribeTopics(groupIdList);
-
-            subscribeTopics.forEach((groupId, tl) -> {
-                tl.forEach(topicPartition -> {
-                    String t = topicPartition.topic();
-                    if (!cache.containsKey(t)) {
-                        cache.put(t, new HashSet<>());
-                    }
-                    cache.get(t).add(groupId);
-                });
-            });
-
-            topicSubscribedInfo.refresh(cache);
-        }
-
-        Set<String> groups = topicSubscribedInfo.getSubscribedGroups(topic);
+        Set<String> groups = this.getSubscribedGroups(topic).getData();
 
         Map<String, Object> res = new HashMap<>();
         Collection<ConsumerConsole.TopicPartitionConsumeInfo> consumerDetail = consumerConsole.getConsumerDetail(groups);
@@ -210,6 +195,34 @@ public class ConsumerServiceImpl implements ConsumerService {
         }
         int size = topicList.get(0).partitions().size();
         return ResponseData.create().data(Utils.abs(groupId.hashCode()) % size);
+    }
+
+    @Override public ResponseData<Set<String>> getSubscribedGroups(String topic) {
+        if (topicSubscribedInfo.isNeedRefresh(topic) && !lock.isLocked()) {
+            try {
+                lock.lock();
+                Set<String> groupIdList = consumerConsole.getConsumerGroupIdList(Collections.emptySet());
+                Map<String, Set<String>> cache = new HashMap<>();
+                Map<String, List<TopicPartition>> subscribeTopics = consumerConsole.listSubscribeTopics(groupIdList);
+
+                subscribeTopics.forEach((groupId, tl) -> {
+                    tl.forEach(topicPartition -> {
+                        String t = topicPartition.topic();
+                        if (!cache.containsKey(t)) {
+                            cache.put(t, new HashSet<>());
+                        }
+                        cache.get(t).add(groupId);
+                    });
+                });
+
+                topicSubscribedInfo.refresh(cache);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        Set<String> groups = topicSubscribedInfo.getSubscribedGroups(topic);
+        return ResponseData.create(Set.class).data(groups).success();
     }
 
     class TopicSubscribedInfo {

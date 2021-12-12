@@ -4,14 +4,18 @@ import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.vo.ConsumerRecordVO;
 import com.xuxd.kafka.console.beans.vo.MessageDetailVO;
+import com.xuxd.kafka.console.service.ConsumerService;
 import com.xuxd.kafka.console.service.MessageService;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import kafka.console.ConsumerConsole;
 import kafka.console.MessageConsole;
 import kafka.console.TopicConsole;
 import org.apache.commons.collections.CollectionUtils;
@@ -24,7 +28,10 @@ import org.apache.kafka.common.serialization.DoubleDeserializer;
 import org.apache.kafka.common.serialization.FloatDeserializer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,13 +41,18 @@ import org.springframework.stereotype.Service;
  * @date 2021-12-11 09:43:44
  **/
 @Service
-public class MessageServiceImpl implements MessageService {
+public class MessageServiceImpl implements MessageService, ApplicationContextAware {
 
     @Autowired
     private MessageConsole messageConsole;
 
     @Autowired
     private TopicConsole topicConsole;
+
+    @Autowired
+    private ConsumerConsole consumerConsole;
+
+    private ApplicationContext applicationContext;
 
     private Map<String, Deserializer> deserializerDict = new HashMap<>();
 
@@ -112,6 +124,21 @@ public class MessageServiceImpl implements MessageService {
                 vo.getHeaders().add(headerVO);
             });
 
+            // 为了尽量保持代码好看，不直接注入另一个service层的实现类了
+            Set<String> groupIds = applicationContext.getBean(ConsumerService.class).getSubscribedGroups(record.topic()).getData();
+            Collection<ConsumerConsole.TopicPartitionConsumeInfo> consumerDetail = consumerConsole.getConsumerDetail(groupIds);
+
+            List<MessageDetailVO.ConsumerVO> consumerVOS = new LinkedList<>();
+            consumerDetail.forEach(consumerInfo -> {
+                if (consumerInfo.topicPartition().equals(new TopicPartition(record.topic(), record.partition()))) {
+                    MessageDetailVO.ConsumerVO consumerVO = new MessageDetailVO.ConsumerVO();
+                    consumerVO.setGroupId(consumerInfo.getGroupId());
+                    consumerVO.setStatus(consumerInfo.getConsumerOffset() < record.offset() ? "unconsume" : "consumed");
+                    consumerVOS.add(consumerVO);
+                }
+            });
+
+            vo.setConsumers(consumerVOS);
             return ResponseData.create().data(vo).success();
         }
         return ResponseData.create().failed("Not found message detail.");
@@ -146,5 +173,9 @@ public class MessageServiceImpl implements MessageService {
             partitions.addAll(set);
         }
         return partitions;
+    }
+
+    @Override public void setApplicationContext(ApplicationContext context) throws BeansException {
+        this.applicationContext = context;
     }
 }
