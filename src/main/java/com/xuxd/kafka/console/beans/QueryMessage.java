@@ -20,4 +20,8 @@ public class QueryMessage {
     private long endTime;
 
     private long offset;
+
+    private String keyDeserializer;
+
+    private String valueDeserializer;
 }

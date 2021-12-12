@@ -14,4 +14,8 @@ public interface MessageService {
     ResponseData searchByTime(QueryMessage queryMessage);
 
     ResponseData searchByOffset(QueryMessage queryMessage);
+
+    ResponseData searchDetail(QueryMessage queryMessage);
+
+    ResponseData deserializerList();
 }

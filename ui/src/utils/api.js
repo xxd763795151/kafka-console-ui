@@ -232,4 +232,12 @@ export const KafkaMessageApi = {
     url: "/message/search/offset",
     method: "post",
   },
+  searchDetail: {
+    url: "/message/search/detail",
+    method: "post",
+  },
+  deserializerList: {
+    url: "/message/deserializer/list",
+    method: "get",
+  },
 };

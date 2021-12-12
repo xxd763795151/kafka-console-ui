@@ -147,7 +147,7 @@ export default {
     },
   },
 };
-const defaultData = { realNum: 0, maxNum: 0 };
+const defaultData = [];
 </script>
 
 <style scoped>

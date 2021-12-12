@@ -4,22 +4,36 @@
       :columns="columns"
       :data-source="data"
       bordered
-      row-key="(record,index)=>{return index}"
+      :row-key="
+        (record, index) => {
+          return index;
+        }
+      "
     >
-      <div slot="operation" slot-scope="{}">
-        <a-button size="small" href="javascript:;" class="operation-btn"
+      <div slot="operation" slot-scope="record">
+        <a-button
+          size="small"
+          href="javascript:;"
+          class="operation-btn"
+          @click="openDetailDialog(record)"
           >消息详情
         </a-button>
       </div>
     </a-table>
+    <MessageDetail
+      :visible="showDetailDialog"
+      :record="record"
+      @closeDetailDialog="closeDetailDialog"
+    ></MessageDetail>
   </div>
 </template>
 
 <script>
 import moment from "moment";
+import MessageDetail from "@/views/message/MessageDetail";
 export default {
   name: "MessageList",
-  components: {},
+  components: { MessageDetail },
   props: {
     data: {
       type: Array,
@@ -28,7 +42,18 @@ export default {
   data() {
     return {
       columns: columns,
+      showDetailDialog: false,
+      record: {},
     };
+  },
+  methods: {
+    openDetailDialog(record) {
+      this.record = record;
+      this.showDetailDialog = true;
+    },
+    closeDetailDialog() {
+      this.showDetailDialog = false;
+    },
   },
 };
 const columns = [

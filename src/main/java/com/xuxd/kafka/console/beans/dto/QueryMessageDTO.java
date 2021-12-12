@@ -23,6 +23,10 @@ public class QueryMessageDTO {
 
     private Long offset;
 
+    private String keyDeserializer;
+
+    private String valueDeserializer;
+
     public QueryMessage toQueryMessage() {
         QueryMessage queryMessage = new QueryMessage();
         queryMessage.setTopic(topic);
@@ -37,6 +41,9 @@ public class QueryMessageDTO {
         if (offset != null) {
             queryMessage.setOffset(offset);
         }
+
+        queryMessage.setKeyDeserializer(keyDeserializer);
+        queryMessage.setValueDeserializer(valueDeserializer);
 
         return queryMessage;
     }
