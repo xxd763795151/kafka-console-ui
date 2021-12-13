@@ -8,10 +8,10 @@
           @submit="handleSearch"
         >
           <a-row :gutter="24">
-            <a-col :span="6">
+            <a-col :span="9">
               <a-form-item label="topic">
                 <a-select
-                  class="type-select"
+                  class="topic-select"
                   @change="handleTopicChange"
                   show-search
                   option-filter-prop="children"
@@ -29,7 +29,7 @@
                 </a-select>
               </a-form-item>
             </a-col>
-            <a-col :span="6">
+            <a-col :span="5">
               <a-form-item label="分区">
                 <a-select
                   class="type-select"
@@ -44,7 +44,7 @@
                 </a-select>
               </a-form-item>
             </a-col>
-            <a-col :span="10">
+            <a-col :span="8">
               <a-form-item label="时间">
                 <a-range-picker
                   v-decorator="['time', rangeConfig]"
@@ -190,8 +190,11 @@ const defaultData = { realNum: 0, maxNum: 0 };
   text-align: center;
   padding-top: 80px;
 }
+.topic-select {
+  width: 400px !important;
+}
 
 .type-select {
-  width: 200px !important;
+  width: 150px !important;
 }
 </style>

@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import kafka.console.ConsumerConsole;
 import kafka.console.MessageConsole;
 import kafka.console.TopicConsole;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.TopicDescription;
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Service;
  * @author xuxd
  * @date 2021-12-11 09:43:44
  **/
+@Slf4j
 @Service
 public class MessageServiceImpl implements MessageService, ApplicationContextAware {
 
@@ -69,7 +71,9 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
         int maxNums = 10000;
 
         Set<TopicPartition> partitions = getPartitions(queryMessage);
+        long startTime = System.currentTimeMillis();
         List<ConsumerRecord<byte[], byte[]>> records = messageConsole.searchBy(partitions, queryMessage.getStartTime(), queryMessage.getEndTime(), maxNums);
+        log.info("search message by time, cost time: {}", (System.currentTimeMillis() - startTime));
         List<ConsumerRecordVO> vos = records.stream().filter(record -> record.timestamp() <= queryMessage.getEndTime())
             .map(ConsumerRecordVO::fromConsumerRecord).collect(Collectors.toList());
         Map<String, Object> res = new HashMap<>();

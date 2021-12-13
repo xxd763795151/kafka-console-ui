@@ -8,10 +8,10 @@
           @submit="handleSearch"
         >
           <a-row :gutter="24">
-            <a-col :span="6">
+            <a-col :span="9">
               <a-form-item label="topic">
                 <a-select
-                  class="type-select"
+                  class="topic-select"
                   @change="handleTopicChange"
                   show-search
                   option-filter-prop="children"
@@ -44,7 +44,7 @@
                 </a-select>
               </a-form-item>
             </a-col>
-            <a-col :span="10">
+            <a-col :span="7">
               <a-form-item label="偏移">
                 <a-input
                   v-decorator="[
@@ -185,7 +185,9 @@ const defaultData = [];
   text-align: center;
   padding-top: 80px;
 }
-
+.topic-select {
+  width: 400px !important;
+}
 .type-select {
   width: 200px !important;
 }

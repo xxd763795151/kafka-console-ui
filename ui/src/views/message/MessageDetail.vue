@@ -150,7 +150,7 @@ export default {
   },
   methods: {
     getMessageDetail() {
-      this.loading = false;
+      this.loading = true;
       const params = Object.assign({}, this.record, {
         keyDeserializer: this.keyDeserializer,
         valueDeserializer: this.valueDeserializer,
