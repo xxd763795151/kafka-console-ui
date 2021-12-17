@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <a-spin :spinning="loading">
-      <div id="components-form-advanced-search">
+      <div id="search-offset-form-advanced-search">
         <a-form
           class="ant-advanced-search-form"
           :form="form"
@@ -87,7 +87,7 @@ export default {
   data() {
     return {
       loading: false,
-      form: this.$form.createForm(this, { name: "message_search_time" }),
+      form: this.$form.createForm(this, { name: "message_search_offset" }),
       partitions: [],
       selectPartition: undefined,
       rangeConfig: {
@@ -97,7 +97,8 @@ export default {
     };
   },
   methods: {
-    handleSearch() {
+    handleSearch(e) {
+      e.preventDefault();
       this.form.validateFields((err, values) => {
         if (!err) {
           const data = Object.assign({}, values, {
@@ -176,7 +177,7 @@ const defaultData = [];
   margin-bottom: 1%;
 }
 
-#components-form-advanced-search .search-result-list {
+#search-offset-form-advanced-search .search-result-list {
   margin-top: 16px;
   border: 1px dashed #e9e9e9;
   border-radius: 6px;

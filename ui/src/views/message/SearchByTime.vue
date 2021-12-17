@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <a-spin :spinning="loading">
-      <div id="components-form-advanced-search">
+      <div id="search-time-form-advanced-search">
         <a-form
           class="ant-advanced-search-form"
           :form="form"
@@ -100,7 +100,8 @@ export default {
     };
   },
   methods: {
-    handleSearch() {
+    handleSearch(e) {
+      e.preventDefault();
       this.form.validateFields((err, values) => {
         if (!err) {
           const data = Object.assign({}, values, {
@@ -181,7 +182,7 @@ const defaultData = { realNum: 0, maxNum: 0 };
   margin-bottom: 1%;
 }
 
-#components-form-advanced-search .search-result-list {
+#search-time-form-advanced-search .search-result-list {
   margin-top: 16px;
   border: 1px dashed #e9e9e9;
   border-radius: 6px;

@@ -5,10 +5,12 @@
         <a-tab-pane key="1" tab="根据时间查询消息">
           <SearchByTime :topic-list="topicList"></SearchByTime>
         </a-tab-pane>
-        <a-tab-pane key="2" tab="根据偏移查询消息" force-render>
+        <a-tab-pane key="2" tab="根据偏移查询消息">
           <SearchByOffset :topic-list="topicList"></SearchByOffset>
         </a-tab-pane>
-        <!--        <a-tab-pane key="3" tab="消息发送"> 消息发送1 </a-tab-pane>-->
+        <a-tab-pane key="3" tab="在线发送">
+          <SendMessage :topic-list="topicList"></SendMessage>
+        </a-tab-pane>
       </a-tabs>
     </a-spin>
   </div>
@@ -20,9 +22,10 @@ import SearchByOffset from "@/views/message/SearchByOffset";
 import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
+import SendMessage from "@/views/message/SendMessage";
 export default {
   name: "Message",
-  components: { SearchByTime, SearchByOffset },
+  components: { SearchByTime, SearchByOffset, SendMessage },
   data() {
     return {
       loading: false,
