@@ -240,4 +240,8 @@ export const KafkaMessageApi = {
     url: "/message/deserializer/list",
     method: "get",
   },
+  send: {
+    url: "/message/send",
+    method: "post",
+  },
 };

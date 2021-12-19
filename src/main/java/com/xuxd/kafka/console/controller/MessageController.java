@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.SendMessage;
 import com.xuxd.kafka.console.beans.dto.QueryMessageDTO;
 import com.xuxd.kafka.console.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,5 +41,10 @@ public class MessageController {
     @GetMapping("/deserializer/list")
     public Object deserializerList() {
         return messageService.deserializerList();
+    }
+
+    @PostMapping("/send")
+    public Object send(@RequestBody SendMessage message) {
+        return messageService.send(message);
     }
 }

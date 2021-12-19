@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <a-spin :spinning="loading">
-      <a-form :form="form">
+      <a-form :form="form" @submit="handleSubmit">
         <a-form-item label="Topic">
           <a-select
             class="topic-select"
@@ -38,7 +38,7 @@
           <a-input v-decorator="['key', { initialValue: 'key' }]" />
         </a-form-item>
         <a-form-item label="消息体" has-feedback>
-          <a-input
+          <a-textarea
             v-decorator="[
               'body',
               {
@@ -56,7 +56,7 @@
         <a-form-item label="发送的消息数">
           <a-input-number
             v-decorator="[
-              'nums',
+              'num',
               {
                 initialValue: 1,
                 rules: [
@@ -71,6 +71,9 @@
             :max="32"
           />
         </a-form-item>
+        <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
+          <a-button type="primary" html-type="submit"> 提交 </a-button>
+        </a-form-item>
       </a-form>
     </a-spin>
   </div>
@@ -78,7 +81,7 @@
 
 <script>
 import request from "@/utils/request";
-import { KafkaTopicApi } from "@/utils/api";
+import { KafkaTopicApi, KafkaMessageApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
 export default {
   name: "SendMessage",
@@ -133,6 +136,32 @@ export default {
     handleTopicChange(topic) {
       this.selectPartition = -1;
       this.getPartitionInfo(topic);
+    },
+    handleSubmit(e) {
+      e.preventDefault();
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          const param = Object.assign({}, values, {
+            partition: this.selectPartition,
+          });
+          this.loading = true;
+          request({
+            url: KafkaMessageApi.send.url,
+            method: KafkaMessageApi.send.method,
+            data: param,
+          }).then((res) => {
+            this.loading = false;
+            if (res.code == 0) {
+              this.$message.success(res.msg);
+            } else {
+              notification.error({
+                message: "error",
+                description: res.msg,
+              });
+            }
+          });
+        }
+      });
     },
   },
   created() {

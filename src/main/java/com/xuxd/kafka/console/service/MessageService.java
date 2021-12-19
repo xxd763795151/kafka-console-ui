@@ -2,6 +2,7 @@ package com.xuxd.kafka.console.service;
 
 import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.SendMessage;
 
 /**
  * kafka-console-ui.
@@ -18,4 +19,6 @@ public interface MessageService {
     ResponseData searchDetail(QueryMessage queryMessage);
 
     ResponseData deserializerList();
+
+    ResponseData send(SendMessage message);
 }

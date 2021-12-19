@@ -5,10 +5,11 @@ import kafka.zk.{AdminZkClient, KafkaZkClient}
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.admin._
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer, OffsetAndMetadata}
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.requests.ListOffsetsResponse
-import org.apache.kafka.common.serialization.ByteArrayDeserializer
+import org.apache.kafka.common.serialization.{ByteArrayDeserializer, StringSerializer}
 import org.apache.kafka.common.utils.Time
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -57,6 +58,22 @@ class KafkaConsole(config: KafkaConfig) {
         }
         finally {
             consumer.close()
+        }
+    }
+
+    protected def withProducerAndCatchError(f: KafkaProducer[String, String] => Any, eh: Exception => Any,
+        extra: Properties = new Properties()): Any = {
+        val props = getProps()
+        props.putAll(extra)
+        props.put(ConsumerConfig.CLIENT_ID_CONFIG, String.valueOf(System.currentTimeMillis()))
+        val producer = new KafkaProducer[String, String](props, new StringSerializer, new StringSerializer)
+        try {
+            f(producer)
+        } catch {
+            case er: Exception => eh(er)
+        }
+        finally {
+            producer.close()
         }
     }
 

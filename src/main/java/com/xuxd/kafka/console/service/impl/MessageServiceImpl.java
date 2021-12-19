@@ -2,6 +2,7 @@ package com.xuxd.kafka.console.service.impl;
 
 import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.SendMessage;
 import com.xuxd.kafka.console.beans.vo.ConsumerRecordVO;
 import com.xuxd.kafka.console.beans.vo.MessageDetailVO;
 import com.xuxd.kafka.console.service.ConsumerService;
@@ -24,6 +25,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.BytesDeserializer;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.DoubleDeserializer;
 import org.apache.kafka.common.serialization.FloatDeserializer;
@@ -59,10 +62,12 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
     private Map<String, Deserializer> deserializerDict = new HashMap<>();
 
     {
+        deserializerDict.put("ByteArray", new ByteArrayDeserializer());
         deserializerDict.put("Integer", new IntegerDeserializer());
         deserializerDict.put("String", new StringDeserializer());
         deserializerDict.put("Float", new FloatDeserializer());
         deserializerDict.put("Double", new DoubleDeserializer());
+        deserializerDict.put("Byte", new BytesDeserializer());
     }
 
     public static String defaultDeserializer = "String";
@@ -150,6 +155,11 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
 
     @Override public ResponseData deserializerList() {
         return ResponseData.create().data(deserializerDict.keySet()).success();
+    }
+
+    @Override public ResponseData send(SendMessage message) {
+        messageConsole.send(message.getTopic(), message.getPartition(), message.getKey(), message.getBody(), message.getNum());
+        return ResponseData.create().success();
     }
 
     private Map<TopicPartition, ConsumerRecord<byte[], byte[]>> searchRecordByOffset(QueryMessage queryMessage) {

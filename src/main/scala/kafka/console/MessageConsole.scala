@@ -2,6 +2,7 @@ package kafka.console
 
 import com.xuxd.kafka.console.config.KafkaConfig
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.TopicPartition
 
 import java.time.Duration
@@ -169,5 +170,16 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
             log.error("searchBy offset error.", e)
         })
         res
+    }
+
+    def send(topic: String, partition: Int, key: String, value: String, num: Int): Unit = {
+        withProducerAndCatchError(producer => {
+            val nullKey = if (key != null && key.trim().length() == 0) null else key
+            for (a <- 1 to num) {
+                val record = if (partition != -1) new ProducerRecord[String, String](topic, partition, nullKey, value) else new ProducerRecord[String, String](topic, nullKey, value)
+                producer.send(record)
+            }
+        }, e => log.error("send error.", e))
+
     }
 }
