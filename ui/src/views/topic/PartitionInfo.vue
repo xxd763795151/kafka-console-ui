@@ -49,7 +49,15 @@
               </a-button>
             </a-popconfirm>
           </div>
+          <p slot="expandedRowRender" slot-scope="record" style="margin: 0">
+            有效消息的时间范围：<span class="red-font">{{
+              formatTime(record.beginTime)
+            }}</span>
+            ~
+            <span class="red-font">{{ formatTime(record.endTime) }}</span>
+          </p>
         </a-table>
+        <p>友情提示：点击+号展开，可以查看当前分区的有效消息的时间范围</p>
       </a-spin>
     </div>
   </a-modal>
@@ -59,6 +67,7 @@
 import request from "@/utils/request";
 import { KafkaOpApi, KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
+import moment from "moment";
 export default {
   name: "PartitionInfo",
   props: {
@@ -128,6 +137,11 @@ export default {
         }
       });
     },
+    formatTime(timestamp) {
+      return timestamp != -1
+        ? moment(timestamp).format("YYYY-MM-DD HH:mm:ss:SSS")
+        : timestamp;
+    },
   },
 };
 
@@ -169,6 +183,26 @@ const columns = [
     dataIndex: "diff",
     key: "diff",
   },
+  // {
+  //   title: "有效消息起始时间",
+  //   dataIndex: "beginTime",
+  //   key: "beginTime",
+  //   slots: { title: "beginTime" },
+  //   scopedSlots: { customRender: "internal" },
+  //   customRender: (text) => {
+  //     return text != -1 ? moment(text).format("YYYY-MM-DD HH:mm:ss:SSS") : text;
+  //   },
+  // },
+  // {
+  //   title: "有效消息结束时间",
+  //   dataIndex: "endTime",
+  //   key: "endTime",
+  //   slots: { title: "endTime" },
+  //   scopedSlots: { customRender: "internal" },
+  //   customRender: (text) => {
+  //     return text != -1 ? moment(text).format("YYYY-MM-DD HH:mm:ss:SSS") : text;
+  //   },
+  // },
   {
     title: "操作",
     key: "operation",
@@ -177,4 +211,8 @@ const columns = [
 ];
 </script>
 
-<style scoped></style>
+<style scoped>
+.red-font {
+  color: red;
+}
+</style>

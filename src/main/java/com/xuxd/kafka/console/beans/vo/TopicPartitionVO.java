@@ -29,6 +29,10 @@ public class TopicPartitionVO {
 
     private long diff;
 
+    private long beginTime;
+
+    private long endTime;
+
     public static TopicPartitionVO from(TopicPartitionInfo partitionInfo) {
         TopicPartitionVO partitionVO = new TopicPartitionVO();
         partitionVO.setPartition(partitionInfo.partition());
