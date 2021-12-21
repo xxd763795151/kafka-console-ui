@@ -20,4 +20,6 @@ public class SendMessage {
     private String body;
 
     private int num;
+
+    private long offset;
 }

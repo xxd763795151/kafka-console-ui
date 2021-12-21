@@ -215,4 +215,7 @@ const columns = [
 .red-font {
   color: red;
 }
+.green-font {
+  color: green;
+}
 </style>

@@ -107,6 +107,18 @@
             </div>
           </a-table>
         </div>
+        <div>
+          <h4>操作</h4>
+          <hr />
+          <a-popconfirm
+            title="确定将当前这条消息重新发回broker？"
+            ok-text="确认"
+            cancel-text="取消"
+            @confirm="resend"
+          >
+            <a-button type="primary" icon="reload"> 重新发送 </a-button>
+          </a-popconfirm>
+        </div>
       </a-spin>
     </div>
   </a-modal>
@@ -198,6 +210,25 @@ export default {
     },
     valueDeserializerChange() {
       this.getMessageDetail();
+    },
+    resend() {
+      const params = Object.assign({}, this.data);
+      this.loading = true;
+      request({
+        url: KafkaMessageApi.resend.url,
+        method: KafkaMessageApi.resend.method,
+        data: params,
+      }).then((res) => {
+        this.loading = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          this.$message.success(res.msg);
+        }
+      });
     },
   },
 };

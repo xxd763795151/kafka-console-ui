@@ -21,4 +21,6 @@ public interface MessageService {
     ResponseData deserializerList();
 
     ResponseData send(SendMessage message);
+
+    ResponseData resend(SendMessage message);
 }

@@ -244,4 +244,8 @@ export const KafkaMessageApi = {
     url: "/message/send",
     method: "post",
   },
+  resend: {
+    url: "/message/resend",
+    method: "post",
+  },
 };

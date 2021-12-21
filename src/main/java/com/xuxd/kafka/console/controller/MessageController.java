@@ -47,4 +47,9 @@ public class MessageController {
     public Object send(@RequestBody SendMessage message) {
         return messageService.send(message);
     }
+
+    @PostMapping("/resend")
+    public Object resend(@RequestBody SendMessage message) {
+        return messageService.resend(message);
+    }
 }

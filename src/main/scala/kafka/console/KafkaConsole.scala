@@ -9,7 +9,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.requests.ListOffsetsResponse
-import org.apache.kafka.common.serialization.{ByteArrayDeserializer, StringSerializer}
+import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySerializer, StringSerializer}
 import org.apache.kafka.common.utils.Time
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -67,6 +67,22 @@ class KafkaConsole(config: KafkaConfig) {
         props.putAll(extra)
         props.put(ConsumerConfig.CLIENT_ID_CONFIG, String.valueOf(System.currentTimeMillis()))
         val producer = new KafkaProducer[String, String](props, new StringSerializer, new StringSerializer)
+        try {
+            f(producer)
+        } catch {
+            case er: Exception => eh(er)
+        }
+        finally {
+            producer.close()
+        }
+    }
+
+    protected def withByteProducerAndCatchError(f: KafkaProducer[Array[Byte], Array[Byte]] => Any, eh: Exception => Any,
+        extra: Properties = new Properties()): Any = {
+        val props = getProps()
+        props.putAll(extra)
+        props.put(ConsumerConfig.CLIENT_ID_CONFIG, String.valueOf(System.currentTimeMillis()))
+        val producer = new KafkaProducer[Array[Byte], Array[Byte]](props, new ByteArraySerializer, new ByteArraySerializer)
         try {
             f(producer)
         } catch {

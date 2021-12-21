@@ -24,6 +24,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.BytesDeserializer;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
+import scala.Tuple2;
 
 /**
  * kafka-console-ui.
@@ -142,7 +144,7 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
                 if (consumerInfo.topicPartition().equals(new TopicPartition(record.topic(), record.partition()))) {
                     MessageDetailVO.ConsumerVO consumerVO = new MessageDetailVO.ConsumerVO();
                     consumerVO.setGroupId(consumerInfo.getGroupId());
-                    consumerVO.setStatus(consumerInfo.getConsumerOffset() < record.offset() ? "unconsume" : "consumed");
+                    consumerVO.setStatus(consumerInfo.getConsumerOffset() <= record.offset() ? "unconsume" : "consumed");
                     consumerVOS.add(consumerVO);
                 }
             });
@@ -160,6 +162,21 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
     @Override public ResponseData send(SendMessage message) {
         messageConsole.send(message.getTopic(), message.getPartition(), message.getKey(), message.getBody(), message.getNum());
         return ResponseData.create().success();
+    }
+
+    @Override public ResponseData resend(SendMessage message) {
+        TopicPartition partition = new TopicPartition(message.getTopic(), message.getPartition());
+        Map<TopicPartition, Object> offsetTable = new HashMap<>(1, 1.0f);
+        offsetTable.put(partition, message.getOffset());
+        Map<TopicPartition, ConsumerRecord<byte[], byte[]>> recordMap = messageConsole.searchBy(offsetTable);
+        if (recordMap.isEmpty()) {
+            return ResponseData.create().failed("Get message failed.");
+        }
+        ConsumerRecord<byte[], byte[]> record = recordMap.get(partition);
+        ProducerRecord<byte[], byte[]> producerRecord = new ProducerRecord<>(record.topic(), record.partition(), record.key(), record.value(), record.headers());
+        Tuple2<Object, String> tuple2 = messageConsole.sendSync(producerRecord);
+        boolean success = (boolean) tuple2._1();
+        return success ? ResponseData.create().success("success: " + tuple2._2()) : ResponseData.create().failed(tuple2._2());
     }
 
     private Map<TopicPartition, ConsumerRecord<byte[], byte[]>> searchRecordByOffset(QueryMessage queryMessage) {

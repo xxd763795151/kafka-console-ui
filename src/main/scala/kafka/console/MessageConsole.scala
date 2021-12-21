@@ -176,10 +176,21 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
         withProducerAndCatchError(producer => {
             val nullKey = if (key != null && key.trim().length() == 0) null else key
             for (a <- 1 to num) {
-                val record = if (partition != -1) new ProducerRecord[String, String](topic, partition, nullKey, value) else new ProducerRecord[String, String](topic, nullKey, value)
+                val record = if (partition != -1) new ProducerRecord[String, String](topic, partition, nullKey, value)
+                else new ProducerRecord[String, String](topic, nullKey, value)
                 producer.send(record)
             }
         }, e => log.error("send error.", e))
 
+    }
+
+    def sendSync(record: ProducerRecord[Array[Byte], Array[Byte]]): (Boolean, String) = {
+        withByteProducerAndCatchError(producer => {
+            val metadata = producer.send(record).get()
+            (true, metadata.toString())
+        }, e => {
+            log.error("send error.", e)
+            (false, e.getMessage)
+        }).asInstanceOf[(Boolean, String)]
     }
 }
