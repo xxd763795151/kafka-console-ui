@@ -54,7 +54,7 @@
               formatTime(record.beginTime)
             }}</span>
             ~
-            <span class="red-font">{{ formatTime(record.endTime) }}</span>
+            <span class="green-font">{{ formatTime(record.endTime) }}</span>
           </p>
         </a-table>
         <p>友情提示：点击+号展开，可以查看当前分区的有效消息的时间范围</p>

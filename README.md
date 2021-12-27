@@ -2,6 +2,12 @@
 一款轻量级的kafka可视化管理平台，安装配置快捷、简单易用。  
 为了开发的省事，没有国际化支持，只支持中文展示。  
 用过rocketmq-console吧，对，前端展示风格跟那个有点类似。
+## 说明
+当前主分支及日后版本不再提供消息同步、迁移的解决方案，如有需要，可以使用single-data-sync分支的代码或者发布v1.0.2： [kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.2/kafka-console-ui.zip) 的安装包  
+
+v1.0.2版本及其之前的版本只支持单集群配置，但是对于SASL_SCRAM认证授权管理功能相当完善  
+
+后续版本会支持多集群管理，并将v1.0.2之前的部分功能去掉或优化，目的是做为一个足够轻量的管理工具，不再涉及其它属性
 ## 安装包下载
 以下两种方式2选一，直接下载安装包或下载源码，手动打包  
 * 点击下载(v1.0.2版本)：[kafka-console-ui.tar.gz](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.2/kafka-console-ui.tar.gz) 或 [kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.2/kafka-console-ui.zip)

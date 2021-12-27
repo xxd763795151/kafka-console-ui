@@ -1,6 +1,15 @@
 <template>
   <div class="content">
     <div class="content-module">
+      <a-card title="集群管理" style="width: 100%; text-align: left">
+        <p>
+          <a-button type="primary"> 集群切换 </a-button>
+          <label>说明：</label>
+          <span>多集群管理：增加、删除集群配置，切换集群</span>
+        </p>
+      </a-card>
+    </div>
+    <div class="content-module">
       <a-card title="Broker管理" style="width: 100%; text-align: left">
         <p>
           <a-button type="primary" @click="openConfigThrottleDialog">
@@ -38,7 +47,8 @@
         </p>
       </a-card>
     </div>
-    <div class="content-module">
+    <!--    隐藏数据同步相关-->
+    <div class="content-module" v-show="false">
       <a-card title="数据同步" style="width: 100%; text-align: left">
         <p v-show="true">
           <a-button type="primary" @click="openDataSyncSchemeDialog">
