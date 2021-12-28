@@ -15,6 +15,7 @@
                     placeholder="topic"
                     class="input-w"
                     v-decorator="['topic']"
+                    @change="onTopicUpdate"
                   />
                 </a-form-item>
               </a-col>
@@ -22,8 +23,9 @@
                 <a-form-item :label="`类型`">
                   <a-select
                     class="type-select"
-                    v-decorator="['type', { initialValue: 'normal' }]"
-                    placeholder="Please select a country"
+                    v-model="type"
+                    placeholder="选择类型"
+                    @change="getTopicList"
                   >
                     <a-select-option value="all"> 所有</a-select-option>
                     <a-select-option value="normal"> 普通</a-select-option>
@@ -34,10 +36,10 @@
 
               <a-col :span="8" :style="{ textAlign: 'right' }">
                 <a-form-item>
-                  <a-button type="primary" html-type="submit"> 搜索</a-button>
-                  <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
-                    重置
-                  </a-button>
+                  <a-button type="primary" html-type="submit"> 刷新</a-button>
+                  <!--                  <a-button :style="{ marginLeft: '8px' }" @click="handleReset">-->
+                  <!--                    重置-->
+                  <!--                  </a-button>-->
                 </a-form-item>
               </a-col>
             </a-row>
@@ -48,7 +50,12 @@
             >新增</a-button
           >
         </div>
-        <a-table :columns="columns" :data-source="data" bordered row-key="name">
+        <a-table
+          :columns="columns"
+          :data-source="filteredData"
+          bordered
+          row-key="name"
+        >
           <div slot="partitions" slot-scope="text, record">
             <a href="#" @click="openPartitionInfoDialog(record.name)"
               >{{ text }}
@@ -215,6 +222,9 @@ export default {
       showUpdateReplicaDialog: false,
       showThrottleDialog: false,
       showSendStatsDialog: false,
+      filterTopic: "",
+      filteredData: [],
+      type: "normal",
     };
   },
   methods: {
@@ -222,13 +232,12 @@ export default {
       e.preventDefault();
       this.getTopicList();
     },
-
     handleReset() {
       this.form.resetFields();
     },
-
     getTopicList() {
-      Object.assign(this.queryParam, this.form.getFieldsValue());
+      Object.assign(this.queryParam, { type: this.type });
+      // delete this.queryParam.topic;
       this.loading = true;
       request({
         url: KafkaTopicApi.getTopicList.url,
@@ -237,6 +246,7 @@ export default {
       }).then((res) => {
         this.loading = false;
         this.data = res.data;
+        this.filter();
       });
     },
     deleteTopic(topic) {
@@ -254,6 +264,15 @@ export default {
           });
         }
       });
+    },
+    onTopicUpdate(input) {
+      this.filterTopic = input.target.value;
+      this.filter();
+    },
+    filter() {
+      this.filteredData = this.data.filter(
+        (e) => e.name.indexOf(this.filterTopic) != -1
+      );
     },
     openPartitionInfoDialog(topic) {
       this.selectDetail.resourceName = topic;

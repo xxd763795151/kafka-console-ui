@@ -59,6 +59,78 @@
               </a-form-item>
             </a-col>
           </a-row>
+          <hr class="hr" />
+          <a-row :gutter="24">
+            <a-col :span="5">
+              <a-form-item label="消息过滤">
+                <a-select
+                  class="filter-select"
+                  option-filter-prop="children"
+                  v-decorator="['filter', { initialValue: 'none' }]"
+                  @change="onFilterChange"
+                >
+                  <a-select-option value="none"> 不启用过滤 </a-select-option>
+                  <a-select-option value="body">
+                    根据消息体过滤
+                  </a-select-option>
+                  <a-select-option value="header">
+                    根据消息头过滤
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <div v-show="showBodyFilter">
+              <a-col :span="8">
+                <a-form-item label="消息内容">
+                  <a-input
+                    class="msg-body"
+                    v-decorator="['body']"
+                    placeholder="请输入消息内容"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item label="消息类型">
+                  <a-select
+                    v-decorator="['bodyType', { initialValue: 'String' }]"
+                    class="body-type"
+                  >
+                    <a-select-option
+                      v-for="v in deserializerList"
+                      :key="v"
+                      :value="v"
+                    >
+                      {{ v }}
+                    </a-select-option>
+                  </a-select>
+                  <span class="hint"
+                    >String类型模糊匹配，数字类型绝对匹配，其它不支持</span
+                  >
+                </a-form-item>
+              </a-col>
+            </div>
+            <div v-show="showHeaderFilter">
+              <a-col :span="5">
+                <a-form-item label="Key">
+                  <a-input
+                    v-decorator="['headerKey']"
+                    placeholder="消息头的key"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="11">
+                <a-form-item label="Value">
+                  <a-input
+                    v-decorator="['headerValue']"
+                    placeholder="消息头对应key的value"
+                  />
+                  <span class="hint"
+                    >消息头的value不是字符串类型，就不要输入用来过滤了</span
+                  >
+                </a-form-item>
+              </a-col>
+            </div>
+          </a-row>
         </a-form>
       </div>
       <p style="margin-top: 1%">
@@ -97,6 +169,9 @@ export default {
         rules: [{ type: "array", required: true, message: "请选择时间!" }],
       },
       data: defaultData,
+      deserializerList: [],
+      showBodyFilter: false,
+      showHeaderFilter: false,
     };
   },
   methods: {
@@ -151,6 +226,40 @@ export default {
       this.selectPartition = -1;
       this.getPartitionInfo(topic);
     },
+    onFilterChange(e) {
+      switch (e) {
+        case "body":
+          this.showBodyFilter = true;
+          this.showHeaderFilter = false;
+          break;
+        case "header":
+          this.showHeaderFilter = true;
+          this.showBodyFilter = false;
+          break;
+        default:
+          this.showBodyFilter = false;
+          this.showHeaderFilter = false;
+          break;
+      }
+    },
+    getDeserializerList() {
+      request({
+        url: KafkaMessageApi.deserializerList.url,
+        method: KafkaMessageApi.deserializerList.method,
+      }).then((res) => {
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          this.deserializerList = res.data;
+        }
+      });
+    },
+  },
+  created() {
+    this.getDeserializerList();
   },
 };
 const defaultData = { realNum: 0, maxNum: 0 };
@@ -195,7 +304,31 @@ const defaultData = { realNum: 0, maxNum: 0 };
   width: 400px !important;
 }
 
+.filter-select {
+  width: 160px !important;
+}
+
+.body-type {
+  width: 120px;
+}
+
+.msg-body {
+  width: 400px;
+}
+
 .type-select {
   width: 150px !important;
+}
+.hint {
+  font-size: smaller;
+  color: green;
+}
+.ant-advanced-search-form {
+  padding-bottom: 0px;
+}
+.hr {
+  height: 1px;
+  border: none;
+  border-top: 1px dashed #0066cc;
 }
 </style>
