@@ -84,7 +84,7 @@
                 <a-form-item label="消息内容">
                   <a-input
                     class="msg-body"
-                    v-decorator="['body']"
+                    v-decorator="['value']"
                     placeholder="请输入消息内容"
                   />
                 </a-form-item>
@@ -92,7 +92,7 @@
               <a-col :span="8">
                 <a-form-item label="消息类型">
                   <a-select
-                    v-decorator="['bodyType', { initialValue: 'String' }]"
+                    v-decorator="['valueDeserializer', { initialValue: 'String' }]"
                     class="body-type"
                   >
                     <a-select-option

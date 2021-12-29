@@ -1,6 +1,9 @@
 package kafka.console
 
+import com.xuxd.kafka.console.beans.MessageFilter
+import com.xuxd.kafka.console.beans.enums.FilterType
 import com.xuxd.kafka.console.config.KafkaConfig
+import org.apache.commons.lang3.StringUtils
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.TopicPartition
@@ -20,7 +23,7 @@ import scala.jdk.CollectionConverters.{CollectionHasAsScala, MapHasAsScala, SeqH
 class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig) with Logging {
 
     def searchBy(partitions: util.Collection[TopicPartition], startTime: Long, endTime: Long,
-        maxNums: Int): util.List[ConsumerRecord[Array[Byte], Array[Byte]]] = {
+        maxNums: Int, filter: MessageFilter): util.List[ConsumerRecord[Array[Byte], Array[Byte]]] = {
         var startOffTable: immutable.Map[TopicPartition, Long] = Map.empty
         var endOffTable: immutable.Map[TopicPartition, Long] = Map.empty
         withAdminClientAndCatchError(admin => {
@@ -33,8 +36,44 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
             log.error("getLogTimestampOffsets error.", e)
             throw new RuntimeException("getLogTimestampOffsets error", e)
         })
+
+        val headerValueBytes = if (StringUtils.isNotEmpty(filter.getHeaderValue())) filter.getHeaderValue().getBytes() else None
+
+        def filterMessage(record: ConsumerRecord[Array[Byte], Array[Byte]]): Boolean = {
+            filter.getFilterType() match {
+                case FilterType.BODY => {
+                    val body = filter.getDeserializer().deserialize(record.topic(), record.value())
+                    var contains = false
+                    if (filter.isContainsValue) {
+                        contains = body.asInstanceOf[String].contains(filter.getSearchContent().asInstanceOf[String])
+                    } else {
+                        contains = body.equals(filter.getSearchContent)
+                    }
+                    contains
+                }
+                case FilterType.HEADER => {
+                    if (StringUtils.isNotEmpty(filter.getHeaderKey()) && StringUtils.isNotEmpty(filter.getHeaderValue())) {
+                        val iterator = record.headers().headers(filter.getHeaderKey()).iterator()
+                        var contains = false
+                        while (iterator.hasNext() && !contains) {
+                            val next = iterator.next().value()
+                            contains = (next.sameElements(headerValueBytes.asInstanceOf[Array[Byte]]))
+                        }
+                        contains
+                    } else if (StringUtils.isNotEmpty(filter.getHeaderKey()) && StringUtils.isEmpty(filter.getHeaderValue())) {
+                        record.headers().headers(filter.getHeaderKey()).iterator().hasNext()
+                    } else {
+                        true
+                    }
+                }
+                case FilterType.NONE => true
+            }
+        }
+
         var terminate: Boolean = (startOffTable == endOffTable)
         val res = new util.LinkedList[ConsumerRecord[Array[Byte], Array[Byte]]]()
+        // 检索的消息条数
+        var searchNums = 0
         // 如果最小和最大偏移一致，就结束
         if (!terminate) {
 
@@ -51,7 +90,7 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
                 // 1.所有查询分区达都到最大偏移的时候
                 while (!terminate) {
                     // 达到查询的最大条数
-                    if (res.size() >= maxNums) {
+                    if (searchNums >= maxNums) {
                         terminate = true
                     } else {
                         val records = consumer.poll(Duration.ofMillis(timeoutMs))
@@ -67,6 +106,7 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
                                         if (first.offset() >= endOff) {
                                             arrive.remove(tp)
                                         } else {
+                                            searchNums += recordList.size()
                                             //
                                             //                                            (String topic,
                                             //                                                int partition,
@@ -80,7 +120,7 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
                                             //                                                V value,
                                             //                                                Headers headers,
                                             //                                                Optional<Integer> leaderEpoch)
-                                            val nullVList = recordList.asScala.map(record => new ConsumerRecord[Array[Byte], Array[Byte]](record.topic(),
+                                            val nullVList = recordList.asScala.filter(filterMessage(_)).map(record => new ConsumerRecord[Array[Byte], Array[Byte]](record.topic(),
                                                 record.partition(),
                                                 record.offset(),
                                                 record.timestamp(),

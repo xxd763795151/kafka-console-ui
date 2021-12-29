@@ -1,8 +1,10 @@
 package com.xuxd.kafka.console.beans.dto;
 
 import com.xuxd.kafka.console.beans.QueryMessage;
+import com.xuxd.kafka.console.beans.enums.FilterType;
 import java.util.Date;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * kafka-console-ui.
@@ -27,6 +29,14 @@ public class QueryMessageDTO {
 
     private String valueDeserializer;
 
+    private String filter;
+
+    private String value;
+
+    private String headerKey;
+
+    private String headerValue;
+
     public QueryMessage toQueryMessage() {
         QueryMessage queryMessage = new QueryMessage();
         queryMessage.setTopic(topic);
@@ -44,6 +54,21 @@ public class QueryMessageDTO {
 
         queryMessage.setKeyDeserializer(keyDeserializer);
         queryMessage.setValueDeserializer(valueDeserializer);
+
+        if (StringUtils.isNotBlank(filter)) {
+            queryMessage.setFilter(FilterType.valueOf(filter.toUpperCase()));
+        } else {
+            queryMessage.setFilter(FilterType.NONE);
+        }
+        if (StringUtils.isNotBlank(value)) {
+            queryMessage.setValue(value.trim());
+        }
+        if (StringUtils.isNotBlank(headerKey)) {
+            queryMessage.setHeaderKey(headerKey.trim());
+        }
+        if (StringUtils.isNotBlank(headerValue)) {
+            queryMessage.setHeaderValue(headerValue.trim());
+        }
 
         return queryMessage;
     }

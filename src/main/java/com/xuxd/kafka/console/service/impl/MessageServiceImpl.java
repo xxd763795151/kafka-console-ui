@@ -1,8 +1,10 @@
 package com.xuxd.kafka.console.service.impl;
 
+import com.xuxd.kafka.console.beans.MessageFilter;
 import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.SendMessage;
+import com.xuxd.kafka.console.beans.enums.FilterType;
 import com.xuxd.kafka.console.beans.vo.ConsumerRecordVO;
 import com.xuxd.kafka.console.beans.vo.MessageDetailVO;
 import com.xuxd.kafka.console.service.ConsumerService;
@@ -32,6 +34,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.DoubleDeserializer;
 import org.apache.kafka.common.serialization.FloatDeserializer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +73,7 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
         deserializerDict.put("Float", new FloatDeserializer());
         deserializerDict.put("Double", new DoubleDeserializer());
         deserializerDict.put("Byte", new BytesDeserializer());
+        deserializerDict.put("Long", new LongDeserializer());
     }
 
     public static String defaultDeserializer = "String";
@@ -77,9 +81,65 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
     @Override public ResponseData searchByTime(QueryMessage queryMessage) {
         int maxNums = 10000;
 
+        Object searchContent = null;
+        String headerKey = null;
+        String headerValue = null;
+        MessageFilter filter = new MessageFilter();
+        switch (queryMessage.getFilter()) {
+            case BODY:
+                if (StringUtils.isBlank(queryMessage.getValue())) {
+                    queryMessage.setFilter(FilterType.NONE);
+                } else {
+                    if (StringUtils.isBlank(queryMessage.getValueDeserializer())) {
+                        queryMessage.setValueDeserializer(defaultDeserializer);
+                    }
+                    switch (queryMessage.getValueDeserializer()) {
+                        case "String":
+                            searchContent = String.valueOf(queryMessage.getValue());
+                            filter.setContainsValue(true);
+                            break;
+                        case "Integer":
+                            searchContent = Integer.valueOf(queryMessage.getValue());
+                            break;
+                        case "Float":
+                            searchContent = Float.valueOf(queryMessage.getValue());
+                            break;
+                        case "Double":
+                            searchContent = Double.valueOf(queryMessage.getValue());
+                            break;
+                        case "Long":
+                            searchContent = Long.valueOf(queryMessage.getValue());
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Message body type not support.");
+                    }
+                }
+                break;
+            case HEADER:
+                headerKey = queryMessage.getHeaderKey();
+                if (StringUtils.isBlank(headerKey)) {
+                    queryMessage.setFilter(FilterType.NONE);
+                } else {
+                    if (StringUtils.isNotBlank(queryMessage.getHeaderValue())) {
+                        headerValue = String.valueOf(queryMessage.getHeaderValue());
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
+        FilterType filterType = queryMessage.getFilter();
+        Deserializer deserializer = deserializerDict.get(queryMessage.getValueDeserializer());
+        filter.setFilterType(filterType);
+        filter.setSearchContent(searchContent);
+        filter.setDeserializer(deserializer);
+        filter.setHeaderKey(headerKey);
+        filter.setHeaderValue(headerValue);
+
         Set<TopicPartition> partitions = getPartitions(queryMessage);
         long startTime = System.currentTimeMillis();
-        List<ConsumerRecord<byte[], byte[]>> records = messageConsole.searchBy(partitions, queryMessage.getStartTime(), queryMessage.getEndTime(), maxNums);
+        List<ConsumerRecord<byte[], byte[]>> records = messageConsole.searchBy(partitions, queryMessage.getStartTime(), queryMessage.getEndTime(), maxNums, filter);
         log.info("search message by time, cost time: {}", (System.currentTimeMillis() - startTime));
         List<ConsumerRecordVO> vos = records.stream().filter(record -> record.timestamp() <= queryMessage.getEndTime())
             .map(ConsumerRecordVO::fromConsumerRecord).collect(Collectors.toList());
