@@ -23,7 +23,7 @@ import scala.jdk.CollectionConverters.{CollectionHasAsScala, MapHasAsScala, SeqH
 class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig) with Logging {
 
     def searchBy(partitions: util.Collection[TopicPartition], startTime: Long, endTime: Long,
-        maxNums: Int, filter: MessageFilter): util.List[ConsumerRecord[Array[Byte], Array[Byte]]] = {
+        maxNums: Int, filter: MessageFilter): (util.List[ConsumerRecord[Array[Byte], Array[Byte]]], Int) = {
         var startOffTable: immutable.Map[TopicPartition, Long] = Map.empty
         var endOffTable: immutable.Map[TopicPartition, Long] = Map.empty
         withAdminClientAndCatchError(admin => {
@@ -154,7 +154,7 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
             })
         }
 
-        res
+        (res, searchNums)
     }
 
     def searchBy(

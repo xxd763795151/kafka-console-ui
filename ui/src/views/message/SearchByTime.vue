@@ -92,7 +92,10 @@
               <a-col :span="8">
                 <a-form-item label="消息类型">
                   <a-select
-                    v-decorator="['valueDeserializer', { initialValue: 'String' }]"
+                    v-decorator="[
+                      'valueDeserializer',
+                      { initialValue: 'String' },
+                    ]"
                     class="body-type"
                   >
                     <a-select-option
@@ -125,7 +128,7 @@
                     placeholder="消息头对应key的value"
                   />
                   <span class="hint"
-                    >消息头的value不是字符串类型，就不要输入用来过滤了</span
+                    >消息头的value不是字符串类型，就不要输入value用来过滤了，可以只输入消息头的key，过滤存在该key的消息</span
                   >
                 </a-form-item>
               </a-col>
@@ -135,9 +138,11 @@
       </div>
       <p style="margin-top: 1%">
         <strong
-          >检索条数：{{ data.realNum }}，允许返回的最大条数：{{
+          >检索消息条数：{{ data.searchNum }}，实际返回条数：{{
+            data.realNum
+          }}，允许返回的最大条数：{{
             data.maxNum
-          }}</strong
+          }}，如果当前时间段消息量太大，可以缩小查询时间范围或指定某一个分区进行查询</strong
         >
       </p>
       <MessageList :data="data.data"></MessageList>
@@ -262,7 +267,7 @@ export default {
     this.getDeserializerList();
   },
 };
-const defaultData = { realNum: 0, maxNum: 0 };
+const defaultData = { realNum: 0, maxNum: 0, searchNum: 0 };
 </script>
 
 <style scoped>

@@ -79,7 +79,7 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
     public static String defaultDeserializer = "String";
 
     @Override public ResponseData searchByTime(QueryMessage queryMessage) {
-        int maxNums = 10000;
+        int maxNums = 5000;
 
         Object searchContent = null;
         String headerKey = null;
@@ -139,14 +139,17 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
 
         Set<TopicPartition> partitions = getPartitions(queryMessage);
         long startTime = System.currentTimeMillis();
-        List<ConsumerRecord<byte[], byte[]>> records = messageConsole.searchBy(partitions, queryMessage.getStartTime(), queryMessage.getEndTime(), maxNums, filter);
+        Tuple2<List<ConsumerRecord<byte[], byte[]>>, Object> tuple2 = messageConsole.searchBy(partitions, queryMessage.getStartTime(), queryMessage.getEndTime(), maxNums, filter);
+        List<ConsumerRecord<byte[], byte[]>> records = tuple2._1();
         log.info("search message by time, cost time: {}", (System.currentTimeMillis() - startTime));
         List<ConsumerRecordVO> vos = records.stream().filter(record -> record.timestamp() <= queryMessage.getEndTime())
             .map(ConsumerRecordVO::fromConsumerRecord).collect(Collectors.toList());
         Map<String, Object> res = new HashMap<>();
+        vos = vos.subList(0, Math.min(maxNums, vos.size()));
         res.put("maxNum", maxNums);
         res.put("realNum", vos.size());
-        res.put("data", vos.subList(0, Math.min(maxNums, vos.size())));
+        res.put("searchNum", tuple2._2());
+        res.put("data", vos);
         return ResponseData.create().data(res).success();
     }
 
