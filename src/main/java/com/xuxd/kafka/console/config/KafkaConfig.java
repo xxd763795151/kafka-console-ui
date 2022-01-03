@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.config;
 
+import java.util.Properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,6 +33,8 @@ public class KafkaConfig {
     private String zookeeperAddr;
 
     private boolean enableAcl;
+
+    private Properties properties;
 
     public String getBootstrapServer() {
         return bootstrapServer;
@@ -111,5 +114,13 @@ public class KafkaConfig {
 
     public void setEnableAcl(boolean enableAcl) {
         this.enableAcl = enableAcl;
+    }
+
+    public Properties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Properties properties) {
+        this.properties = properties;
     }
 }

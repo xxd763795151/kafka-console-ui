@@ -3,7 +3,9 @@ package com.xuxd.kafka.console.utils;
 import com.google.common.base.Preconditions;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ClassUtils;
 
@@ -35,6 +37,20 @@ public class ConvertUtil {
                 }
             });
         }
+        Iterator<Map.Entry<String, Object>> iterator = res.entrySet().iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getValue() == null) {
+                iterator.remove();
+            }
+        }
         return res;
+    }
+
+    public static String toJsonString(Object src) {
+        return GsonUtil.INSTANCE.get().toJson(src);
+    }
+
+    public static Properties toProperties(String jsonStr) {
+        return GsonUtil.INSTANCE.get().fromJson(jsonStr, Properties.class);
     }
 }
