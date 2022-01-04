@@ -3,7 +3,9 @@
     <div class="content-module">
       <a-card title="集群管理" style="width: 100%; text-align: left">
         <p>
-          <a-button type="primary"> 集群切换 </a-button>
+          <a-button type="primary" @click="openClusterInfoDialog">
+            集群切换
+          </a-button>
           <label>说明：</label>
           <span>多集群管理：增加、删除集群配置，切换集群</span>
         </p>
@@ -117,6 +119,10 @@
       :visible="replicationManager.showCurrentReassignmentsDialog"
       @closeCurrentReassignmentsDialog="closeCurrentReassignmentsDialog"
     ></CurrentReassignments>
+    <ClusterInfo
+      :visible="clusterManager.showClusterInfoDialog"
+      @closeClusterInfoDialog="closeClusterInfoDialog"
+    ></ClusterInfo>
   </div>
 </template>
 
@@ -129,6 +135,7 @@ import DataSyncScheme from "@/views/op/DataSyncScheme";
 import ConfigThrottle from "@/views/op/ConfigThrottle";
 import RemoveThrottle from "@/views/op/RemoveThrottle";
 import CurrentReassignments from "@/views/op/CurrentReassignments";
+import ClusterInfo from "@/views/op/ClusterInfo";
 export default {
   name: "Operation",
   components: {
@@ -140,6 +147,7 @@ export default {
     ConfigThrottle,
     RemoveThrottle,
     CurrentReassignments,
+    ClusterInfo,
   },
   data() {
     return {
@@ -156,6 +164,9 @@ export default {
       brokerManager: {
         showConfigThrottleDialog: false,
         showRemoveThrottleDialog: false,
+      },
+      clusterManager: {
+        showClusterInfoDialog: false,
       },
     };
   },
@@ -207,6 +218,12 @@ export default {
     },
     closeCurrentReassignmentsDialog() {
       this.replicationManager.showCurrentReassignmentsDialog = false;
+    },
+    openClusterInfoDialog() {
+      this.clusterManager.showClusterInfoDialog = true;
+    },
+    closeClusterInfoDialog() {
+      this.clusterManager.showClusterInfoDialog = false;
     },
   },
 };

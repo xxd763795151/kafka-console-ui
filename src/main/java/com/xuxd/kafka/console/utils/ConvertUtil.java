@@ -1,9 +1,13 @@
 package com.xuxd.kafka.console.utils;
 
 import com.google.common.base.Preconditions;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
@@ -52,5 +56,37 @@ public class ConvertUtil {
 
     public static Properties toProperties(String jsonStr) {
         return GsonUtil.INSTANCE.get().fromJson(jsonStr, Properties.class);
+    }
+
+    public static String jsonStr2PropertiesStr(String jsonStr) {
+        StringBuilder sb = new StringBuilder();
+        Map<String, Object> map = GsonUtil.INSTANCE.get().fromJson(jsonStr, Map.class);
+        map.keySet().forEach(k -> {
+            sb.append(k).append("=").append(map.get(k).toString()).append(System.lineSeparator());
+        });
+
+        return sb.toString();
+    }
+
+    public static List<String> jsonStr2List(String jsonStr) {
+        List<String> res = new LinkedList<>();
+        Map<String, Object> map = GsonUtil.INSTANCE.get().fromJson(jsonStr, Map.class);
+        map.forEach((k, v) -> {
+            res.add(k + "=" + v);
+        });
+
+        return res;
+    }
+
+    public static String propertiesStr2JsonStr(String propertiesStr) {
+        String res = "{}";
+        try (ByteArrayInputStream baos = new ByteArrayInputStream(propertiesStr.getBytes())) {
+            Properties properties = new Properties();
+            properties.load(baos);
+            res = toJsonString(properties);
+        } catch (IOException e) {
+            log.error("propertiesStr2JsonStr error.", e);
+        }
+        return res;
     }
 }

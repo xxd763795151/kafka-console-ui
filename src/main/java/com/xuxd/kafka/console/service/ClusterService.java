@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.service;
 
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.dos.ClusterInfoDO;
 
 /**
  * kafka-console-ui.
@@ -10,4 +11,8 @@ import com.xuxd.kafka.console.beans.ResponseData;
  **/
 public interface ClusterService {
     ResponseData getClusterInfo();
+
+    ResponseData getClusterInfoList();
+
+    ResponseData addClusterInfo(ClusterInfoDO infoDO);
 }

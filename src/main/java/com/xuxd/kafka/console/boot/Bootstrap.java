@@ -57,6 +57,7 @@ public class Bootstrap implements SmartInitializingSingleton {
         infoDO.setAddress(config.getBootstrapServer().trim());
         infoDO.setProperties(ConvertUtil.toJsonString(config.getProperties()));
         clusterInfoMapper.insert(infoDO);
+        log.info("Insert default config: {}", infoDO);
     }
 
     @Override public void afterSingletonsInstantiated() {

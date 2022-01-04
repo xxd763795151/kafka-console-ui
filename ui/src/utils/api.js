@@ -183,6 +183,14 @@ export const KafkaClusterApi = {
     url: "/cluster",
     method: "get",
   },
+  getClusterInfoList: {
+    url: "/cluster/list",
+    method: "get",
+  },
+  addClusterInfo: {
+    url: "/cluster",
+    method: "post",
+  },
 };
 
 export const KafkaOpApi = {
