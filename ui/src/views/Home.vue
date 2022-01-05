@@ -11,6 +11,7 @@
 // @ is an alias to /src
 import request from "@/utils/request";
 import { KafkaConfigApi } from "@/utils/api";
+import notification from "ant-design-vue/lib/notification";
 export default {
   name: "Home",
   components: {},
@@ -25,7 +26,14 @@ export default {
       url: KafkaConfigApi.getConfig.url,
       method: KafkaConfigApi.getConfig.method,
     }).then((res) => {
-      this.config = res.data;
+      if (res.code == 0) {
+        this.config = res.data;
+      } else {
+        notification.error({
+          message: "error",
+          description: res.msg,
+        });
+      }
     });
   },
 };

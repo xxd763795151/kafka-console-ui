@@ -37,9 +37,14 @@
               size="small"
               href="javascript:;"
               class="operation-btn"
+              @click="switchCluster(record)"
               >切换
             </a-button>
-            <a-button size="small" href="javascript:;" class="operation-btn"
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openUpdateClusterInfoDialog(record)"
               >编辑
             </a-button>
             <a-popconfirm
@@ -63,6 +68,15 @@
           @closeAddClusterInfoDialog="closeAddClusterInfoDialog"
         >
         </AddClusterInfo>
+
+        <AddClusterInfo
+          :visible="showUpdateClusterInfoDialog"
+          closeDialogEvent="closeUpdateClusterInfoDialog"
+          @closeUpdateClusterInfoDialog="closeUpdateClusterInfoDialog"
+          :cluster-info="select"
+          :is-modify="true"
+        >
+        </AddClusterInfo>
       </a-spin>
     </div>
   </a-modal>
@@ -72,6 +86,9 @@
 import request from "@/utils/request";
 import { KafkaClusterApi } from "@/utils/api";
 import AddClusterInfo from "@/views/op/AddClusterInfo";
+import notification from "ant-design-vue/lib/notification";
+import { mapMutations } from "vuex";
+import { CLUSTER } from "@/store/mutation-types";
 
 export default {
   name: "Cluster",
@@ -89,6 +106,8 @@ export default {
       data: [],
       loading: false,
       showAddClusterInfoDialog: false,
+      showUpdateClusterInfoDialog: false,
+      select: {},
     };
   },
   watch: {
@@ -110,7 +129,24 @@ export default {
         this.data = res.data;
       });
     },
-    deleteClusterInfo() {},
+    deleteClusterInfo(record) {
+      request({
+        url: KafkaClusterApi.deleteClusterInfo.url,
+        method: KafkaClusterApi.deleteClusterInfo.method,
+        data: Object.assign({}, { id: record.id }),
+      }).then((res) => {
+        this.loading = false;
+        if (res.code == 0) {
+          this.$message.success(res.msg);
+          this.getClusterInfoList();
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    },
     handleCancel() {
       this.data = [];
       this.$emit("closeClusterInfoDialog", {});
@@ -124,6 +160,27 @@ export default {
         this.getClusterInfoList();
       }
     },
+    openUpdateClusterInfoDialog(record) {
+      this.showUpdateClusterInfoDialog = true;
+      const r = Object.assign({}, record);
+      if (r.properties) {
+        let str = "";
+        r.properties.forEach((e) => {
+          str = str + e + "\r\n";
+        });
+        r.properties = str;
+      }
+      this.select = r;
+    },
+    closeUpdateClusterInfoDialog(res) {
+      this.showUpdateClusterInfoDialog = false;
+      if (res.refresh) {
+        this.getClusterInfoList();
+      }
+    },
+    ...mapMutations({
+      switchCluster: CLUSTER.SWITCH,
+    }),
   },
 };
 

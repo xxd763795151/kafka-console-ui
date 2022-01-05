@@ -1,6 +1,6 @@
 package kafka.console
 
-import com.xuxd.kafka.console.config.KafkaConfig
+import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import kafka.zk.{AdminZkClient, KafkaZkClient}
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.admin._
@@ -117,8 +117,9 @@ class KafkaConsole(config: KafkaConfig) {
 
     private def getProps(): Properties = {
         val props: Properties = new Properties();
-        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServer)
-        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, config.getRequestTimeoutMs())
+        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, ContextConfigHolder.CONTEXT_CONFIG.get().getBootstrapServer())
+        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs())
+        props.putAll(ContextConfigHolder.CONTEXT_CONFIG.get().getProperties())
         if (config.isEnableAcl) {
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, config.getSecurityProtocol())
             props.put(SaslConfigs.SASL_MECHANISM, config.getSaslMechanism())

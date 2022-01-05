@@ -45,6 +45,7 @@
 import request from "@/utils/request";
 import { KafkaClusterApi } from "@/utils/api";
 import BrokerConfig from "@/views/cluster/BrokerConfig";
+import notification from "ant-design-vue/lib/notification";
 
 export default {
   name: "Topic",
@@ -68,8 +69,15 @@ export default {
         method: KafkaClusterApi.getClusterInfo.method,
       }).then((res) => {
         this.loading = false;
-        this.data = res.data.nodes;
-        this.clusterId = res.data.clusterId;
+        if (res.code == 0) {
+          this.data = res.data.nodes;
+          this.clusterId = res.data.clusterId;
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
       });
     },
     openBrokerConfigDialog(record, isLoggerConfig) {

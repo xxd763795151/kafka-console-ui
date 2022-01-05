@@ -15,4 +15,10 @@ public interface ClusterService {
     ResponseData getClusterInfoList();
 
     ResponseData addClusterInfo(ClusterInfoDO infoDO);
+
+    ResponseData deleteClusterInfo(Long id);
+
+    ResponseData updateClusterInfo(ClusterInfoDO infoDO);
+
+    ResponseData peekClusterInfo();
 }

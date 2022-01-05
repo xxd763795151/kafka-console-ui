@@ -21,7 +21,10 @@
             <a-input
               v-decorator="[
                 'clusterName',
-                { rules: [{ required: true, message: '输入集群名称!' }] },
+                {
+                  rules: [{ required: true, message: '输入集群名称!' }],
+                  initialValue: clusterInfo.clusterName,
+                },
               ]"
               placeholder="输入集群名称"
             />
@@ -30,7 +33,10 @@
             <a-input
               v-decorator="[
                 'address',
-                { rules: [{ required: true, message: '输入集群地址!' }] },
+                {
+                  rules: [{ required: true, message: '输入集群地址!' }],
+                  initialValue: clusterInfo.address,
+                },
               ]"
               placeholder="输入集群地址"
             />
@@ -44,11 +50,14 @@ security-protocol=SASL_PLAINTEXT
 sasl-mechanism=SCRAM-SHA-256
 sasl-jaas-config=org.apache.kafka.common.security.scram.ScramLoginModule required username="name" password="password";
 '
-              v-decorator="['properties']"
+              v-decorator="[
+                'properties',
+                { initialValue: clusterInfo.properties },
+              ]"
             />
           </a-form-item>
           <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
-            <a-button type="primary" html-type="submit"> 提交 </a-button>
+            <a-button type="primary" html-type="submit"> 提交</a-button>
           </a-form-item>
         </a-form>
       </a-spin>
@@ -60,12 +69,25 @@ sasl-jaas-config=org.apache.kafka.common.security.scram.ScramLoginModule require
 import request from "@/utils/request";
 import { KafkaClusterApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
+
 export default {
   name: "AddClusterInfo",
   props: {
     visible: {
       type: Boolean,
       default: false,
+    },
+    isModify: {
+      type: Boolean,
+      default: false,
+    },
+    clusterInfo: {
+      type: Object,
+      default: () => defaultInfo,
+    },
+    closeDialogEvent: {
+      type: String,
+      default: "closeAddClusterInfoDialog",
     },
   },
   data() {
@@ -87,15 +109,21 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true;
+          const api = this.isModify
+            ? KafkaClusterApi.updateClusterInfo
+            : KafkaClusterApi.addClusterInfo;
+          const data = this.isModify
+            ? Object.assign({}, this.clusterInfo, values)
+            : Object.assign({}, values);
           request({
-            url: KafkaClusterApi.addClusterInfo.url,
-            method: KafkaClusterApi.addClusterInfo.method,
-            data: values,
+            url: api.url,
+            method: api.method,
+            data: data,
           }).then((res) => {
             this.loading = false;
             if (res.code == 0) {
               this.$message.success(res.msg);
-              this.$emit("closeAddClusterInfoDialog", { refresh: true });
+              this.$emit(this.closeDialogEvent, { refresh: true });
             } else {
               notification.error({
                 message: "error",
@@ -108,10 +136,11 @@ export default {
     },
     handleCancel() {
       this.data = [];
-      this.$emit("closeAddClusterInfoDialog", { refresh: false });
+      this.$emit(this.closeDialogEvent, { refresh: false });
     },
   },
 };
+const defaultInfo = { clusterName: "", address: "", properties: "" };
 </script>
 
 <style scoped></style>

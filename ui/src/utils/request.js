@@ -1,6 +1,7 @@
 import axios from "axios";
 import notification from "ant-design-vue/es/notification";
 import { VueAxios } from "./axios";
+import { getClusterInfo } from "@/utils/local-cache";
 
 // 创建 axios 实例
 const request = axios.create({
@@ -22,10 +23,14 @@ const errorHandler = (error) => {
 };
 
 // request interceptor
-// request.interceptors.request.use(config => {
-//
-//   return config
-// }, errorHandler)
+request.interceptors.request.use((config) => {
+  const clusterInfo = getClusterInfo();
+  if (clusterInfo) {
+    config.headers["X-Cluster-Info-Id"] = clusterInfo.id;
+    config.headers["X-Cluster-Info-Name"] = clusterInfo.clusterName;
+  }
+  return config;
+}, errorHandler);
 
 // response interceptor
 request.interceptors.response.use((response) => {

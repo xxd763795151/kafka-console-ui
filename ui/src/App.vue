@@ -17,13 +17,18 @@
       >
       <span>|</span
       ><router-link to="/op-page" class="pad-l-r">运维</router-link>
+      <span class="right">集群：{{ clusterName }}</span>
     </div>
     <router-view class="content" />
   </div>
 </template>
 <script>
-import { KafkaConfigApi } from "@/utils/api";
+import { KafkaConfigApi, KafkaClusterApi } from "@/utils/api";
 import request from "@/utils/request";
+import { mapMutations, mapState } from "vuex";
+import { getClusterInfo } from "@/utils/local-cache";
+import notification from "ant-design-vue/lib/notification";
+import { CLUSTER } from "@/store/mutation-types";
 
 export default {
   data() {
@@ -38,6 +43,35 @@ export default {
     }).then((res) => {
       this.config = res.data;
     });
+
+    const clusterInfo = getClusterInfo();
+    if (!clusterInfo) {
+      request({
+        url: KafkaClusterApi.peekClusterInfo.url,
+        method: KafkaClusterApi.peekClusterInfo.method,
+      }).then((res) => {
+        if (res.code == 0) {
+          this.switchCluster(res.data);
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    } else {
+      this.switchCluster(clusterInfo);
+    }
+  },
+  computed: {
+    ...mapState({
+      clusterName: (state) => state.clusterInfo.clusterName,
+    }),
+  },
+  methods: {
+    ...mapMutations({
+      switchCluster: CLUSTER.SWITCH,
+    }),
   },
 };
 </script>
@@ -88,6 +122,12 @@ export default {
   float: left;
   left: 1%;
   top: 1%;
+  position: absolute;
+}
+.right {
+  float: right;
+  right: 1%;
+  top: 2%;
   position: absolute;
 }
 </style>

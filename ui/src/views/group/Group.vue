@@ -196,7 +196,14 @@ export default {
         data: this.queryParam,
       }).then((res) => {
         this.loading = false;
-        this.data = res.data.list;
+        if (res.code == 0) {
+          this.data = res.data.list;
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
       });
     },
     deleteGroup(group) {

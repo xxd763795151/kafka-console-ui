@@ -184,12 +184,24 @@ export const KafkaClusterApi = {
     method: "get",
   },
   getClusterInfoList: {
-    url: "/cluster/list",
+    url: "/cluster/info",
     method: "get",
   },
   addClusterInfo: {
-    url: "/cluster",
+    url: "/cluster/info",
     method: "post",
+  },
+  deleteClusterInfo: {
+    url: "/cluster/info",
+    method: "delete",
+  },
+  updateClusterInfo: {
+    url: "/cluster/info",
+    method: "put",
+  },
+  peekClusterInfo: {
+    url: "/cluster/info/peek",
+    method: "get",
   },
 };
 

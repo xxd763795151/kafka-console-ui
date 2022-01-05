@@ -3,8 +3,10 @@ package com.xuxd.kafka.console.controller;
 import com.xuxd.kafka.console.beans.dto.ClusterInfoDTO;
 import com.xuxd.kafka.console.service.ClusterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,13 +29,28 @@ public class ClusterController {
         return clusterService.getClusterInfo();
     }
 
-    @GetMapping("/list")
+    @GetMapping("/info")
     public Object getClusterInfoList() {
         return clusterService.getClusterInfoList();
     }
 
-    @PostMapping
+    @PostMapping("/info")
     public Object addClusterInfo(@RequestBody ClusterInfoDTO dto) {
         return clusterService.addClusterInfo(dto.to());
+    }
+
+    @DeleteMapping("/info")
+    public Object deleteClusterInfo(@RequestBody ClusterInfoDTO dto) {
+        return clusterService.deleteClusterInfo(dto.getId());
+    }
+
+    @PutMapping("/info")
+    public Object updateClusterInfo(@RequestBody ClusterInfoDTO dto) {
+        return clusterService.updateClusterInfo(dto.to());
+    }
+
+    @GetMapping("/info/peek")
+    public Object peekClusterInfo() {
+        return clusterService.peekClusterInfo();
     }
 }
