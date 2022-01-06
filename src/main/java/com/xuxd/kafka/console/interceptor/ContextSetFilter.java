@@ -27,7 +27,7 @@ import org.springframework.http.MediaType;
  * @author xuxd
  * @date 2022-01-05 19:56:25
  **/
-@WebFilter(filterName = "context-set-filter", urlPatterns = {"/*"})
+@WebFilter(filterName = "context-set-filter", urlPatterns = {"/acl/*","/user/*","/cluster/*","/config/*","/consumer/*","/message/*","/topic/*","/op/*"})
 @Slf4j
 public class ContextSetFilter implements Filter {
 
@@ -36,6 +36,7 @@ public class ContextSetFilter implements Filter {
     {
         excludes.add("/cluster/info/peek");
         excludes.add("/cluster/info");
+        excludes.add("/config/console");
     }
 
     @Autowired
@@ -49,16 +50,27 @@ public class ContextSetFilter implements Filter {
             if (!excludes.contains(uri)) {
                 String headerId = request.getHeader(Header.ID);
                 if (StringUtils.isBlank(headerId)) {
-                    ResponseData failed = ResponseData.create().failed("Cluster id is null.");
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    response.getOutputStream().println(ConvertUtil.toJsonString(failed));
+//                    ResponseData failed = ResponseData.create().failed("Cluster info is null.");
+                    ResponseData failed = ResponseData.create().failed("没有集群信息，请先切换集群");
+                    response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+                    response.getWriter().println(ConvertUtil.toJsonString(failed));
                     return;
                 } else {
                     ClusterInfoDO infoDO = clusterInfoMapper.selectById(Long.valueOf(headerId));
+                    if (infoDO == null) {
+                        ResponseData failed = ResponseData.create().failed("该集群找不到信息，请切换一个有效集群");
+                        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+                        response.getWriter().println(ConvertUtil.toJsonString(failed));
+                        return;
+                    }
                     ContextConfig config = new ContextConfig();
+                    config.setClusterInfoId(infoDO.getId());
+                    config.setClusterName(infoDO.getClusterName());
 
                     config.setBootstrapServer(infoDO.getAddress());
-                    config.setProperties(ConvertUtil.toProperties(infoDO.getProperties()));
+                    if (StringUtils.isNotBlank(infoDO.getProperties())) {
+                        config.setProperties(ConvertUtil.toProperties(infoDO.getProperties()));
+                    }
                     ContextConfigHolder.CONTEXT_CONFIG.set(config);
                 }
             }

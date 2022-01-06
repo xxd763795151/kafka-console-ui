@@ -3,9 +3,8 @@ package kafka.console
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Collections, List}
-
 import com.xuxd.kafka.console.beans.AclEntry
-import com.xuxd.kafka.console.config.KafkaConfig
+import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import org.apache.commons.lang3.StringUtils
 import org.apache.kafka.common.acl._
 import org.apache.kafka.common.resource.{ResourcePattern, ResourcePatternFilter, ResourceType}
@@ -58,6 +57,7 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
     def addAcl(acls: List[AclBinding]): Boolean = {
         withAdminClient(adminClient => {
             try {
+                val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
                 adminClient.createAcls(acls).all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 true
             } catch {
@@ -100,6 +100,7 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
     def deleteAcl(entry: AclEntry, allResource: Boolean, allPrincipal: Boolean, allOperation: Boolean): Boolean = {
         withAdminClient(adminClient => {
             try {
+                val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
                 val result = adminClient.deleteAcls(Collections.singleton(entry.toAclBindingFilter(allResource, allPrincipal, allOperation))).all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 log.info("delete acl: {}", result)
                 true
@@ -113,6 +114,7 @@ class KafkaAclConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
     def deleteAcl(filters: util.Collection[AclBindingFilter]): Boolean = {
         withAdminClient(adminClient => {
             try {
+                val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
                 val result = adminClient.deleteAcls(filters).all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 log.info("delete acl: {}", result)
                 true

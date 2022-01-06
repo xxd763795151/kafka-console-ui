@@ -1,6 +1,6 @@
 package kafka.console
 
-import com.xuxd.kafka.console.config.KafkaConfig
+import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import kafka.admin.ReassignPartitionsCommand._
 import kafka.utils.Json
 import org.apache.kafka.clients.admin._
@@ -28,6 +28,7 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
      * @return all topic name set.
      */
     def getTopicNameList(internal: Boolean = true): Set[String] = {
+        val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
         withAdminClientAndCatchError(admin => admin.listTopics(new ListTopicsOptions().listInternal(internal)).names()
             .get(timeoutMs, TimeUnit.MILLISECONDS),
             e => {
@@ -42,6 +43,7 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
      * @return internal topic name set.
      */
     def getInternalTopicNameList(): Set[String] = {
+        val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
         withAdminClientAndCatchError(admin => admin.listTopics(new ListTopicsOptions().listInternal(true)).listings()
             .get(timeoutMs, TimeUnit.MILLISECONDS).asScala.filter(_.isInternal).map(_.name()).toSet[String].asJava,
             e => {
@@ -69,6 +71,7 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
      */
     def deleteTopic(topic: String): (Boolean, String) = {
         withAdminClientAndCatchError(admin => {
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             admin.deleteTopics(Collections.singleton(topic), new DeleteTopicsOptions().retryOnQuotaViolation(false)).all().get(timeoutMs, TimeUnit.MILLISECONDS)
             (true, "")
         },
@@ -103,6 +106,7 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
      */
     def createTopic(topic: NewTopic): (Boolean, String) = {
         withAdminClientAndCatchError(admin => {
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             val createResult = admin.createTopics(Collections.singleton(topic), new CreateTopicsOptions().retryOnQuotaViolation(false))
             createResult.all().get(timeoutMs, TimeUnit.MILLISECONDS)
             (true, "")
@@ -117,6 +121,7 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
      */
     def createPartitions(newPartitions: util.Map[String, NewPartitions]): (Boolean, String) = {
         withAdminClientAndCatchError(admin => {
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             admin.createPartitions(newPartitions,
                 new CreatePartitionsOptions().retryOnQuotaViolation(false)).all().get(timeoutMs, TimeUnit.MILLISECONDS)
             (true, "")
@@ -241,6 +246,7 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
                     .asScala.map(info => new TopicPartition(topic, info.partition())).toSeq
                 case None => throw new IllegalArgumentException("topic is not exist.")
             }
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             val offsetMap = KafkaConsole.getLogTimestampOffsets(admin, partitions, timestamp, timeoutMs)
             offsetMap.map(tuple2 => (tuple2._1, tuple2._2.offset())).toMap.asJava
         }, e => {

@@ -2,9 +2,8 @@ package kafka.console
 
 import java.util.Collections
 import java.util.concurrent.TimeUnit
-
 import com.xuxd.kafka.console.beans.{BrokerNode, ClusterInfo}
-import com.xuxd.kafka.console.config.KafkaConfig
+import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import org.apache.kafka.clients.admin.DescribeClusterResult
 
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, SetHasAsJava, SetHasAsScala}
@@ -19,6 +18,7 @@ class ClusterConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
 
     def clusterInfo(): ClusterInfo = {
         withAdminClientAndCatchError(admin => {
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             val clusterResult: DescribeClusterResult = admin.describeCluster()
             val clusterInfo = new ClusterInfo
             clusterInfo.setClusterId(clusterResult.clusterId().get(timeoutMs, TimeUnit.MILLISECONDS))

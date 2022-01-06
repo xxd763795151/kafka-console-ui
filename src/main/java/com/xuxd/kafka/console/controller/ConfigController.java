@@ -36,7 +36,7 @@ public class ConfigController {
         this.configService = configService;
     }
 
-    @GetMapping
+    @GetMapping("/console")
     public Object getConfig() {
         return ResponseData.create().data(configMap).success();
     }

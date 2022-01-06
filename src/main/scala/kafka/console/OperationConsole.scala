@@ -1,6 +1,6 @@
 package kafka.console
 
-import com.xuxd.kafka.console.config.KafkaConfig
+import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import kafka.admin.ReassignPartitionsCommand
 import org.apache.kafka.clients.admin.{ElectLeadersOptions, ListPartitionReassignmentsOptions, PartitionReassignment}
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -34,6 +34,7 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
                     throw new UnsupportedOperationException("exist consumer client.")
                 }
             }
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             val thatGroupDescriptionList = thatAdmin.describeConsumerGroups(searchGroupIds).all().get(timeoutMs, TimeUnit.MILLISECONDS).values()
             if (groupDescriptionList.isEmpty) {
                 throw new IllegalArgumentException("that consumer group info is null.")
@@ -101,6 +102,7 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
         thatMinOffset: util.Map[TopicPartition, Long]): (Boolean, String) = {
         val thatAdmin = createAdminClient(props)
         try {
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             val searchGroupIds = Collections.singleton(groupId)
             val groupDescriptionList = consumerConsole.getConsumerGroupList(searchGroupIds)
             if (groupDescriptionList.isEmpty) {
@@ -178,6 +180,7 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
         val thatConsumer = new KafkaConsumer(props, new ByteArrayDeserializer, new ByteArrayDeserializer)
 
         try {
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             val thisTopicPartitions = consumerConsole.listSubscribeTopics(groupId).get(topic).asScala.sortBy(_.partition())
             val thatTopicPartitionMap = thatAdmin.listConsumerGroupOffsets(
                 groupId

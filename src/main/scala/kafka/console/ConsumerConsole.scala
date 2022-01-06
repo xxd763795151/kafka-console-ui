@@ -1,6 +1,6 @@
 package kafka.console
 
-import com.xuxd.kafka.console.config.KafkaConfig
+import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo
 import org.apache.kafka.clients.admin._
 import org.apache.kafka.clients.consumer.{ConsumerConfig, OffsetAndMetadata, OffsetResetStrategy}
@@ -75,6 +75,7 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
                 val endOffsets = commitOffsets.keySet.map { topicPartition =>
                     topicPartition -> OffsetSpec.latest
                 }.toMap
+                val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
                 admin.listOffsets(endOffsets.asJava).all().get(timeoutMs, TimeUnit.MILLISECONDS)
             }, e => {
                 log.error("listOffsets error.", e)
@@ -166,6 +167,7 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
 
     def resetPartitionToTargetOffset(groupId: String, partition: TopicPartition, offset: Long): (Boolean, String) = {
         withAdminClientAndCatchError(admin => {
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             admin.alterConsumerGroupOffsets(groupId, Map(partition -> new OffsetAndMetadata(offset)).asJava).all().get(timeoutMs, TimeUnit.MILLISECONDS)
             (true, "")
         }, e => {
@@ -178,7 +180,7 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
         timestamp: java.lang.Long): (Boolean, String) = {
         withAdminClientAndCatchError(admin => {
             val logOffsets = getLogTimestampOffsets(admin, groupId, topicPartitions.asScala, timestamp)
-
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             admin.alterConsumerGroupOffsets(groupId, logOffsets.asJava).all().get(timeoutMs, TimeUnit.MILLISECONDS)
             (true, "")
         }, e => {
@@ -256,6 +258,7 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
         val timestampOffsets = topicPartitions.map { topicPartition =>
             topicPartition -> OffsetSpec.forTimestamp(timestamp)
         }.toMap
+        val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
         val offsets = admin.listOffsets(
             timestampOffsets.asJava,
             new ListOffsetsOptions().timeoutMs(timeoutMs)
@@ -280,6 +283,7 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
         val endOffsets = topicPartitions.map { topicPartition =>
             topicPartition -> OffsetSpec.latest
         }.toMap
+        val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
         val offsets = admin.listOffsets(
             endOffsets.asJava,
             new ListOffsetsOptions().timeoutMs(timeoutMs)

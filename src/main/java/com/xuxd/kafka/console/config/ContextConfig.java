@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.config;
 
 import java.util.Properties;
+import org.apache.kafka.clients.CommonClientConfigs;
 
 /**
  * kafka-console-ui.
@@ -11,6 +12,10 @@ import java.util.Properties;
 public class ContextConfig {
 
     public static final int DEFAULT_REQUEST_TIMEOUT_MS = 5000;
+
+    private Long clusterInfoId;
+
+    private String clusterName;
 
     private String bootstrapServer;
 
@@ -27,7 +32,8 @@ public class ContextConfig {
     }
 
     public int getRequestTimeoutMs() {
-        return requestTimeoutMs;
+        return properties.containsKey(CommonClientConfigs.REQUEST_TIMEOUT_MS_CONFIG) ?
+            Integer.parseInt(properties.getProperty(CommonClientConfigs.REQUEST_TIMEOUT_MS_CONFIG)) : requestTimeoutMs;
     }
 
     public void setRequestTimeoutMs(int requestTimeoutMs) {
@@ -36,6 +42,22 @@ public class ContextConfig {
 
     public Properties getProperties() {
         return properties;
+    }
+
+    public Long getClusterInfoId() {
+        return clusterInfoId;
+    }
+
+    public void setClusterInfoId(Long clusterInfoId) {
+        this.clusterInfoId = clusterInfoId;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 
     public void setProperties(Properties properties) {

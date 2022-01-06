@@ -11,8 +11,8 @@
       ><router-link to="/group-page" class="pad-l-r">消费组</router-link>
       <span>|</span
       ><router-link to="/message-page" class="pad-l-r">消息</router-link>
-      <span v-show="config.enableAcl">|</span
-      ><router-link to="/acl-page" class="pad-l-r" v-show="config.enableAcl"
+      <span v-show="enableSasl">|</span
+      ><router-link to="/acl-page" class="pad-l-r" v-show="enableSasl"
         >Acl</router-link
       >
       <span>|</span
@@ -23,7 +23,7 @@
   </div>
 </template>
 <script>
-import { KafkaConfigApi, KafkaClusterApi } from "@/utils/api";
+import { KafkaClusterApi } from "@/utils/api";
 import request from "@/utils/request";
 import { mapMutations, mapState } from "vuex";
 import { getClusterInfo } from "@/utils/local-cache";
@@ -37,13 +37,6 @@ export default {
     };
   },
   created() {
-    request({
-      url: KafkaConfigApi.getConfig.url,
-      method: KafkaConfigApi.getConfig.method,
-    }).then((res) => {
-      this.config = res.data;
-    });
-
     const clusterInfo = getClusterInfo();
     if (!clusterInfo) {
       request({
@@ -66,6 +59,7 @@ export default {
   computed: {
     ...mapState({
       clusterName: (state) => state.clusterInfo.clusterName,
+      enableSasl: (state) => state.clusterInfo.enableSasl,
     }),
   },
   methods: {

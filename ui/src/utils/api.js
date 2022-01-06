@@ -51,7 +51,7 @@ export const KafkaAclApi = {
 
 export const KafkaConfigApi = {
   getConfig: {
-    url: "/config",
+    url: "/config/console",
     method: "get",
   },
   getTopicConfig: {

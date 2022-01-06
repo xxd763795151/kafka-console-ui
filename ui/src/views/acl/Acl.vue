@@ -232,11 +232,13 @@ export default {
       }
     },
     onDeleteUser(row) {
+      this.loading = true;
       request({
         url: KafkaAclApi.deleteKafkaUser.url,
         method: KafkaAclApi.deleteKafkaUser.method,
         data: { username: row.username },
       }).then((res) => {
+        this.loading = false;
         this.getAclList();
         if (res.code == 0) {
           this.$message.success(res.msg);

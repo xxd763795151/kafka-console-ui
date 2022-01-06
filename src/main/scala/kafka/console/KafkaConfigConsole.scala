@@ -1,16 +1,16 @@
 package kafka.console
 
+import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
+import kafka.server.ConfigType
+import kafka.utils.Implicits.PropertiesOps
+import org.apache.kafka.clients.admin._
+import org.apache.kafka.common.config.SaslConfigs
+import org.apache.kafka.common.security.scram.internals.{ScramCredentialUtils, ScramFormatter}
+
 import java.security.MessageDigest
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Properties, Set}
-
-import com.xuxd.kafka.console.config.KafkaConfig
-import kafka.server.ConfigType
-import kafka.utils.Implicits.PropertiesOps
-import org.apache.kafka.clients.admin._
-import org.apache.kafka.common.security.scram.internals.{ScramCredentialUtils, ScramFormatter}
-
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, DictionaryHasAsScala, SeqHasAsJava}
 
 /**
@@ -35,31 +35,32 @@ class KafkaConfigConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
         }).asInstanceOf[util.Map[String, UserScramCredentialsDescription]]
     }
 
-    def addOrUpdateUser(name: String, pass: String): Boolean = {
+    def addOrUpdateUser(name: String, pass: String): (Boolean, String) = {
         withAdminClient(adminClient => {
             try {
-                adminClient.alterUserScramCredentials(util.Arrays.asList(
-                    new UserScramCredentialUpsertion(name,
-                        new ScramCredentialInfo(ScramMechanism.fromMechanismName(config.getSaslMechanism), defaultIterations), pass)))
-                    .all().get(timeoutMs, TimeUnit.MILLISECONDS)
-                true
+                val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
+                val mechanisms = ContextConfigHolder.CONTEXT_CONFIG.get().getProperties().getProperty(SaslConfigs.SASL_MECHANISM).split(",").toSeq
+                val scrams = mechanisms.map(m => new UserScramCredentialUpsertion(name,
+                    new ScramCredentialInfo(ScramMechanism.fromMechanismName(m), defaultIterations), pass))
+                adminClient.alterUserScramCredentials(scrams.asInstanceOf[Seq[UserScramCredentialAlteration]].asJava).all().get(timeoutMs, TimeUnit.MILLISECONDS)
+                (true, "")
             } catch {
                 case ex: Exception => log.error("addOrUpdateUser error", ex)
-                    false
+                    (false, ex.getMessage)
             }
 
-        }).asInstanceOf[Boolean]
+        }).asInstanceOf[(Boolean, String)]
     }
 
     def addOrUpdateUserWithZK(name: String, pass: String): Boolean = {
         withZKClient(adminZkClient => {
             try {
-                val credential = new ScramFormatter(org.apache.kafka.common.security.scram.internals.ScramMechanism.forMechanismName(config.getSaslMechanism))
+                val credential = new ScramFormatter(org.apache.kafka.common.security.scram.internals.ScramMechanism.forMechanismName(ContextConfigHolder.CONTEXT_CONFIG.get().getProperties().getProperty(SaslConfigs.SASL_MECHANISM)))
                     .generateCredential(pass, defaultIterations)
                 val credentialStr = ScramCredentialUtils.credentialToString(credential)
 
                 val userConfig: Properties = new Properties()
-                userConfig.put(config.getSaslMechanism, credentialStr)
+                userConfig.put(ContextConfigHolder.CONTEXT_CONFIG.get().getProperties().getProperty(SaslConfigs.SASL_MECHANISM), credentialStr)
 
                 val configs = adminZkClient.fetchEntityConfig(ConfigType.User, name)
                 userConfig ++= configs
@@ -101,6 +102,7 @@ class KafkaConfigConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
                 //                    .all().get(timeoutMs, TimeUnit.MILLISECONDS)
                 // all delete
                 val userDetail = getUserDetailList(util.Collections.singletonList(name))
+                val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
                 userDetail.values().asScala.foreach(u => {
                     adminClient.alterUserScramCredentials(u.credentialInfos().asScala.map(s => new UserScramCredentialDeletion(u.name(), s.mechanism())
                         .asInstanceOf[UserScramCredentialAlteration]).toList.asJava)

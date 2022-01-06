@@ -3,8 +3,7 @@ package kafka.console
 import java.util
 import java.util.Collections
 import java.util.concurrent.TimeUnit
-
-import com.xuxd.kafka.console.config.KafkaConfig
+import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import kafka.console.ConfigConsole.BrokerLoggerConfigType
 import kafka.server.ConfigType
 import org.apache.kafka.clients.admin.{AlterConfigOp, Config, ConfigEntry, DescribeConfigsOptions}
@@ -69,6 +68,7 @@ class ConfigConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfi
             val configResource = new ConfigResource(getResourceTypeAndValidate(entityType, entityName), entityName)
 
             val config = Map(configResource -> Collections.singletonList(new AlterConfigOp(entry, opType)).asInstanceOf[util.Collection[AlterConfigOp]])
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             admin.incrementalAlterConfigs(config.asJava).all().get(timeoutMs, TimeUnit.MILLISECONDS)
             (true, "")
         }, e => {

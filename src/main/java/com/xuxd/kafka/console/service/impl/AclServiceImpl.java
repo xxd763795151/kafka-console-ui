@@ -6,28 +6,36 @@ import com.xuxd.kafka.console.beans.CounterMap;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.KafkaUserDO;
 import com.xuxd.kafka.console.beans.vo.KafkaUserDetailVO;
-import com.xuxd.kafka.console.config.KafkaConfig;
+import com.xuxd.kafka.console.config.ContextConfigHolder;
 import com.xuxd.kafka.console.dao.KafkaUserMapper;
 import com.xuxd.kafka.console.service.AclService;
+import com.xuxd.kafka.console.utils.SaslUtil;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 import kafka.console.KafkaAclConsole;
 import kafka.console.KafkaConfigConsole;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.clients.admin.ScramMechanism;
 import org.apache.kafka.clients.admin.UserScramCredentialsDescription;
 import org.apache.kafka.common.acl.AclBinding;
 import org.apache.kafka.common.acl.AclOperation;
+import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
+
+import static com.xuxd.kafka.console.utils.SaslUtil.isEnableSasl;
+import static com.xuxd.kafka.console.utils.SaslUtil.isEnableScram;
 
 /**
  * kafka-console-ui.
@@ -37,16 +45,13 @@ import scala.Tuple2;
  **/
 @Slf4j
 @Service
-public class AclServiceImpl implements AclService, SmartInitializingSingleton {
+public class AclServiceImpl implements AclService {
 
     @Autowired
     private KafkaConfigConsole configConsole;
 
     @Autowired
     private KafkaAclConsole aclConsole;
-
-    @Autowired
-    private KafkaConfig kafkaConfig;
 
     private final KafkaUserMapper kafkaUserMapper;
 
@@ -64,15 +69,23 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
     }
 
     @Override public ResponseData addOrUpdateUser(String name, String pass) {
+        if (!isEnableSasl()) {
+            return ResponseData.create().failed("Only support SASL protocol.");
+        }
+        if (!isEnableScram()) {
+            return ResponseData.create().failed("Only support SASL_SCRAM.");
+        }
         log.info("add or update user, username: {}, password: {}", name, pass);
-        if (!configConsole.addOrUpdateUser(name, pass)) {
+        Tuple2<Object, String> tuple2 = configConsole.addOrUpdateUser(name, pass);
+        if (!(boolean) tuple2._1()) {
             log.error("add user to kafka failed.");
-            return ResponseData.create().failed("add user to kafka failed");
+            return ResponseData.create().failed("add user to kafka failed: " + tuple2._2());
         }
         // save user info to database.
         KafkaUserDO userDO = new KafkaUserDO();
         userDO.setUsername(name);
         userDO.setPassword(pass);
+        userDO.setClusterInfoId(ContextConfigHolder.CONTEXT_CONFIG.get().getClusterInfoId());
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("username", name);
@@ -86,12 +99,24 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
     }
 
     @Override public ResponseData deleteUser(String name) {
+        if (!isEnableSasl()) {
+            return ResponseData.create().failed("Only support SASL protocol.");
+        }
+        if (!isEnableScram()) {
+            return ResponseData.create().failed("Only support SASL_SCRAM.");
+        }
         log.info("delete user: {}", name);
         Tuple2<Object, String> tuple2 = configConsole.deleteUser(name);
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
     @Override public ResponseData deleteUserAndAuth(String name) {
+        if (!isEnableSasl()) {
+            return ResponseData.create().failed("Only support SASL protocol.");
+        }
+        if (!isEnableScram()) {
+            return ResponseData.create().failed("Only support SASL_SCRAM.");
+        }
         log.info("delete user and authority: {}", name);
         AclEntry entry = new AclEntry();
         entry.setPrincipal(name);
@@ -120,7 +145,8 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
         Map<String, Object> resultMap = new HashMap<>();
         entryMap.forEach((k, v) -> {
             Map<String, List<AclEntry>> map = v.stream().collect(Collectors.groupingBy(e -> e.getResourceType() + "#" + e.getName()));
-            if (k.equals(kafkaConfig.getAdminUsername())) {
+            String username = SaslUtil.findUsername(ContextConfigHolder.CONTEXT_CONFIG.get().getProperties().getProperty(SaslConfigs.SASL_JAAS_CONFIG));
+            if (k.equals(username)) {
                 Map<String, Object> map2 = new HashMap<>(map);
                 Map<String, Object> userMap = new HashMap<>();
                 userMap.put("role", "admin");
@@ -133,7 +159,8 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
 
             detailList.values().forEach(u -> {
                 if (!resultMap.containsKey(u.name()) && !u.credentialInfos().isEmpty()) {
-                    if (!u.name().equals(kafkaConfig.getAdminUsername())) {
+                    String username = SaslUtil.findUsername(ContextConfigHolder.CONTEXT_CONFIG.get().getProperties().getProperty(SaslConfigs.SASL_JAAS_CONFIG));
+                    if (!u.name().equals(username)) {
                         resultMap.put(u.name(), Collections.emptyMap());
                     } else {
                         Map<String, Object> map2 = new HashMap<>();
@@ -194,27 +221,29 @@ public class AclServiceImpl implements AclService, SmartInitializingSingleton {
         }
         Map<String, Object> param = new HashMap<>();
         param.put("username", username);
+        param.put("cluster_info_id", ContextConfigHolder.CONTEXT_CONFIG.get().getClusterInfoId());
         List<KafkaUserDO> dos = kafkaUserMapper.selectByMap(param);
         if (dos.isEmpty()) {
             vo.setConsistencyDescription("Password is null.");
         } else {
             vo.setPassword(dos.stream().findFirst().get().getPassword());
             // check for consistency.
-            boolean consistent = configConsole.isPassConsistent(username, vo.getPassword());
-            vo.setConsistencyDescription(consistent ? "Consistent" : "Password is not consistent.");
+//            boolean consistent = configConsole.isPassConsistent(username, vo.getPassword());
+//            vo.setConsistencyDescription(consistent ? "Consistent" : "Password is not consistent.");
+            vo.setConsistencyDescription("Can not check password consistent.");
         }
 
         return ResponseData.create().data(vo).success();
     }
 
-    @Override public void afterSingletonsInstantiated() {
-        if (kafkaConfig.isEnableAcl() && kafkaConfig.isAdminCreate()) {
-            log.info("Start create admin user, username: {}, password: {}", kafkaConfig.getAdminUsername(), kafkaConfig.getAdminPassword());
-            boolean done = configConsole.addOrUpdateUserWithZK(kafkaConfig.getAdminUsername(), kafkaConfig.getAdminPassword());
-            if (!done) {
-                log.error("Create admin failed.");
-                throw new IllegalStateException();
-            }
-        }
-    }
+//    @Override public void afterSingletonsInstantiated() {
+//        if (kafkaConfig.isEnableAcl() && kafkaConfig.isAdminCreate()) {
+//            log.info("Start create admin user, username: {}, password: {}", kafkaConfig.getAdminUsername(), kafkaConfig.getAdminPassword());
+//            boolean done = configConsole.addOrUpdateUserWithZK(kafkaConfig.getAdminUsername(), kafkaConfig.getAdminPassword());
+//            if (!done) {
+//                log.error("Create admin failed.");
+//                throw new IllegalStateException();
+//            }
+//        }
+//    }
 }

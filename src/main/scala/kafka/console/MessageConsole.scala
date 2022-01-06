@@ -2,7 +2,7 @@ package kafka.console
 
 import com.xuxd.kafka.console.beans.MessageFilter
 import com.xuxd.kafka.console.beans.enums.FilterType
-import com.xuxd.kafka.console.config.KafkaConfig
+import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import org.apache.commons.lang3.StringUtils
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -27,6 +27,7 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
         var startOffTable: immutable.Map[TopicPartition, Long] = Map.empty
         var endOffTable: immutable.Map[TopicPartition, Long] = Map.empty
         withAdminClientAndCatchError(admin => {
+            val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
             val startTable = KafkaConsole.getLogTimestampOffsets(admin, partitions.asScala.toSeq, startTime, timeoutMs)
             startOffTable = startTable.map(t2 => (t2._1, t2._2.offset())).toMap
 
@@ -93,6 +94,7 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
                     if (searchNums >= maxNums) {
                         terminate = true
                     } else {
+                        val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
                         val records = consumer.poll(Duration.ofMillis(timeoutMs))
 
                         if (records.isEmpty) {
@@ -189,6 +191,7 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
 
             var terminate = tpSet.isEmpty
             while (!terminate) {
+                val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
                 val records = consumer.poll(Duration.ofMillis(timeoutMs))
                 val tps = new util.HashSet(tpSet).asScala
                 for (tp <- tps) {

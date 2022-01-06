@@ -10,12 +10,22 @@ export default new Vuex.Store({
     clusterInfo: {
       id: undefined,
       clusterName: undefined,
+      enableSasl: false,
     },
   },
   mutations: {
     [CLUSTER.SWITCH](state, clusterInfo) {
       state.clusterInfo.id = clusterInfo.id;
       state.clusterInfo.clusterName = clusterInfo.clusterName;
+      let enableSasl = false;
+      for (let p in clusterInfo.properties) {
+        if (enableSasl) {
+          break;
+        }
+        enableSasl =
+          clusterInfo.properties[p].indexOf("security.protocol=SASL") != -1;
+      }
+      state.clusterInfo.enableSasl = enableSasl;
       setClusterInfo(clusterInfo);
     },
   },

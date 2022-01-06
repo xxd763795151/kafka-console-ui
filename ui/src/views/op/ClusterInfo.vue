@@ -201,6 +201,7 @@ const columns = [
     dataIndex: "properties",
     key: "properties",
     scopedSlots: { customRender: "properties" },
+    width: 300,
   },
   {
     title: "操作",

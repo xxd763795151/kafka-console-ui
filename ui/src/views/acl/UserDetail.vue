@@ -8,20 +8,22 @@
     :footer="null"
     @cancel="handleCancel"
   >
-    <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
-      <a-form-item label="用户名">
-        <span>{{ user.username }}</span>
-      </a-form-item>
-      <a-form-item label="密码">
-        <span>{{ user.password }}</span>
-      </a-form-item>
-      <a-form-item label="凭证信息">
-        <span>{{ user.credentialInfos }}</span>
-      </a-form-item>
-      <a-form-item label="数据一致性说明">
-        <strong>{{ user.consistencyDescription }}</strong>
-      </a-form-item>
-    </a-form>
+    <a-spin :spinning="loading">
+      <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
+        <a-form-item label="用户名">
+          <span>{{ user.username }}</span>
+        </a-form-item>
+        <a-form-item label="密码">
+          <span>{{ user.password }}</span>
+        </a-form-item>
+        <a-form-item label="凭证信息">
+          <span>{{ user.credentialInfos }}</span>
+        </a-form-item>
+        <a-form-item label="数据一致性说明">
+          <strong>{{ user.consistencyDescription }}</strong>
+        </a-form-item>
+      </a-form>
+    </a-spin>
   </a-modal>
 </template>
 
@@ -47,6 +49,7 @@ export default {
       show: this.visible,
       form: this.$form.createForm(this, { name: "UserDetailForm" }),
       user: {},
+      loading: false,
     };
   },
   watch: {
@@ -63,11 +66,13 @@ export default {
     },
     getUserDetail() {
       const api = KafkaAclApi.getKafkaUserDetail;
+      this.loading = true;
       request({
         url: api.url,
         method: api.method,
         params: { username: this.username },
       }).then((res) => {
+        this.loading = false;
         if (res.code != 0) {
           this.$message.error(res.msg);
         } else {

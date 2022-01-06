@@ -46,9 +46,9 @@
               rows="5"
               placeholder='可选参数，集群其它属性配置：
 request.timeout.ms=10000
-security-protocol=SASL_PLAINTEXT
-sasl-mechanism=SCRAM-SHA-256
-sasl-jaas-config=org.apache.kafka.common.security.scram.ScramLoginModule required username="name" password="password";
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=SCRAM-SHA-256
+sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username="name" password="password";
 '
               v-decorator="[
                 'properties',

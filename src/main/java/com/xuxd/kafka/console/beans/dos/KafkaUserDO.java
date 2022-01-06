@@ -23,4 +23,6 @@ public class KafkaUserDO {
     private String password;
 
     private String updateTime;
+
+    private Long clusterInfoId;
 }

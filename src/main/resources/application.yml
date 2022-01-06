@@ -6,23 +6,12 @@ server:
 
 kafka:
   config:
-    # kafka broker地址，多个以逗号分隔
-    bootstrap-server: 'localhost:9092'
-    request-timeout-ms: 5000
-    # 服务端是否启用acl，如果不启用，下面的所有配置都忽略即可，只用配置上面的Kafka集群地址就行了
-    enable-acl: false
-    # 只支持2种安全协议SASL_PLAINTEXT和PLAINTEXT，启用acl则设置为SASL_PLAINTEXT，不启用acl不需关心这个配置
-    security-protocol: SASL_PLAINTEXT
-    sasl-mechanism: SCRAM-SHA-256
-    # 超级管理员用户名，在broker上已经配置为超级管理员
-    admin-username: admin
-    # 超级管理员密码
-    admin-password: admin
-    # 启动自动创建配置的超级管理员用户
-    admin-create: false
-    # broker连接的zk地址，如果启动自动创建配置的超级管理员用户则必须配置，否则忽略
-    zookeeper-addr: 'localhost:2181'
-    sasl-jaas-config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${kafka.config.admin-username}" password="${kafka.config.admin-password}";
+    # 如果不存在default集群，启动的时候默认会把这个加载进来(如果这里配置集群地址了)，如果已经存在，则不加载
+    # kafka broker地址，多个以逗号分隔，不是必须在这里配置，也可以启动之后，在页面上添加集群信息
+    bootstrap-server:
+    # 集群其它属性配置
+    properties:
+#      request.timeout.ms: 5000
 
 spring:
   application:
@@ -46,6 +35,7 @@ spring:
 logging:
   home: ./
 
+# 基于scram方案的acl，这里会记录创建的用户密码等信息，定时扫描，如果集群中已经不存在这些用户，就把这些信息从db中清除掉
 cron:
 #  clear-dirty-user: 0 * * * * ?
   clear-dirty-user: 0 0 1 * * ?
