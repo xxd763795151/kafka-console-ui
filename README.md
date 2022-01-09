@@ -2,95 +2,70 @@
 一款轻量级的kafka可视化管理平台，安装配置快捷、简单易用。  
 为了开发的省事，没有国际化支持，只支持中文展示。  
 用过rocketmq-console吧，对，前端展示风格跟那个有点类似。
-## 说明
-当前主分支及日后版本不再提供消息同步、迁移的解决方案，如有需要，可以使用single-data-sync分支的代码或者发布v1.0.2： [kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.2/kafka-console-ui.zip) 的安装包  
 
-v1.0.2版本及其之前的版本只支持单集群配置，但是对于SASL_SCRAM认证授权管理功能相当完善  
+## 页面预览
+如果github能查看图片的话，可以点击[查看菜单页面]()，查看每个页面的样子
+## 集群迁移支持说明
+当前主分支及日后版本不再提供消息同步、集群迁移的解决方案，如有需要，查看：[集群迁移说明](./document/datasync/集群迁移.md)
 
-后续版本会支持多集群管理，并将v1.0.2之前的部分功能去掉或优化，目的是做为一个足够轻量的管理工具，不再涉及其它属性
-## 安装包下载
-以下两种方式2选一，直接下载安装包或下载源码，手动打包  
-* 点击下载(v1.0.2版本)：[kafka-console-ui.tar.gz](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.2/kafka-console-ui.tar.gz) 或 [kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.2/kafka-console-ui.zip)
-* 参考下面的打包部署，下载源码重新打包(提交的最新功能特性)  
 ## 功能支持
+* 多集群支持
 * 集群信息
 * Topic管理
 * 消费组管理
 * 消息管理
-* 基于SASL_SCRAM认证授权管理
+* ACL
 * 运维
-![功能特性](./document/功能特性.png)
-## 技术栈
-* spring boot 
-* java、scala 
-* kafka
-* h2  
-* vue 
-## kafka版本
-* 当前使用的kafka 2.8.0
-## 监控
-仅提供运维管理功能，监控、告警需要配合其它组件，使用请查看：https://blog.csdn.net/x763795151/article/details/119705372
-# 打包、部署
-## 打包
-环境要求  
-* maven 3.6+
-* jdk 8
-* git  
+
+功能明细看这个脑图：
+![功能特性](./document/img/功能特性.png)
+
+## 安装包下载
+点击下载(v1.0.2版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.2/kafka-console-ui.zip)
+
+## 快速使用
+### Windows
+1. 解压缩zip安装包  
+2. 进入bin目录（必须在bin目录下），双击执行`start.bat`启动
+3. 停止：直接关闭启动的命令行窗口即可
+
+### Linux或Mac OS
 ```
-git clone https://github.com/xxd763795151/kafka-console-ui.git
-cd kafka-console-ui
-# linux或mac执行
-sh package.sh
-# windows执行
-package.bat
-```
-打包成功，输出文件(以下2种归档类型)：  
-* target/kafka-console-ui.tar.gz  
-* target/kafka-console-ui.zip  
-## 部署
-### Mac OS 或 Linux
-```
-# 解压缩(以tar.gz为例)
-tar -zxvf kafka-console-ui.tar.gz
+# 解压缩
+unzip kafka-console-ui.zip
 # 进入解压缩后的目录
 cd kafka-console-ui
-# 编辑配置
-vim config/application.yml
 # 启动
 sh bin/start.sh
 # 停止
 sh bin/shutdown.sh
 ```
-### Windows
-1.解压缩zip安装包  
-2.编辑配置文件 ：`config/application.yml`  
-3.进入bin目录（必须在bin目录下），执行`start.bat`启动  
 
-启动完成，访问：http://127.0.0.1:7766  
+### 访问地址
+启动完成，访问：http://127.0.0.1:7766
 
-# 开发环境
-* jdk 8
-* idea
-* scala 2.13
-* maven >=3.6+
-* webstorm
-除了webstorm是开发前端的ide可以根据自己需要代替，jdk scala是必须有的。
-# 本地开发配置
-以我自己为例，开发环境里的工具准备好，然后代码clone到本地。
-## 后端配置
-1. 用idea打开项目
-2. 打开idea的Project Structure(Settings) ->  Modules -> 设置src/main/scala为Sources，因为约定src/main/java是源码目录，所以这里要再加一个
-3. 打开idea的Project Structure(Settings) -> Libraries 添加scala sdk，然后选择本地下载的scala 2.13的目录，确定添加进来
-## 前端
-前端代码在工程的ui目录下，找个前端开发的ide打开进行开发即可。
-## 注意
-前后分离，直接启动后端如果未编译前端代码是没有前端页面的，可以先打包进行编译`sh package.sh`，然后再用idea启动，或者前端部分单独启动  
-# 页面示例
-如果未启用ACL配置，不会显示ACL的菜单页面，所以导航栏上没有Acl这一项  
+### 配置集群
+第一次启动，打开浏览器后，因为还没有配置kafka集群信息，所以页面右上角可能会有错误信息，比如：No Cluster Info或者是没有集群信息，请先切换集群之类的提示。  
 
-![集群](./document/集群.png)  
-![Topic](./document/Topic.png)  
-![消费组](./document/消费组.png)  
-![运维](./document/运维.png)  
-增加消息检索页面
-![消息](./document/消息.png)  
+集群配置如下：
+1. 点击页面上方导航栏的 [运维] 菜单
+2. 点击集群管理下的 [集群切换] 按钮
+3. 在弹框里点击 [新增集群]
+4. 然后输入kafka集群地址和一个名称（随便起个名字）
+5. 点击提交便增加成功了
+6. 增加成功可以看到会话框已经有这个集群信息，然后点击右侧的 [切换] 按钮，便切换该集群为当前集群  
+
+后续如果再增加其它集群，就可以按上面这个流程，如果想切换到哪个集群，点击切换按钮，便会切换到对应的集群，页面的右上角会显示当前是使用的哪个集群，如果不确定，可以刷新下页面。
+
+在新增集群的时候，除了集群地址还可以输入集群的其它属性配置，比如请求超时，ACL配置等。如果开启了ACL，切换到该集群的时候，导航栏上便会出现ACL菜单，支持进行相关操作（目前是基于SASL_SCRAM认证授权管理支持的最完善，其它的我也没验证过，虽然是我开发的，但是我也没具体全部验证这一块功能，授权部分应该是通用的）
+
+## kafka版本
+* 当前使用的kafka 2.8.0
+## 监控
+仅提供运维管理功能，监控、告警需要配合其它组件，如有需要，建议请查看：https://blog.csdn.net/x763795151/article/details/119705372
+
+## 源码打包
+如果想通过源码打包，查看：[源码打包说明](./document/package/源码打包.md)
+
+## 本地开发
+如果需要本地开发，开发环境配置查看：[本地开发](./document/develop/开发配置.md)
