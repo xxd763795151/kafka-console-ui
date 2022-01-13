@@ -27,7 +27,7 @@ request.interceptors.request.use((config) => {
   const clusterInfo = getClusterInfo();
   if (clusterInfo) {
     config.headers["X-Cluster-Info-Id"] = clusterInfo.id;
-    config.headers["X-Cluster-Info-Name"] = clusterInfo.clusterName;
+    // config.headers["X-Cluster-Info-Name"] = encodeURIComponent(clusterInfo.clusterName);
   }
   return config;
 }, errorHandler);

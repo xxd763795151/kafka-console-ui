@@ -9,6 +9,7 @@
           return index;
         }
       "
+      @change="handleChange"
     >
       <div slot="operation" slot-scope="record">
         <a-button
@@ -41,9 +42,9 @@ export default {
   },
   data() {
     return {
-      columns: columns,
       showDetailDialog: false,
       record: {},
+      sortedInfo: null,
     };
   },
   methods: {
@@ -54,42 +55,56 @@ export default {
     closeDetailDialog() {
       this.showDetailDialog = false;
     },
-  },
-};
-const columns = [
-  {
-    title: "topic",
-    dataIndex: "topic",
-    key: "topic",
-    width: 300,
-  },
-  {
-    title: "分区",
-    dataIndex: "partition",
-    key: "partition",
-  },
-  {
-    title: "偏移",
-    dataIndex: "offset",
-    key: "offset",
-  },
-  {
-    title: "时间",
-    dataIndex: "timestamp",
-    key: "timestamp",
-    slots: { title: "timestamp" },
-    scopedSlots: { customRender: "timestamp" },
-    customRender: (text) => {
-      return moment(text).format("YYYY-MM-DD HH:mm:ss:SSS");
+    handleChange() {
+      this.sortedInfo = arguments[2];
     },
   },
-  {
-    title: "操作",
-    key: "operation",
-    scopedSlots: { customRender: "operation" },
-    width: 200,
+  computed: {
+    columns() {
+      let sortedInfo = this.sortedInfo || {};
+      const columns = [
+        {
+          title: "topic",
+          dataIndex: "topic",
+          key: "topic",
+          width: 300,
+        },
+        {
+          title: "分区",
+          dataIndex: "partition",
+          key: "partition",
+        },
+        {
+          title: "偏移",
+          dataIndex: "offset",
+          key: "offset",
+        },
+        {
+          title: "时间",
+          dataIndex: "timestamp",
+          key: "timestamp",
+          slots: { title: "timestamp" },
+          scopedSlots: { customRender: "timestamp" },
+          customRender: (text) => {
+            return text == -1
+              ? -1
+              : moment(text).format("YYYY-MM-DD HH:mm:ss:SSS");
+          },
+          sorter: (a, b) => a.timestamp - b.timestamp,
+          sortOrder: sortedInfo.columnKey === "timestamp" && sortedInfo.order,
+          sortDirections: ["ascend", "descend"],
+        },
+        {
+          title: "操作",
+          key: "operation",
+          scopedSlots: { customRender: "operation" },
+          width: 200,
+        },
+      ];
+      return columns;
+    },
   },
-];
+};
 </script>
 
 <style scoped></style>

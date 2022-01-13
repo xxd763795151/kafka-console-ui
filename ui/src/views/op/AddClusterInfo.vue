@@ -69,6 +69,9 @@ sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule require
 import request from "@/utils/request";
 import { KafkaClusterApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
+import { getClusterInfo } from "@/utils/local-cache";
+import { mapMutations } from "vuex";
+import { CLUSTER } from "@/store/mutation-types";
 
 export default {
   name: "AddClusterInfo",
@@ -124,6 +127,17 @@ export default {
             if (res.code == 0) {
               this.$message.success(res.msg);
               this.$emit(this.closeDialogEvent, { refresh: true });
+              if (this.isModify) {
+                let clusterInfo = getClusterInfo();
+                if (
+                  clusterInfo &&
+                  clusterInfo.id &&
+                  clusterInfo.id == this.clusterInfo.id &&
+                  clusterInfo.clusterName != data.clusterName
+                ) {
+                  this.switchCluster(data);
+                }
+              }
             } else {
               notification.error({
                 message: "error",
@@ -138,6 +152,9 @@ export default {
       this.data = [];
       this.$emit(this.closeDialogEvent, { refresh: false });
     },
+    ...mapMutations({
+      switchCluster: CLUSTER.SWITCH,
+    }),
   },
 };
 const defaultInfo = { clusterName: "", address: "", properties: "" };

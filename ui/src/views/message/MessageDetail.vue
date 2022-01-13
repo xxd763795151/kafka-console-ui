@@ -203,7 +203,7 @@ export default {
       this.$emit("closeDetailDialog", { refresh: false });
     },
     formatTime(time) {
-      return moment(time).format("YYYY-MM-DD HH:mm:ss:SSS");
+      return time == -1 ? -1 : moment(time).format("YYYY-MM-DD HH:mm:ss:SSS");
     },
     keyDeserializerChange() {
       this.getMessageDetail();
