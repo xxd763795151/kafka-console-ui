@@ -21,7 +21,7 @@ public class TopicPartition implements Comparable {
         }
         TopicPartition other = (TopicPartition) o;
         if (!this.topic.equals(other.getTopic())) {
-            return this.compareTo(other);
+            return this.topic.compareTo(other.topic);
         }
 
         return this.partition - other.partition;
