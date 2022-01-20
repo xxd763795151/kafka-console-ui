@@ -242,8 +242,8 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
         withAdminClientAndCatchError(admin => {
             admin.listPartitionReassignments(withTimeoutMs(new ListPartitionReassignmentsOptions)).reassignments().get()
         }, e => {
-            Collections.emptyMap()
             log.error("listPartitionReassignments error.", e)
+            Collections.emptyMap()
         }).asInstanceOf[util.Map[TopicPartition, PartitionReassignment]]
     }
 
