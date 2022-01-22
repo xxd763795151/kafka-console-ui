@@ -203,6 +203,10 @@ export const KafkaClusterApi = {
     url: "/cluster/info/peek",
     method: "get",
   },
+  getBrokerApiVersionInfo: {
+    url: "/cluster/info/api/version",
+    method: "get",
+  },
 };
 
 export const KafkaOpApi = {

@@ -21,4 +21,6 @@ public interface ClusterService {
     ResponseData updateClusterInfo(ClusterInfoDO infoDO);
 
     ResponseData peekClusterInfo();
+
+    ResponseData getBrokerApiVersionInfo();
 }

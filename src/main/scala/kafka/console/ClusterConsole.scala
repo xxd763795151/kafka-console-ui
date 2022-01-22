@@ -1,11 +1,13 @@
 package kafka.console
 
-import java.util.Collections
-import java.util.concurrent.TimeUnit
 import com.xuxd.kafka.console.beans.{BrokerNode, ClusterInfo}
 import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
+import org.apache.kafka.clients.NodeApiVersions
 import org.apache.kafka.clients.admin.DescribeClusterResult
+import org.apache.kafka.common.Node
 
+import java.util.Collections
+import java.util.concurrent.TimeUnit
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, SetHasAsJava, SetHasAsScala}
 
 /**
@@ -40,5 +42,9 @@ class ClusterConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
             log.error("get clusterInfo error.", eh)
             new ClusterInfo
         }).asInstanceOf[ClusterInfo]
+    }
+
+    def listBrokerVersionInfo(): java.util.HashMap[Node, NodeApiVersions] = {
+        BrokerApiVersion.listAllBrokerApiVersionInfo()
     }
 }

@@ -53,4 +53,9 @@ public class ClusterController {
     public Object peekClusterInfo() {
         return clusterService.peekClusterInfo();
     }
+
+    @GetMapping("/info/api/version")
+    public Object getBrokerApiVersionInfo() {
+        return clusterService.getBrokerApiVersionInfo();
+    }
 }
