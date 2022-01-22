@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.xuxd.kafka.console.beans.ClusterInfo;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.ClusterInfoDO;
 import com.xuxd.kafka.console.beans.vo.BrokerApiVersionVO;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import kafka.console.ClusterConsole;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,7 +44,9 @@ public class ClusterServiceImpl implements ClusterService {
     }
 
     @Override public ResponseData getClusterInfo() {
-        return ResponseData.create().data(clusterConsole.clusterInfo()).success();
+        ClusterInfo clusterInfo = clusterConsole.clusterInfo();
+        clusterInfo.setNodes(new TreeSet<>(clusterInfo.getNodes()));
+        return ResponseData.create().data(clusterInfo).success();
     }
 
     @Override public ResponseData getClusterInfoList() {

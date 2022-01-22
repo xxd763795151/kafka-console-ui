@@ -8,7 +8,7 @@ import org.apache.kafka.common.Node;
  * @author xuxd
  * @date 2021-10-08 14:03:21
  **/
-public class BrokerNode {
+public class BrokerNode implements Comparable{
 
     private int id;
 
@@ -79,5 +79,9 @@ public class BrokerNode {
 
     public void setController(boolean controller) {
         isController = controller;
+    }
+
+    @Override public int compareTo(Object o) {
+        return this.id - ((BrokerNode)o).id;
     }
 }
