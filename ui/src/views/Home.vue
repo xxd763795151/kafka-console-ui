@@ -6,22 +6,24 @@
     <p></p>
     <hr />
     <h3>kafka API 版本兼容性</h3>
-    <a-table
-      :columns="columns"
-      :data-source="brokerApiVersionInfo"
-      bordered
-      row-key="brokerId"
-    >
-      <div slot="operation" slot-scope="record">
-        <a-button
-          size="small"
-          href="javascript:;"
-          class="operation-btn"
-          @click="openApiVersionInfoDialog(record)"
-          >详情
-        </a-button>
-      </div>
-    </a-table>
+    <a-spin :spinning="apiVersionInfoLoading">
+      <a-table
+        :columns="columns"
+        :data-source="brokerApiVersionInfo"
+        bordered
+        row-key="brokerId"
+      >
+        <div slot="operation" slot-scope="record">
+          <a-button
+            size="small"
+            href="javascript:;"
+            class="operation-btn"
+            @click="openApiVersionInfoDialog(record)"
+            >详情
+          </a-button>
+        </div>
+      </a-table>
+    </a-spin>
     <VersionInfo
       :version-info="apiVersionInfo"
       :visible="showApiVersionInfoDialog"
@@ -47,6 +49,7 @@ export default {
       brokerApiVersionInfo: [],
       showApiVersionInfoDialog: false,
       apiVersionInfo: [],
+      apiVersionInfoLoading: false,
     };
   },
   methods: {
@@ -73,10 +76,12 @@ export default {
         });
       }
     });
+    this.apiVersionInfoLoading = true;
     request({
       url: KafkaClusterApi.getBrokerApiVersionInfo.url,
       method: KafkaClusterApi.getBrokerApiVersionInfo.method,
     }).then((res) => {
+      this.apiVersionInfoLoading = false;
       if (res.code == 0) {
         this.brokerApiVersionInfo = res.data;
       } else {

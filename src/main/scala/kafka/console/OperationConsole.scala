@@ -256,4 +256,20 @@ class OperationConsole(config: KafkaConfig, topicConsole: TopicConsole,
             throw e
         }).asInstanceOf[util.Map[TopicPartition, Throwable]]
     }
+
+    def proposedAssignments(reassignmentJson: String,
+        brokerListString: String): util.Map[TopicPartition, util.List[Int]] = {
+        withAdminClientAndCatchError(admin => {
+            val map = ReassignPartitionsCommand.generateAssignment(admin, reassignmentJson, brokerListString, true)._1
+            val res = new util.HashMap[TopicPartition, util.List[Int]]()
+            for (tp <- map.keys) {
+                res.put(tp, map(tp).asJava)
+//                res.put(tp, map.getOrElse(tp, Seq.empty).asJava)
+            }
+            res
+        }, e => {
+            log.error("proposedAssignments error.", e)
+            throw e
+        })
+    }.asInstanceOf[util.Map[TopicPartition, util.List[Int]]]
 }

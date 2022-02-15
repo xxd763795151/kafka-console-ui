@@ -30,4 +30,6 @@ public interface OperationService {
     ResponseData currentReassignments();
 
     ResponseData cancelReassignment(TopicPartition partition);
+
+    ResponseData proposedAssignments(String topic, List<Integer> brokerList);
 }

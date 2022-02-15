@@ -2,6 +2,7 @@ package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.beans.TopicPartition;
 import com.xuxd.kafka.console.beans.dto.BrokerThrottleDTO;
+import com.xuxd.kafka.console.beans.dto.ProposedAssignmentDTO;
 import com.xuxd.kafka.console.beans.dto.ReplicationDTO;
 import com.xuxd.kafka.console.beans.dto.SyncDataDTO;
 import com.xuxd.kafka.console.service.OperationService;
@@ -73,5 +74,10 @@ public class OperationController {
     @DeleteMapping("/replication/reassignments")
     public Object cancelReassignment(@RequestBody TopicPartition partition) {
         return operationService.cancelReassignment(new org.apache.kafka.common.TopicPartition(partition.getTopic(), partition.getPartition()));
+    }
+
+    @PostMapping("/replication/reassignments/proposed")
+    public Object proposedAssignments(@RequestBody ProposedAssignmentDTO dto) {
+        return operationService.proposedAssignments(dto.getTopic(), dto.getBrokers());
     }
 }

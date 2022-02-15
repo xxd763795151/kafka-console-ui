@@ -246,6 +246,10 @@ export const KafkaOpApi = {
     url: "/op/replication/reassignments",
     method: "delete",
   },
+  proposedAssignment: {
+    url: "/op/replication/reassignments/proposed",
+    method: "post",
+  },
 };
 export const KafkaMessageApi = {
   searchByTime: {

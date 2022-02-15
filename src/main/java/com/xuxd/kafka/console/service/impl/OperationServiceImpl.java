@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.xuxd.kafka.console.beans.ResponseData;
@@ -10,6 +11,7 @@ import com.xuxd.kafka.console.beans.vo.OffsetAlignmentVO;
 import com.xuxd.kafka.console.dao.MinOffsetAlignmentMapper;
 import com.xuxd.kafka.console.service.OperationService;
 import com.xuxd.kafka.console.utils.GsonUtil;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +21,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 import kafka.console.OperationConsole;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.PartitionReassignment;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.ObjectProvider;
@@ -161,5 +164,22 @@ public class OperationServiceImpl implements OperationService {
             return ResponseData.create().failed(sb.toString());
         }
         return ResponseData.create().success();
+    }
+
+    @Override public ResponseData proposedAssignments(String topic, List<Integer> brokerList) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("version", 1);
+        Map<String, String> topicMap = new HashMap<>(1, 1.0f);
+        topicMap.put("topic", topic);
+        params.put("topics", Lists.newArrayList(topicMap));
+        List<String> list = brokerList.stream().map(String::valueOf).collect(Collectors.toList());
+        Map<TopicPartition, List<Object>> assignments = operationConsole.proposedAssignments(gson.toJson(params), StringUtils.join(list, ","));
+        List<CurrentReassignmentVO> res = new ArrayList<>(assignments.size());
+        assignments.forEach((tp, replicas) -> {
+            CurrentReassignmentVO vo = new CurrentReassignmentVO(tp.topic(), tp.partition(),
+                replicas.stream().map(x -> (Integer) x).collect(Collectors.toList()), null, null);
+            res.add(vo);
+        });
+        return ResponseData.create().data(res).success();
     }
 }

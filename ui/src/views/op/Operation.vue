@@ -49,6 +49,15 @@
           <label>说明：</label>
           <span>查看正在进行副本变更/重分配的任务，或者将其取消</span>
         </p>
+        <p>
+          <a-button type="primary" @click="openReplicaReassignDialog">
+            副本重分配
+          </a-button>
+          <label>说明：</label>
+          <span
+            >副本所在节点重新分配，打个比方，集群有6个节点，分区1的3个副本在节点1、2、3上，现在将它们重新分配到3、4、5上</span
+          >
+        </p>
       </a-card>
     </div>
     <!--    隐藏数据同步相关-->
@@ -125,6 +134,11 @@
       :visible="clusterManager.showClusterInfoDialog"
       @closeClusterInfoDialog="closeClusterInfoDialog"
     ></ClusterInfo>
+    <ReplicaReassign
+      :visible="replicationManager.showReplicaReassignDialog"
+      @closeReplicaReassignDialog="closeReplicaReassignDialog"
+    >
+    </ReplicaReassign>
   </div>
 </template>
 
@@ -138,6 +152,7 @@ import ConfigThrottle from "@/views/op/ConfigThrottle";
 import RemoveThrottle from "@/views/op/RemoveThrottle";
 import CurrentReassignments from "@/views/op/CurrentReassignments";
 import ClusterInfo from "@/views/op/ClusterInfo";
+import ReplicaReassign from "@/views/op/ReplicaReassign";
 export default {
   name: "Operation",
   components: {
@@ -150,6 +165,7 @@ export default {
     RemoveThrottle,
     CurrentReassignments,
     ClusterInfo,
+    ReplicaReassign,
   },
   data() {
     return {
@@ -162,6 +178,7 @@ export default {
       replicationManager: {
         showElectPreferredLeaderDialog: false,
         showCurrentReassignmentsDialog: false,
+        showReplicaReassignDialog: false,
       },
       brokerManager: {
         showConfigThrottleDialog: false,
@@ -226,6 +243,12 @@ export default {
     },
     closeClusterInfoDialog() {
       this.clusterManager.showClusterInfoDialog = false;
+    },
+    openReplicaReassignDialog() {
+      this.replicationManager.showReplicaReassignDialog = true;
+    },
+    closeReplicaReassignDialog() {
+      this.replicationManager.showReplicaReassignDialog = false;
     },
   },
 };
