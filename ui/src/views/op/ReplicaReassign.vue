@@ -81,8 +81,21 @@
           "
         >
         </a-table>
-        <a-button type="danger"> 更新分配 </a-button>
+        <a-button type="danger" @click="updateAssignment"> 更新分配 </a-button>
       </a-spin>
+      <hr />
+      <h4>注意</h4>
+      <ul>
+        <li>
+          副本重分配，可以将副本分配到其它broker上，通过选择上面的broker节点，根据这几个节点生成分配方案
+        </li>
+        <li>
+          选择的broker的节点数量不能少于当前的副本数，比如有3个副本，至少需要3个broker节点
+        </li>
+        <li>
+          数据量太大，考虑设置一下限流，毕竟重新分配后，不同broker之间可能做数据迁移
+        </li>
+      </ul>
     </div>
   </a-modal>
 </template>
@@ -216,10 +229,9 @@ export default {
             description: res.msg,
           });
         } else {
-          this.proposedAssignment = res.data;
-          this.proposedAssignmentShow = Object.assign(
-            [],
-            this.proposedAssignment
+          this.proposedAssignmentShow = res.data;
+          this.proposedAssignment = JSON.parse(
+            JSON.stringify(this.proposedAssignmentShow)
           );
           this.proposedAssignmentShow.forEach(
             (e) => (e.replicas = e.replicas.join(","))
@@ -235,6 +247,33 @@ export default {
     handleCancel() {
       this.data = [];
       this.$emit("closeReplicaReassignDialog", { refresh: false });
+    },
+    updateAssignment() {
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          if (this.proposedAssignment.length == 0) {
+            this.$message.warn("请先生成分配计划！");
+            return;
+          }
+          this.loading = true;
+          request({
+            url: KafkaTopicApi.updateReplicaAssignment.url,
+            method: KafkaTopicApi.updateReplicaAssignment.method,
+            data: { partitions: this.proposedAssignment },
+          }).then((res) => {
+            this.loading = false;
+            if (res.code == 0) {
+              this.$message.success(res.msg);
+              this.handleTopicChange(values.topic);
+            } else {
+              notification.error({
+                message: "error",
+                description: res.msg,
+              });
+            }
+          });
+        }
+      });
     },
   },
 };
