@@ -73,7 +73,7 @@ sh bin/shutdown.sh
 
 ## 联系方式
 + 微信群
-  <img src="https://github.com/dongyinuo/kafka-console-ui/blob/feature/dongyinuo/add/contact/document/contact/weixin_contact.jpeg" width="40%"/>
+<img src="https://github.com/dongyinuo/kafka-console-ui/blob/feature/dongyinuo/add/contact/document/contact/weixin_contact.jpeg" width="40%"/>
 
 + 若联系方式失效, 请联系加一下微信, 说明意图
     - xxd763795151
