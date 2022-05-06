@@ -92,6 +92,29 @@ export const KafkaConfigApi = {
   },
 };
 
+export const DevOpsUserAPi = {
+  createUser: {
+    url: "/devops/user/add",
+    method: "post",
+  },
+  userList: {
+    url: "/devops/user/list",
+    method: "get",
+  },
+  deleteUser: {
+    url: "/devops/user/",
+    method: "delete",
+  },
+  updateUser: {
+    url: "/devops/user/update",
+    method: "post",
+  },
+  login: {
+    url: "/devops/user/login",
+    method: "post",
+  },
+}
+
 export const KafkaTopicApi = {
   getTopicNameList: {
     url: "/topic",

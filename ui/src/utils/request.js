@@ -1,4 +1,5 @@
 import axios from "axios";
+import router from "../router";
 import notification from "ant-design-vue/es/notification";
 import { VueAxios } from "./axios";
 import { getClusterInfo } from "@/utils/local-cache";
@@ -25,6 +26,7 @@ const errorHandler = (error) => {
 // request interceptor
 request.interceptors.request.use((config) => {
   const clusterInfo = getClusterInfo();
+  config.headers["token"] = localStorage.getItem('token');
   if (clusterInfo) {
     config.headers["X-Cluster-Info-Id"] = clusterInfo.id;
     // config.headers["X-Cluster-Info-Name"] = encodeURIComponent(clusterInfo.clusterName);
@@ -34,6 +36,10 @@ request.interceptors.request.use((config) => {
 
 // response interceptor
 request.interceptors.response.use((response) => {
+  if (response.data.code === -5000){
+    router.push({ path:'/'})
+    return
+  }
   return response.data;
 }, errorHandler);
 

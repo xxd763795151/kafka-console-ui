@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.beans.ReplicaAssignment;
+import com.xuxd.kafka.console.beans.annotation.RequiredAuthorize;
 import com.xuxd.kafka.console.beans.dto.AddPartitionDTO;
 import com.xuxd.kafka.console.beans.dto.NewTopicDTO;
 import com.xuxd.kafka.console.beans.dto.TopicThrottleDTO;
@@ -43,6 +44,7 @@ public class TopicController {
     }
 
     @DeleteMapping
+    @RequiredAuthorize
     public Object deleteTopic(@RequestParam String topic) {
         return topicService.deleteTopic(topic);
     }
@@ -53,11 +55,13 @@ public class TopicController {
     }
 
     @PostMapping("/new")
+    @RequiredAuthorize
     public Object createNewTopic(@RequestBody NewTopicDTO topicDTO) {
         return topicService.createTopic(topicDTO.toNewTopic());
     }
 
     @PostMapping("/partition/new")
+    @RequiredAuthorize
     public Object addPartition(@RequestBody AddPartitionDTO partitionDTO) {
         String topic = partitionDTO.getTopic().trim();
         int addNum = partitionDTO.getAddNum();
@@ -80,11 +84,13 @@ public class TopicController {
     }
 
     @PostMapping("/replica/assignment")
+    @RequiredAuthorize
     public Object updateReplicaAssignment(@RequestBody ReplicaAssignment assignment) {
         return topicService.updateReplicaAssignment(assignment);
     }
 
     @PostMapping("/replica/throttle")
+    @RequiredAuthorize
     public Object configThrottle(@RequestBody TopicThrottleDTO dto) {
         return topicService.configThrottle(dto.getTopic(), dto.getPartitions(), dto.getOperation());
     }

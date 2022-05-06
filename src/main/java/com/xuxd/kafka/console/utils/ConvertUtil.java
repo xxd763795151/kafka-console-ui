@@ -1,17 +1,15 @@
 package com.xuxd.kafka.console.utils;
 
 import com.google.common.base.Preconditions;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.beans.BeanCopier;
+import org.springframework.objenesis.ObjenesisStd;
+import org.springframework.util.ClassUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.ClassUtils;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * kafka-console-ui.
@@ -21,6 +19,47 @@ import org.springframework.util.ClassUtils;
  **/
 @Slf4j
 public class ConvertUtil {
+
+    private static ThreadLocal<ObjenesisStd> objenesisStdThreadLocal = ThreadLocal.withInitial(ObjenesisStd::new);
+    private static ConcurrentHashMap<Class<?>, ConcurrentHashMap<Class<?>, BeanCopier>> cache = new ConcurrentHashMap<>();
+
+    public static <T> T copy(Object source, Class<T> target) {
+        return copy(source, objenesisStdThreadLocal.get().newInstance(target));
+    }
+
+    public static <T> T copy(Object source, T target) {
+        if (null == source) {
+            return null;
+        }
+        BeanCopier beanCopier = getCacheBeanCopier(source.getClass(), target.getClass());
+        beanCopier.copy(source, target, null);
+        return target;
+    }
+
+    public static <T> List<T> copyList(List<?> sources, Class<T> target) {
+        if (sources.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        ArrayList<T> list = new ArrayList<>(sources.size());
+        ObjenesisStd objenesisStd = objenesisStdThreadLocal.get();
+        for (Object source : sources) {
+            if (source == null) {
+                break;
+            }
+            T newInstance = objenesisStd.newInstance(target);
+            BeanCopier beanCopier = getCacheBeanCopier(source.getClass(), target);
+            beanCopier.copy(source, newInstance, null);
+            list.add(newInstance);
+        }
+        return list;
+    }
+
+    private static <S, T> BeanCopier getCacheBeanCopier(Class<S> source, Class<T> target) {
+        ConcurrentHashMap<Class<?>, BeanCopier> copierConcurrentHashMap =
+                cache.computeIfAbsent(source, aClass -> new ConcurrentHashMap<>(16));
+        return copierConcurrentHashMap.computeIfAbsent(target, aClass -> BeanCopier.create(source, target, false));
+    }
 
     public static Map<String, Object> toMap(Object src) {
         Preconditions.checkNotNull(src);

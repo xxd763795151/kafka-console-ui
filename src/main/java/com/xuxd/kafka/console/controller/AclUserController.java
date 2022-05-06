@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.beans.AclUser;
+import com.xuxd.kafka.console.beans.annotation.RequiredAuthorize;
 import com.xuxd.kafka.console.service.AclService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,17 +31,20 @@ public class AclUserController {
     }
 
     @PostMapping
+    @RequiredAuthorize
     public Object addOrUpdateUser(@RequestBody AclUser user) {
         return aclService.addOrUpdateUser(user.getUsername(), user.getPassword());
     }
 
     @DeleteMapping
+    @RequiredAuthorize
     public Object deleteUser(@RequestBody AclUser user) {
         return aclService.deleteUser(user.getUsername());
     }
 
 
     @DeleteMapping("/auth")
+    @RequiredAuthorize
     public Object deleteUserAndAuth(@RequestBody AclUser user) {
         return aclService.deleteUserAndAuth(user.getUsername());
     }

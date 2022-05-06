@@ -1,176 +1,185 @@
 <template>
-  <div class="content">
-    <a-spin :spinning="loading">
-      <div class="topic">
-        <div id="components-form-topic-advanced-search">
-          <a-form
-            class="ant-advanced-search-form"
-            :form="form"
-            @submit="handleSearch"
-          >
-            <a-row :gutter="24">
-              <a-col :span="8">
-                <a-form-item :label="`topic`">
-                  <a-input
-                    placeholder="topic"
-                    class="input-w"
-                    v-decorator="['topic']"
-                    @change="onTopicUpdate"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="8">
-                <a-form-item :label="`类型`">
-                  <a-select
-                    class="type-select"
-                    v-model="type"
-                    placeholder="选择类型"
-                    @change="getTopicList"
-                  >
-                    <a-select-option value="all"> 所有</a-select-option>
-                    <a-select-option value="normal"> 普通</a-select-option>
-                    <a-select-option value="system"> 系统</a-select-option>
-                  </a-select>
-                </a-form-item>
-              </a-col>
-
-              <a-col :span="8" :style="{ textAlign: 'right' }">
-                <a-form-item>
-                  <a-button type="primary" html-type="submit"> 刷新</a-button>
-                  <!--                  <a-button :style="{ marginLeft: '8px' }" @click="handleReset">-->
-                  <!--                    重置-->
-                  <!--                  </a-button>-->
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </div>
-        <div class="operation-row-button">
-          <a-button type="primary" @click="openCreateTopicDialog"
-            >新增</a-button
-          >
-        </div>
-        <a-table
-          :columns="columns"
-          :data-source="filteredData"
-          bordered
-          row-key="name"
-        >
-          <div slot="partitions" slot-scope="text, record">
-            <a href="#" @click="openPartitionInfoDialog(record.name)"
-              >{{ text }}
-            </a>
-          </div>
-
-          <div slot="internal" slot-scope="text">
-            <span v-if="text" style="color: red">是</span><span v-else>否</span>
-          </div>
-
-          <div slot="operation" slot-scope="record" v-show="!record.internal">
-            <a-popconfirm
-              :title="'删除topic: ' + record.name + '？'"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="deleteTopic(record.name)"
+  <div>
+    <Header/>
+    <div class="content">
+      <a-spin :spinning="loading">
+        <div class="topic">
+          <div id="components-form-topic-advanced-search">
+            <a-form
+                class="ant-advanced-search-form"
+                :form="form"
+                @submit="handleSearch"
             >
-              <a-button size="small" href="javascript:;" class="operation-btn"
-                >删除
-              </a-button>
-            </a-popconfirm>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openPartitionInfoDialog(record.name)"
-              >分区详情
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openAddPartitionDialog(record.name)"
-              >增加分区
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openConsumedDetailDialog(record.name)"
-              >消费详情
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openTopicConfigDialog(record.name)"
-              >属性配置
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openUpdateReplicaDialog(record.name)"
-              >变更副本
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openMessageStatsDialog(record.name)"
-              >发送统计
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openThrottleDialog(record.name)"
-              >限流
-            </a-button>
+              <a-row :gutter="24">
+                <a-col :span="8">
+                  <a-form-item :label="`topic`">
+                    <a-input
+                        placeholder="topic"
+                        class="input-w"
+                        v-decorator="['topic']"
+                        @change="onTopicUpdate"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="8">
+                  <a-form-item :label="`类型`">
+                    <a-select
+                        class="type-select"
+                        v-model="type"
+                        placeholder="选择类型"
+                        @change="getTopicList"
+                    >
+                      <a-select-option value="all"> 所有</a-select-option>
+                      <a-select-option value="normal"> 普通</a-select-option>
+                      <a-select-option value="system"> 系统</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+
+                <a-col :span="8" :style="{ textAlign: 'right' }">
+                  <a-form-item>
+                    <a-button type="primary" html-type="submit"> 刷新</a-button>
+                    <!--                  <a-button :style="{ marginLeft: '8px' }" @click="handleReset">-->
+                    <!--                    重置-->
+                    <!--                  </a-button>-->
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
           </div>
-        </a-table>
-        <PartitionInfo
-          :topic="selectDetail.resourceName"
-          :visible="showPartitionInfo"
-          @closePartitionInfoDialog="closePartitionInfoDialog"
-        ></PartitionInfo>
-        <CreateTopic
-          :visible="showCreateTopic"
-          @closeCreateTopicDialog="closeCreateTopicDialog"
-        >
-        </CreateTopic>
-        <AddPartition
-          :visible="showAddPartition"
-          :topic="selectDetail.resourceName"
-          @closeAddPartitionDialog="closeAddPartitionDialog"
-        ></AddPartition>
-        <ConsumedDetail
-          :visible="showConsumedDetailDialog"
-          :topic="selectDetail.resourceName"
-          @closeConsumedDetailDialog="closeConsumedDetailDialog"
-        >
-        </ConsumedDetail>
-        <TopicConfig
-          :visible="showTopicConfigDialog"
-          :topic="selectDetail.resourceName"
-          @closeTopicConfigDialog="closeTopicConfigDialog"
-        ></TopicConfig>
-        <UpdateReplica
-          :visible="showUpdateReplicaDialog"
-          :topic="selectDetail.resourceName"
-          @closeUpdateReplicaDialog="closeUpdateReplicaDialog"
-        ></UpdateReplica>
-        <ConfigTopicThrottle
-          :visible="showThrottleDialog"
-          :topic="selectDetail.resourceName"
-          @closeThrottleDialog="closeThrottleDialog"
-        ></ConfigTopicThrottle>
-        <SendStats
-          :visible="showSendStatsDialog"
-          :topic="selectDetail.resourceName"
-          @closeMessageStatsDialog="closeMessageStatsDialog"
-        ></SendStats>
-      </div>
-    </a-spin>
+          <div v-show="manager" class="operation-row-button">
+            <a-button type="primary" @click="openCreateTopicDialog"
+            >新增</a-button
+            >
+          </div>
+          <a-table
+              :columns="columns"
+              :data-source="filteredData"
+              bordered
+              row-key="name"
+          >
+            <div slot="partitions" slot-scope="text, record">
+              <a href="#" @click="openPartitionInfoDialog(record.name)"
+              >{{ text }}
+              </a>
+            </div>
+
+            <div slot="internal" slot-scope="text">
+              <span v-if="text" style="color: red">是</span><span v-else>否</span>
+            </div>
+
+            <div slot="operation" slot-scope="record" v-show="!record.internal">
+              <a-popconfirm
+                  v-show="manager"
+                  :title="'删除topic: ' + record.name + '？'"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @confirm="deleteTopic(record.name)"
+              >
+                <a-button size="small" href="javascript:;" class="operation-btn"
+                >删除
+                </a-button>
+              </a-popconfirm>
+              <a-button
+                  v-show="manager"
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openPartitionInfoDialog(record.name)"
+              >分区详情
+              </a-button>
+              <a-button
+                  v-show="manager"
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openAddPartitionDialog(record.name)"
+              >增加分区
+              </a-button>
+              <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openConsumedDetailDialog(record.name)"
+              >消费详情
+              </a-button>
+              <a-button
+                  v-show="manager"
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openTopicConfigDialog(record.name)"
+              >属性配置
+              </a-button>
+              <a-button
+                  v-show="manager"
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openUpdateReplicaDialog(record.name)"
+              >变更副本
+              </a-button>
+              <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openMessageStatsDialog(record.name)"
+              >发送统计
+              </a-button>
+              <a-button
+                  v-show="manager"
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openThrottleDialog(record.name)"
+              >限流
+              </a-button>
+            </div>
+          </a-table>
+          <PartitionInfo
+              :topic="selectDetail.resourceName"
+              :visible="showPartitionInfo"
+              @closePartitionInfoDialog="closePartitionInfoDialog"
+          ></PartitionInfo>
+          <CreateTopic
+              :visible="showCreateTopic"
+              @closeCreateTopicDialog="closeCreateTopicDialog"
+          >
+          </CreateTopic>
+          <AddPartition
+              :visible="showAddPartition"
+              :topic="selectDetail.resourceName"
+              @closeAddPartitionDialog="closeAddPartitionDialog"
+          ></AddPartition>
+          <ConsumedDetail
+              :visible="showConsumedDetailDialog"
+              :topic="selectDetail.resourceName"
+              @closeConsumedDetailDialog="closeConsumedDetailDialog"
+          >
+          </ConsumedDetail>
+          <TopicConfig
+              :visible="showTopicConfigDialog"
+              :topic="selectDetail.resourceName"
+              @closeTopicConfigDialog="closeTopicConfigDialog"
+          ></TopicConfig>
+          <UpdateReplica
+              :visible="showUpdateReplicaDialog"
+              :topic="selectDetail.resourceName"
+              @closeUpdateReplicaDialog="closeUpdateReplicaDialog"
+          ></UpdateReplica>
+          <ConfigTopicThrottle
+              :visible="showThrottleDialog"
+              :topic="selectDetail.resourceName"
+              @closeThrottleDialog="closeThrottleDialog"
+          ></ConfigTopicThrottle>
+          <SendStats
+              :visible="showSendStatsDialog"
+              :topic="selectDetail.resourceName"
+              @closeMessageStatsDialog="closeMessageStatsDialog"
+          ></SendStats>
+        </div>
+      </a-spin>
+    </div>
   </div>
 </template>
 
@@ -186,7 +195,8 @@ import TopicConfig from "@/views/topic/TopicConfig";
 import UpdateReplica from "@/views/topic/UpdateReplica";
 import ConfigTopicThrottle from "@/views/topic/ConfigTopicThrottle";
 import SendStats from "@/views/topic/SendStats";
-
+import Header from "@/components/Header"
+import {isManager} from "../../utils/role";
 export default {
   name: "Topic",
   components: {
@@ -198,9 +208,11 @@ export default {
     UpdateReplica,
     ConfigTopicThrottle,
     SendStats,
+    Header
   },
   data() {
     return {
+      manager: isManager(),
       queryParam: { type: "normal" },
       data: [],
       columns,

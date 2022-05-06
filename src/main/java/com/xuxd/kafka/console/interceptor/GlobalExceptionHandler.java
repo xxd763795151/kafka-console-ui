@@ -1,7 +1,6 @@
 package com.xuxd.kafka.console.interceptor;
 
-import com.xuxd.kafka.console.beans.ResponseData;
-import javax.servlet.http.HttpServletRequest;
+import com.xuxd.kafka.console.utils.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,14 +13,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @date 2021-10-19 14:32:18
  **/
 @Slf4j
-@ControllerAdvice(basePackages = "com.xuxd.kafka.console.controller")
+@ControllerAdvice(basePackages = "com.xuxd.kafka.console")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public Object exceptionHandler(HttpServletRequest req, Exception ex) throws Exception {
-
+    public Object exceptionHandler(Exception ex) {
         log.error("exception handle: ", ex);
-        return ResponseData.create().failed(ex.getMessage());
+        return ResponseUtil.error(ex.getMessage());
     }
 }

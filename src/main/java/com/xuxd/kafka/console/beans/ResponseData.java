@@ -11,7 +11,7 @@ import lombok.Setter;
  **/
 public class ResponseData<T> {
 
-    public static final int SUCCESS_CODE = 0, FAILED_CODE = -9999;
+    public static final int SUCCESS_CODE = 0, TOKEN_ILLEGAL = -5000, FAILED_CODE = -9999;
 
     public static final String SUCCESS_MSG = "success", FAILED_MSG = "failed";
 
@@ -54,6 +54,12 @@ public class ResponseData<T> {
 
     public ResponseData<T> failed() {
         this.code = FAILED_CODE;
+        this.msg = FAILED_MSG;
+        return this;
+    }
+
+    public ResponseData<T> failed(int code) {
+        this.code = code;
         this.msg = FAILED_MSG;
         return this;
     }

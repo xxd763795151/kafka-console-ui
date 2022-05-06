@@ -1,157 +1,160 @@
 <template>
-  <div class="content">
-    <a-spin :spinning="loading">
-      <div class="acl">
-        <div id="components-form-acl-advanced-search">
-          <a-form
-            class="ant-advanced-search-form"
-            :form="form"
-            @submit="handleSearch"
-          >
-            <a-row :gutter="24">
-              <a-col :span="8">
-                <a-form-item :label="`用户名`">
-                  <a-input
-                    placeholder="username"
-                    class="input-w"
-                    v-decorator="['username']"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="8">
-                <a-form-item :label="`topic`">
-                  <a-input
-                    placeholder="topic"
-                    class="input-w"
-                    v-decorator="['topic']"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="8">
-                <a-form-item :label="`消费组`">
-                  <a-input
-                    placeholder="groupId"
-                    class="input-w"
-                    v-decorator="['groupId']"
-                  />
-                </a-form-item>
-              </a-col>
+  <div>
+    <Header/>
+    <div class="content">
+      <a-spin :spinning="loading">
+        <div class="acl">
+          <div id="components-form-acl-advanced-search">
+            <a-form
+                class="ant-advanced-search-form"
+                :form="form"
+                @submit="handleSearch"
+            >
+              <a-row :gutter="24">
+                <a-col :span="8">
+                  <a-form-item :label="`用户名`">
+                    <a-input
+                        placeholder="username"
+                        class="input-w"
+                        v-decorator="['username']"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="8">
+                  <a-form-item :label="`topic`">
+                    <a-input
+                        placeholder="topic"
+                        class="input-w"
+                        v-decorator="['topic']"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="8">
+                  <a-form-item :label="`消费组`">
+                    <a-input
+                        placeholder="groupId"
+                        class="input-w"
+                        v-decorator="['groupId']"
+                    />
+                  </a-form-item>
+                </a-col>
 
-              <a-col :span="24" :style="{ textAlign: 'right' }">
-                <a-button type="primary" html-type="submit"> 搜索</a-button>
-                <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
-                  重置
-                </a-button>
-              </a-col>
-            </a-row>
-          </a-form>
-        </div>
-        <div class="operation-row-button">
-          <a-button type="primary" @click="updateUser">新增/更新用户</a-button>
-          <UpdateUser
-            :visible="showUpdateUser"
-            @updateUserDialogData="closeUpdateUserDialog"
-          ></UpdateUser>
-        </div>
-        <a-table :columns="columns" :data-source="data" bordered>
-          <div slot="username" slot-scope="username">
+                <a-col :span="24" :style="{ textAlign: 'right' }">
+                  <a-button type="primary" html-type="submit"> 搜索</a-button>
+                  <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
+                    重置
+                  </a-button>
+                </a-col>
+              </a-row>
+            </a-form>
+          </div>
+          <div class="operation-row-button">
+            <a-button type="primary" @click="updateUser">新增/更新用户</a-button>
+            <UpdateUser
+                :visible="showUpdateUser"
+                @updateUserDialogData="closeUpdateUserDialog"
+            ></UpdateUser>
+          </div>
+          <a-table :columns="columns" :data-source="data" bordered>
+            <div slot="username" slot-scope="username">
             <span>{{ username }}</span
             ><a-button
-              size="small"
-              shape="round"
-              type="dashed"
-              style="float: right"
-              @click="onUserDetail(username)"
-              >详情</a-button
+                size="small"
+                shape="round"
+                type="dashed"
+                style="float: right"
+                @click="onUserDetail(username)"
+            >详情</a-button
             >
-          </div>
+            </div>
 
-          <div slot="topicList" slot-scope="topicList, record">
-            <a
-              href="#"
-              v-for="t in topicList"
-              :key="t"
-              @click="onTopicDetail(t, record.username)"
+            <div slot="topicList" slot-scope="topicList, record">
+              <a
+                  href="#"
+                  v-for="t in topicList"
+                  :key="t"
+                  @click="onTopicDetail(t, record.username)"
               ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
-            </a>
-          </div>
+              </a>
+            </div>
 
-          <div slot="groupList" slot-scope="groupList, record">
-            <a
-              href="#"
-              v-for="t in groupList"
-              :key="t"
-              @click="onGroupDetail(t, record.username)"
+            <div slot="groupList" slot-scope="groupList, record">
+              <a
+                  href="#"
+                  v-for="t in groupList"
+                  :key="t"
+                  @click="onGroupDetail(t, record.username)"
               ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
-            </a>
-          </div>
+              </a>
+            </div>
 
-          <div
-            slot="operation"
-            slot-scope="record"
-            v-show="!record.user || record.user.role != 'admin'"
-          >
-            <a-popconfirm
-              :title="'删除用户: ' + record.username + '及相关权限？'"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="onDeleteUser(record)"
+            <div
+                slot="operation"
+                slot-scope="record"
+                v-show="!record.user || record.user.role != 'admin'"
             >
-              <a-button size="small" href="javascript:;" class="operation-btn"
-                >删除</a-button
+              <a-popconfirm
+                  :title="'删除用户: ' + record.username + '及相关权限？'"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @confirm="onDeleteUser(record)"
               >
-            </a-popconfirm>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="onManageProducerAuth(record)"
+                <a-button size="small" href="javascript:;" class="operation-btn"
+                >删除</a-button
+                >
+              </a-popconfirm>
+              <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="onManageProducerAuth(record)"
               >管理生产权限
-            </a-button>
+              </a-button>
 
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="onManageConsumerAuth(record)"
+              <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="onManageConsumerAuth(record)"
               >管理消费权限
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="onAddAuth(record)"
+              </a-button>
+              <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="onAddAuth(record)"
               >增加权限
-            </a-button>
-          </div>
-        </a-table>
-        <UserDetail
-          :visible="openUserDetailDialog"
-          :username="selectDetail.username"
-          @userDetailDialog="closeUserDetailDialog"
-        ></UserDetail>
-        <AclDetail
-          :visible="openAclDetailDialog"
-          :selectDetail="selectDetail"
-          @aclDetailDialog="closeAclDetailDialog"
-        ></AclDetail>
-        <ManageProducerAuth
-          :visible="openManageProducerAuthDialog"
-          :record="selectRow"
-          @manageProducerAuthDialog="closeManageProducerAuthDialog"
-        ></ManageProducerAuth>
-        <ManageConsumerAuth
-          :visible="openManageConsumerAuthDialog"
-          :record="selectRow"
-          @manageConsumerAuthDialog="closeManageConsumerAuthDialog"
-        ></ManageConsumerAuth>
-        <AddAuth
-          :visible="openAddAuthDialog"
-          :record="selectRow"
-          @addAuthDialog="closeAddAuthDialog"
-        ></AddAuth>
-      </div>
-    </a-spin>
+              </a-button>
+            </div>
+          </a-table>
+          <UserDetail
+              :visible="openUserDetailDialog"
+              :username="selectDetail.username"
+              @userDetailDialog="closeUserDetailDialog"
+          ></UserDetail>
+          <AclDetail
+              :visible="openAclDetailDialog"
+              :selectDetail="selectDetail"
+              @aclDetailDialog="closeAclDetailDialog"
+          ></AclDetail>
+          <ManageProducerAuth
+              :visible="openManageProducerAuthDialog"
+              :record="selectRow"
+              @manageProducerAuthDialog="closeManageProducerAuthDialog"
+          ></ManageProducerAuth>
+          <ManageConsumerAuth
+              :visible="openManageConsumerAuthDialog"
+              :record="selectRow"
+              @manageConsumerAuthDialog="closeManageConsumerAuthDialog"
+          ></ManageConsumerAuth>
+          <AddAuth
+              :visible="openAddAuthDialog"
+              :record="selectRow"
+              @addAuthDialog="closeAddAuthDialog"
+          ></AddAuth>
+        </div>
+      </a-spin>
+    </div>
   </div>
 </template>
 
@@ -165,7 +168,7 @@ import ManageConsumerAuth from "@/views/acl/ManageConsumerAuth";
 import AddAuth from "@/views/acl/AddAuth";
 import AclDetail from "@/views/acl/AclDetail";
 import UserDetail from "@/views/acl/UserDetail";
-
+import Header from "@/components/Header"
 export default {
   name: "Acl",
   components: {
@@ -175,6 +178,7 @@ export default {
     AddAuth,
     AclDetail,
     UserDetail,
+    Header
   },
   data() {
     return {

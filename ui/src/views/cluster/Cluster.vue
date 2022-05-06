@@ -1,43 +1,47 @@
 <template>
-  <div class="content">
-    <a-spin :spinning="loading">
-      <div class="body-c">
-        <div class="cluster-id">
-          <h3>集群ID：{{ clusterId }}</h3>
-        </div>
+  <div>
+    <Header/>
+    <div class="content">
+      <a-spin :spinning="loading">
+        <div class="body-c">
+          <div class="cluster-id">
+            <h3>集群ID：{{ clusterId }}</h3>
+          </div>
 
-        <a-table :columns="columns" :data-source="data" bordered row-key="id">
-          <div slot="addr" slot-scope="text, record">
-            {{ record.host }}:{{ record.port }}
-          </div>
-          <div slot="controller" slot-scope="text">
-            <span v-if="text" style="color: red">是</span><span v-else>否</span>
-          </div>
-          <div slot="operation" slot-scope="record" v-show="!record.internal">
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openBrokerConfigDialog(record, false)"
+          <a-table :columns="columns" :data-source="data" bordered row-key="id">
+            <div slot="addr" slot-scope="text, record">
+              {{ record.host }}:{{ record.port }}
+            </div>
+            <div slot="controller" slot-scope="text">
+              <span v-if="text" style="color: red">是</span><span v-else>否</span>
+            </div>
+            <div slot="operation" slot-scope="record" v-show="!record.internal">
+              <a-button
+                  v-show="manager"
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openBrokerConfigDialog(record, false)"
               >属性配置
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openBrokerConfigDialog(record, true)"
+              </a-button>
+              <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openBrokerConfigDialog(record, true)"
               >日志配置
-            </a-button>
-          </div>
-        </a-table>
-      </div>
-      <BrokerConfig
-        :visible="showBrokerConfigDialog"
-        :id="this.select.idString"
-        :is-logger-config="isLoggerConfig"
-        @closeBrokerConfigDialog="closeBrokerConfigDialog"
-      ></BrokerConfig>
-    </a-spin>
+              </a-button>
+            </div>
+          </a-table>
+        </div>
+        <BrokerConfig
+            :visible="showBrokerConfigDialog"
+            :id="this.select.idString"
+            :is-logger-config="isLoggerConfig"
+            @closeBrokerConfigDialog="closeBrokerConfigDialog"
+        ></BrokerConfig>
+      </a-spin>
+    </div>
   </div>
 </template>
 
@@ -46,12 +50,14 @@ import request from "@/utils/request";
 import { KafkaClusterApi } from "@/utils/api";
 import BrokerConfig from "@/views/cluster/BrokerConfig";
 import notification from "ant-design-vue/lib/notification";
-
+import Header from "@/components/Header"
+import {isManager} from "../../utils/role";
 export default {
   name: "Topic",
-  components: { BrokerConfig },
+  components: { BrokerConfig, Header },
   data() {
     return {
+      manager: isManager(),
       data: [],
       columns,
       loading: false,

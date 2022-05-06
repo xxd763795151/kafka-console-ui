@@ -31,7 +31,7 @@
               {{ i }}
             </span>
           </div>
-          <div slot="operation" slot-scope="record" v-show="!record.internal">
+          <div slot="operation" slot-scope="record" v-show="!record.internal && manager">
             <a-popconfirm
               :title="
                 'topic: ' +
@@ -68,6 +68,7 @@ import request from "@/utils/request";
 import { KafkaOpApi, KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
 import moment from "moment";
+import {isManager} from "../../utils/role";
 export default {
   name: "PartitionInfo",
   props: {
@@ -82,6 +83,7 @@ export default {
   },
   data() {
     return {
+      manager: isManager(),
       columns: columns,
       show: this.visible,
       data: [],

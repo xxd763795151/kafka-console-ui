@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.annotation.RequiredAuthorize;
 import com.xuxd.kafka.console.beans.dto.AlterConfigDTO;
 import com.xuxd.kafka.console.beans.enums.AlterType;
 import com.xuxd.kafka.console.config.KafkaConfig;
@@ -47,11 +48,13 @@ public class ConfigController {
     }
 
     @PostMapping("/topic")
+    @RequiredAuthorize
     public Object setTopicConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterTopicConfig(dto.getEntity(), dto.to(), AlterType.SET);
     }
 
     @DeleteMapping("/topic")
+    @RequiredAuthorize
     public Object deleteTopicConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterTopicConfig(dto.getEntity(), dto.to(), AlterType.DELETE);
     }
@@ -62,11 +65,13 @@ public class ConfigController {
     }
 
     @PostMapping("/broker")
+    @RequiredAuthorize
     public Object setBrokerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerConfig(dto.getEntity(), dto.to(), AlterType.SET);
     }
 
     @DeleteMapping("/broker")
+    @RequiredAuthorize
     public Object deleteBrokerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerConfig(dto.getEntity(), dto.to(), AlterType.DELETE);
     }
@@ -77,11 +82,13 @@ public class ConfigController {
     }
 
     @PostMapping("/broker/logger")
+    @RequiredAuthorize
     public Object setBrokerLoggerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerLoggerConfig(dto.getEntity(), dto.to(), AlterType.SET);
     }
 
     @DeleteMapping("/broker/logger")
+    @RequiredAuthorize
     public Object deleteBrokerLoggerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerLoggerConfig(dto.getEntity(), dto.to(), AlterType.DELETE);
     }

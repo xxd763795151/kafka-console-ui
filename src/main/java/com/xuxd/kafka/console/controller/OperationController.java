@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.beans.TopicPartition;
+import com.xuxd.kafka.console.beans.annotation.RequiredAuthorize;
 import com.xuxd.kafka.console.beans.dto.BrokerThrottleDTO;
 import com.xuxd.kafka.console.beans.dto.ProposedAssignmentDTO;
 import com.xuxd.kafka.console.beans.dto.ReplicationDTO;
@@ -30,12 +31,14 @@ public class OperationController {
     private OperationService operationService;
 
     @PostMapping("/sync/consumer/offset")
+    @RequiredAuthorize
     public Object syncConsumerOffset(@RequestBody SyncDataDTO dto) {
         dto.getProperties().put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, dto.getAddress());
         return operationService.syncConsumerOffset(dto.getGroupId(), dto.getTopic(), dto.getProperties());
     }
 
     @PostMapping("/sync/min/offset/alignment")
+    @RequiredAuthorize
     public Object minOffsetAlignment(@RequestBody SyncDataDTO dto) {
         dto.getProperties().put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, dto.getAddress());
         return operationService.minOffsetAlignment(dto.getGroupId(), dto.getTopic(), dto.getProperties());
@@ -47,6 +50,7 @@ public class OperationController {
     }
 
     @DeleteMapping("/sync/alignment")
+    @RequiredAuthorize
     public Object deleteAlignment(@RequestParam Long id) {
         return operationService.deleteAlignmentById(id);
     }
@@ -57,6 +61,7 @@ public class OperationController {
     }
 
     @PostMapping("/broker/throttle")
+    @RequiredAuthorize
     public Object configThrottle(@RequestBody BrokerThrottleDTO dto) {
         return operationService.configThrottle(dto.getBrokerList(), dto.getUnit().toKb(dto.getThrottle()));
     }
@@ -77,6 +82,7 @@ public class OperationController {
     }
 
     @PostMapping("/replication/reassignments/proposed")
+    @RequiredAuthorize
     public Object proposedAssignments(@RequestBody ProposedAssignmentDTO dto) {
         return operationService.proposedAssignments(dto.getTopic(), dto.getBrokers());
     }

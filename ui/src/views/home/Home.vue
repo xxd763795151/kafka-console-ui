@@ -1,35 +1,38 @@
 <template>
-  <div class="home">
-    <a-card title="控制台默认配置" class="card-style">
-      <p v-for="(v, k) in config" :key="k">{{ k }}={{ v }}</p>
-    </a-card>
-    <p></p>
-    <hr />
-    <h3>kafka API 版本兼容性</h3>
-    <a-spin :spinning="apiVersionInfoLoading">
-      <a-table
-        :columns="columns"
-        :data-source="brokerApiVersionInfo"
-        bordered
-        row-key="brokerId"
-      >
-        <div slot="operation" slot-scope="record">
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="openApiVersionInfoDialog(record)"
+  <div>
+    <Header/>
+    <div class="content">
+      <a-card title="控制台默认配置" class="card-style">
+        <p v-for="(v, k) in config" :key="k">{{ k }}={{ v }}</p>
+      </a-card>
+      <p></p>
+      <hr />
+      <h3>kafka API 版本兼容性</h3>
+      <a-spin :spinning="apiVersionInfoLoading">
+        <a-table
+            :columns="columns"
+            :data-source="brokerApiVersionInfo"
+            bordered
+            row-key="brokerId"
+        >
+          <div slot="operation" slot-scope="record">
+            <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                @click="openApiVersionInfoDialog(record)"
             >详情
-          </a-button>
-        </div>
-      </a-table>
-    </a-spin>
-    <VersionInfo
-      :version-info="apiVersionInfo"
-      :visible="showApiVersionInfoDialog"
-      @closeApiVersionInfoDialog="closeApiVersionInfoDialog"
-    >
-    </VersionInfo>
+            </a-button>
+          </div>
+        </a-table>
+      </a-spin>
+      <VersionInfo
+          :version-info="apiVersionInfo"
+          :visible="showApiVersionInfoDialog"
+          @closeApiVersionInfoDialog="closeApiVersionInfoDialog"
+      >
+      </VersionInfo>
+    </div>
   </div>
 </template>
 
@@ -39,9 +42,10 @@ import request from "@/utils/request";
 import { KafkaConfigApi, KafkaClusterApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
 import VersionInfo from "@/views/home/VersionInfo";
+import Header from "@/components/Header"
 export default {
   name: "Home",
-  components: { VersionInfo },
+  components: { VersionInfo, Header },
   data() {
     return {
       config: {},

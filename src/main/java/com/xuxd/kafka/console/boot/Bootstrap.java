@@ -2,15 +2,20 @@ package com.xuxd.kafka.console.boot;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xuxd.kafka.console.beans.dos.ClusterInfoDO;
+import com.xuxd.kafka.console.beans.dos.DevOpsUserDO;
 import com.xuxd.kafka.console.config.KafkaConfig;
 import com.xuxd.kafka.console.dao.ClusterInfoMapper;
+import com.xuxd.kafka.console.dao.DevOpsUserMapper;
 import com.xuxd.kafka.console.utils.ConvertUtil;
 import java.util.List;
+
+import com.xuxd.kafka.console.utils.Md5Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**

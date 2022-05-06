@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.annotation.RequiredAuthorize;
 import com.xuxd.kafka.console.beans.dto.AddSubscriptionDTO;
 import com.xuxd.kafka.console.beans.dto.QueryConsumerGroupDTO;
 import com.xuxd.kafka.console.beans.dto.ResetOffsetDTO;
@@ -67,11 +68,13 @@ public class ConsumerController {
     }
 
     @PostMapping("/subscription")
+    @RequiredAuthorize
     public Object addSubscription(@RequestBody AddSubscriptionDTO subscriptionDTO) {
         return consumerService.addSubscription(subscriptionDTO.getGroupId(), subscriptionDTO.getTopic());
     }
 
     @PostMapping("/reset/offset")
+    @RequiredAuthorize
     public Object restOffset(@RequestBody ResetOffsetDTO offsetDTO) {
         ResponseData res = ResponseData.create().failed("unknown");
         switch (offsetDTO.getLevel()) {

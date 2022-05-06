@@ -1,144 +1,148 @@
 <template>
-  <div class="content">
-    <a-spin :spinning="loading">
-      <div class="topic">
-        <div id="form-consumer-group-advanced-search">
-          <a-form
-            class="ant-advanced-search-form"
-            :form="form"
-            @submit="handleSearch"
-          >
-            <a-row :gutter="24">
-              <a-col :span="8">
-                <a-form-item :label="`消费组`">
-                  <a-input
-                    placeholder="groupId"
-                    class="input-w"
-                    v-decorator="['groupId']"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="12">
-                <a-form-item :label="`状态`">
-                  <a-checkbox-group
-                    v-decorator="['states']"
-                    style="width: 100%"
-                  >
-                    <a-row>
-                      <a-col :span="8">
-                        <a-checkbox value="Empty"> Empty</a-checkbox>
-                      </a-col>
-                      <a-col :span="8">
-                        <a-checkbox value="PreparingRebalance">
-                          PreparingRebalance
-                        </a-checkbox>
-                      </a-col>
-                      <a-col :span="8">
-                        <a-checkbox value="CompletingRebalance">
-                          CompletingRebalance
-                        </a-checkbox>
-                      </a-col>
-                      <a-col :span="8">
-                        <a-checkbox value="Stable"> Stable</a-checkbox>
-                      </a-col>
-                      <a-col :span="8">
-                        <a-checkbox value="Dead"> Dead</a-checkbox>
-                      </a-col>
-                    </a-row>
-                  </a-checkbox-group>
-                </a-form-item>
-              </a-col>
-
-              <a-col :span="4" :style="{ textAlign: 'right' }">
-                <a-form-item>
-                  <a-button type="primary" html-type="submit"> 搜索</a-button>
-                  <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
-                    重置
-                  </a-button>
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </div>
-        <div class="operation-row-button">
-          <a-button type="primary" @click="openAddSubscriptionDialog"
-            >新增订阅</a-button
-          >
-        </div>
-        <a-table
-          :columns="columns"
-          :data-source="data"
-          bordered
-          row-key="groupId"
-        >
-          <div slot="members" slot-scope="text, record">
-            <a href="#" @click="openConsumerMemberDialog(record.groupId)"
-              >{{ text }}
-            </a>
-          </div>
-
-          <div slot="state" slot-scope="text">
-            {{ text }}
-            <!--          <span v-if="text" style="color: red">是</span><span v-else>否</span>-->
-          </div>
-
-          <div slot="operation" slot-scope="record" v-show="!record.internal">
-            <a-popconfirm
-              :title="'删除消费组: ' + record.groupId + '？'"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="deleteGroup(record.groupId)"
+  <div>
+    <Header/>
+    <div class="content">
+      <a-spin :spinning="loading">
+        <div class="topic">
+          <div id="form-consumer-group-advanced-search">
+            <a-form
+                class="ant-advanced-search-form"
+                :form="form"
+                @submit="handleSearch"
             >
-              <a-button size="small" href="javascript:;" class="operation-btn"
-                >删除
-              </a-button>
-            </a-popconfirm>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openConsumerMemberDialog(record.groupId)"
-              >消费端
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openConsumerDetailDialog(record.groupId)"
-              >消费详情
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openOffsetPartitionDialog(record.groupId)"
-              >位移分区
-            </a-button>
+              <a-row :gutter="24">
+                <a-col :span="8">
+                  <a-form-item :label="`消费组`">
+                    <a-input
+                        placeholder="groupId"
+                        class="input-w"
+                        v-decorator="['groupId']"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="12">
+                  <a-form-item :label="`状态`">
+                    <a-checkbox-group
+                        v-decorator="['states']"
+                        style="width: 100%"
+                    >
+                      <a-row>
+                        <a-col :span="8">
+                          <a-checkbox value="Empty"> Empty</a-checkbox>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-checkbox value="PreparingRebalance">
+                            PreparingRebalance
+                          </a-checkbox>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-checkbox value="CompletingRebalance">
+                            CompletingRebalance
+                          </a-checkbox>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-checkbox value="Stable"> Stable</a-checkbox>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-checkbox value="Dead"> Dead</a-checkbox>
+                        </a-col>
+                      </a-row>
+                    </a-checkbox-group>
+                  </a-form-item>
+                </a-col>
+
+                <a-col :span="4" :style="{ textAlign: 'right' }">
+                  <a-form-item>
+                    <a-button type="primary" html-type="submit"> 搜索</a-button>
+                    <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
+                      重置
+                    </a-button>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
           </div>
-        </a-table>
-        <Member
-          :visible="showConsumerGroupDialog"
-          :group="selectDetail.resourceName"
-          @closeConsumerMemberDialog="closeConsumerDialog"
-        ></Member>
-        <ConsumerDetail
-          :visible="showConsumerDetailDialog"
-          :group="selectDetail.resourceName"
-          @closeConsumerDetailDialog="closeConsumerDetailDialog"
-        >
-        </ConsumerDetail>
-        <AddSupscription
-          :visible="showAddSubscriptionDialog"
-          @closeAddSubscriptionDialog="closeAddSubscriptionDialog"
-        >
-        </AddSupscription>
-        <OffsetTopicPartition
-          :visible="showOffsetPartitionDialog"
-          :group="selectDetail.resourceName"
-          @closeOffsetPartitionDialog="closeOffsetPartitionDialog"
-        ></OffsetTopicPartition>
-      </div>
-    </a-spin>
+          <div v-show="manager" class="operation-row-button">
+            <a-button type="primary" @click="openAddSubscriptionDialog"
+            >新增订阅</a-button
+            >
+          </div>
+          <a-table
+              :columns="columns"
+              :data-source="data"
+              bordered
+              row-key="groupId"
+          >
+            <div slot="members" slot-scope="text, record">
+              <a href="#" @click="openConsumerMemberDialog(record.groupId)"
+              >{{ text }}
+              </a>
+            </div>
+
+            <div slot="state" slot-scope="text">
+              {{ text }}
+              <!--          <span v-if="text" style="color: red">是</span><span v-else>否</span>-->
+            </div>
+
+            <div slot="operation" slot-scope="record" v-show="!record.internal">
+              <a-popconfirm
+                  :title="'删除消费组: ' + record.groupId + '？'"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @confirm="deleteGroup(record.groupId)"
+              >
+                <a-button v-show="manager" size="small" href="javascript:;" class="operation-btn"
+                >删除
+                </a-button>
+              </a-popconfirm>
+              <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openConsumerMemberDialog(record.groupId)"
+              >消费端
+              </a-button>
+              <a-button
+                  v-show="manager"
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openConsumerDetailDialog(record.groupId)"
+              >消费详情
+              </a-button>
+              <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openOffsetPartitionDialog(record.groupId)"
+              >位移分区
+              </a-button>
+            </div>
+          </a-table>
+          <Member
+              :visible="showConsumerGroupDialog"
+              :group="selectDetail.resourceName"
+              @closeConsumerMemberDialog="closeConsumerDialog"
+          ></Member>
+          <ConsumerDetail
+              :visible="showConsumerDetailDialog"
+              :group="selectDetail.resourceName"
+              @closeConsumerDetailDialog="closeConsumerDetailDialog"
+          >
+          </ConsumerDetail>
+          <AddSupscription
+              :visible="showAddSubscriptionDialog"
+              @closeAddSubscriptionDialog="closeAddSubscriptionDialog"
+          >
+          </AddSupscription>
+          <OffsetTopicPartition
+              :visible="showOffsetPartitionDialog"
+              :group="selectDetail.resourceName"
+              @closeOffsetPartitionDialog="closeOffsetPartitionDialog"
+          ></OffsetTopicPartition>
+        </div>
+      </a-spin>
+    </div>
   </div>
 </template>
 
@@ -150,12 +154,14 @@ import Member from "@/views/group/Member";
 import ConsumerDetail from "@/views/group/ConsumerDetail";
 import AddSupscription from "@/views/group/AddSupscription";
 import OffsetTopicPartition from "@/views/group/OffsetTopicPartition";
-
+import Header from "@/components/Header"
+import {isManager} from "../../utils/role";
 export default {
   name: "ConsumerGroup",
-  components: { Member, ConsumerDetail, AddSupscription, OffsetTopicPartition },
+  components: { Member, ConsumerDetail, AddSupscription, OffsetTopicPartition, Header },
   data() {
     return {
+      manager: isManager(),
       queryParam: {},
       data: [],
       columns,
