@@ -1,6 +1,6 @@
 # kafka可视化管理平台
 一款轻量级的kafka可视化管理平台，安装配置快捷、简单易用。  
-为了开发的省事，没有国际化支持，只支持中文展示。  
+为了开发的省事，没有国际化支持，页面只支持中文展示。  
 用过rocketmq-console吧，对，前端展示风格跟那个有点类似。
 
 ## 页面预览
@@ -22,7 +22,9 @@ acl配置说明，如果kafka集群启用了ACL，但是控制台没看到Acl菜
 ![功能特性](./document/img/功能特性.png)
 
 ## 安装包下载
-点击下载(v1.0.4版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.4/kafka-console-ui.zip)
+点击下载(v1.0.4版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.4/kafka-console-ui.zip)  
+
+如果安装包下载的比较慢，可以查看下面的源码打包说明，把代码下载下来，快速打包  
 
 ## 快速使用
 ### Windows
@@ -70,6 +72,12 @@ sh bin/shutdown.sh
 
 ## 本地开发
 如果需要本地开发，开发环境配置查看：[本地开发](./document/develop/开发配置.md)
+
+## 登录认证和权限
+目前主分支不支持登录认证，感谢@dongyinuo 同学开发了一版支持登录认证，及相关的按钮权限（主要有两个角色：管理员和普通开发人员）。  
+在分支：feature/dongyinuo/20220501/devops 上。  
+如果有需要使用管理台登录认证的，可以切换到这个分支上进行打包，打包方式看 源码打包 说明。  
+默认登录账户：admin/kafka-console-ui521
 
 ## 联系方式
 + 微信群

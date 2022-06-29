@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.xuxd.kafka.console.beans.BrokerNode;
 import com.xuxd.kafka.console.beans.ClusterInfo;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.ClusterInfoDO;
@@ -8,15 +9,11 @@ import com.xuxd.kafka.console.beans.vo.BrokerApiVersionVO;
 import com.xuxd.kafka.console.beans.vo.ClusterInfoVO;
 import com.xuxd.kafka.console.dao.ClusterInfoMapper;
 import com.xuxd.kafka.console.service.ClusterService;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import kafka.console.ClusterConsole;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.NodeApiVersions;
@@ -30,6 +27,7 @@ import org.springframework.stereotype.Service;
  * @author xuxd
  * @date 2021-10-08 14:23:09
  **/
+@Slf4j
 @Service
 public class ClusterServiceImpl implements ClusterService {
 
@@ -45,7 +43,12 @@ public class ClusterServiceImpl implements ClusterService {
 
     @Override public ResponseData getClusterInfo() {
         ClusterInfo clusterInfo = clusterConsole.clusterInfo();
-        clusterInfo.setNodes(new TreeSet<>(clusterInfo.getNodes()));
+        Set<BrokerNode> nodes = clusterInfo.getNodes();
+        if (nodes == null) {
+            log.error("集群节点信息为空，集群地址可能不正确或集群内没有活跃节点");
+            return ResponseData.create().failed("集群节点信息为空，集群地址可能不正确或集群内没有活跃节点");
+        }
+        clusterInfo.setNodes(new TreeSet<>(nodes));
         return ResponseData.create().data(clusterInfo).success();
     }
 
