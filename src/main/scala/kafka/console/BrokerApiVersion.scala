@@ -18,6 +18,7 @@ import org.apache.kafka.common.network.Selector
 import org.apache.kafka.common.protocol.Errors
 import org.apache.kafka.common.requests._
 import org.apache.kafka.common.utils.{KafkaThread, LogContext, Time}
+import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.IOException
 import java.util.Properties
@@ -34,7 +35,9 @@ import scala.util.{Failure, Success, Try}
  * @author xuxd
  * @date 2022-01-22 15:15:57
  * */
-object BrokerApiVersion extends Logging {
+object BrokerApiVersion{
+
+  protected lazy val log : Logger = LoggerFactory.getLogger(this.getClass)
 
     def listAllBrokerApiVersionInfo(): java.util.HashMap[Node, NodeApiVersions] = {
         val res = new java.util.HashMap[Node, NodeApiVersions]()
@@ -48,7 +51,7 @@ object BrokerApiVersion extends Logging {
                         case Success(v) => {
                             res.put(broker, v)
                         }
-                        case Failure(v) => logger.error(s"${broker} -> ERROR: ${v}\n")
+                        case Failure(v) => log.error(s"${broker} -> ERROR: ${v}\n")
                     }
             }
         } finally {
@@ -149,12 +152,12 @@ object BrokerApiVersion extends Logging {
             val response = sendAnyNode(request).asInstanceOf[MetadataResponse]
             val errors = response.errors
             if (!errors.isEmpty) {
-                logger.info(s"Metadata request contained errors: $errors")
+                log.info(s"Metadata request contained errors: $errors")
             }
 
             // 在3.x版本中这个方法是buildCluster 代替cluster()了
-            //            response.buildCluster.nodes.asScala.toList
-            response.cluster().nodes.asScala.toList
+                        response.buildCluster.nodes.asScala.toList
+//            response.cluster().nodes.asScala.toList
         }
 
         def listAllBrokerVersionInfo(): Map[Node, Try[NodeApiVersions]] =
@@ -277,40 +280,40 @@ object BrokerApiVersion extends Logging {
 
             // 版本不一样，这个地方的兼容性问题也不一样了
             // 3.x版本用这个
-            //            val networkClient = new NetworkClient(
-            //                selector,
-            //                metadata,
-            //                clientId,
-            //                DefaultMaxInFlightRequestsPerConnection,
-            //                DefaultReconnectBackoffMs,
-            //                DefaultReconnectBackoffMax,
-            //                DefaultSendBufferBytes,
-            //                DefaultReceiveBufferBytes,
-            //                requestTimeoutMs,
-            //                connectionSetupTimeoutMs,
-            //                connectionSetupTimeoutMaxMs,
-            //                time,
-            //                true,
-            //                new ApiVersions,
-            //                logContext)
+                        val networkClient = new NetworkClient(
+                            selector,
+                            metadata,
+                            clientId,
+                            DefaultMaxInFlightRequestsPerConnection,
+                            DefaultReconnectBackoffMs,
+                            DefaultReconnectBackoffMax,
+                            DefaultSendBufferBytes,
+                            DefaultReceiveBufferBytes,
+                            requestTimeoutMs,
+                            connectionSetupTimeoutMs,
+                            connectionSetupTimeoutMaxMs,
+                            time,
+                            true,
+                            new ApiVersions,
+                            logContext)
 
-            val networkClient = new NetworkClient(
-                selector,
-                metadata,
-                clientId,
-                DefaultMaxInFlightRequestsPerConnection,
-                DefaultReconnectBackoffMs,
-                DefaultReconnectBackoffMax,
-                DefaultSendBufferBytes,
-                DefaultReceiveBufferBytes,
-                requestTimeoutMs,
-                connectionSetupTimeoutMs,
-                connectionSetupTimeoutMaxMs,
-                ClientDnsLookup.USE_ALL_DNS_IPS,
-                time,
-                true,
-                new ApiVersions,
-                logContext)
+//            val networkClient = new NetworkClient(
+//                selector,
+//                metadata,
+//                clientId,
+//                DefaultMaxInFlightRequestsPerConnection,
+//                DefaultReconnectBackoffMs,
+//                DefaultReconnectBackoffMax,
+//                DefaultSendBufferBytes,
+//                DefaultReceiveBufferBytes,
+//                requestTimeoutMs,
+//                connectionSetupTimeoutMs,
+//                connectionSetupTimeoutMaxMs,
+//                ClientDnsLookup.USE_ALL_DNS_IPS,
+//                time,
+//                true,
+//                new ApiVersions,
+//                logContext)
 
             val highLevelClient = new ConsumerNetworkClient(
                 logContext,

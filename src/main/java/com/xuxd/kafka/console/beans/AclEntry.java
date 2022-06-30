@@ -1,18 +1,15 @@
 package com.xuxd.kafka.console.beans;
 
-import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.common.acl.AccessControlEntry;
-import org.apache.kafka.common.acl.AccessControlEntryFilter;
-import org.apache.kafka.common.acl.AclBinding;
-import org.apache.kafka.common.acl.AclBindingFilter;
-import org.apache.kafka.common.acl.AclOperation;
-import org.apache.kafka.common.acl.AclPermissionType;
+import org.apache.kafka.common.acl.*;
 import org.apache.kafka.common.resource.PatternType;
 import org.apache.kafka.common.resource.ResourcePattern;
 import org.apache.kafka.common.resource.ResourcePatternFilter;
 import org.apache.kafka.common.resource.ResourceType;
 import org.apache.kafka.common.security.auth.KafkaPrincipal;
+import org.apache.kafka.common.utils.SecurityUtils;
+
+import java.util.Objects;
 
 /**
  * kafka-console-ui.
@@ -41,7 +38,9 @@ public class AclEntry {
         entry.setResourceType(binding.pattern().resourceType().name());
         entry.setName(binding.pattern().name());
         entry.setPatternType(binding.pattern().patternType().name());
-        entry.setPrincipal(KafkaPrincipal.fromString(binding.entry().principal()).getName());
+//        entry.setPrincipal(KafkaPrincipal.fromString(binding.entry().principal()).getName());
+        // 3.x版本使用该方法
+        entry.setPrincipal(SecurityUtils.parseKafkaPrincipal(binding.entry().principal()).getName());
         entry.setHost(binding.entry().host());
         entry.setOperation(binding.entry().operation().name());
         entry.setPermissionType(binding.entry().permissionType().name());

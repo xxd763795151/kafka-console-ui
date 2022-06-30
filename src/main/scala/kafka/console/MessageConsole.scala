@@ -127,7 +127,7 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
                                                 record.offset(),
                                                 record.timestamp(),
                                                 record.timestampType(),
-                                                record.checksum(),
+//                                                record.checksum(),
                                                 record.serializedKeySize(),
                                                 record.serializedValueSize(),
                                                 record.key(),

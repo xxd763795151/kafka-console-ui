@@ -24,7 +24,7 @@ acl配置说明，如果kafka集群启用了ACL，但是控制台没看到Acl菜
 ## 安装包下载
 点击下载(v1.0.4版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.4/kafka-console-ui.zip)  
 
-如果安装包下载的比较慢，可以查看下面的源码打包说明，把代码下载下来，快速打包  
+如果安装包下载的比较慢，可以查看下面的源码打包说明，把代码下载下来，快速打包，不过最新main分支代码刚升级了kafka版本到3.2.0，还没有充分测试，如果需要稳定版本，可以下载 1.0.4-release分支代码  
 
 ## 快速使用
 ### Windows
@@ -63,7 +63,7 @@ sh bin/shutdown.sh
 在新增集群的时候，除了集群地址还可以输入集群的其它属性配置，比如请求超时，ACL配置等。如果开启了ACL，切换到该集群的时候，导航栏上便会出现ACL菜单，支持进行相关操作（目前是基于SASL_SCRAM认证授权管理支持的最完善，其它的我也没验证过，虽然是我开发的，但是我也没具体全部验证这一块功能，授权部分应该是通用的）
 
 ## kafka版本
-* 当前使用的kafka 2.8.0
+* 当前使用的kafka 3.2.0
 ## 监控
 仅提供运维管理功能，监控、告警需要配合其它组件，如有需要，建议请查看：https://blog.csdn.net/x763795151/article/details/119705372
 
@@ -78,6 +78,9 @@ sh bin/shutdown.sh
 在分支：feature/dongyinuo/20220501/devops 上。  
 如果有需要使用管理台登录认证的，可以切换到这个分支上进行打包，打包方式看 源码打包 说明。  
 默认登录账户：admin/kafka-console-ui521
+
+## DockerCompose部署
+感谢@wdkang123 同学分享的部署方式，如果有需要请查看[DockerCompose部署方式](./document/deploy/docker部署.md)
 
 ## 联系方式
 + 微信群

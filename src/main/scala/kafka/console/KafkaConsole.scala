@@ -91,14 +91,17 @@ class KafkaConsole(config: KafkaConfig) {
         }
     }
 
+    @Deprecated
     protected def withZKClient(f: AdminZkClient => Any): Any = {
-        val zkClient = KafkaZkClient(config.getZookeeperAddr, false, 30000, 30000, Int.MaxValue, Time.SYSTEM)
-        val adminZkClient = new AdminZkClient(zkClient)
-        try {
-            f(adminZkClient)
-        } finally {
-            zkClient.close()
-        }
+//        val zkClient = KafkaZkClient(config.getZookeeperAddr, false, 30000, 30000, Int.MaxValue, Time.SYSTEM)
+        // 3.x
+//        val zkClient = KafkaZkClient(config.getZookeeperAddr, false, 30000, 30000, Int.MaxValue, Time.SYSTEM, new ZKClientConfig(), "KafkaZkClient")
+//        val adminZkClient = new AdminZkClient(zkClient)
+//        try {
+//            f(adminZkClient)
+//        } finally {
+//            zkClient.close()
+//        }
     }
 
     protected def createAdminClient(props: Properties): Admin = {
