@@ -1,14 +1,15 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.QueryMessage;
+import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.SendMessage;
 import com.xuxd.kafka.console.beans.dto.QueryMessageDTO;
 import com.xuxd.kafka.console.service.MessageService;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * kafka-console-ui.
@@ -51,5 +52,13 @@ public class MessageController {
     @PostMapping("/resend")
     public Object resend(@RequestBody SendMessage message) {
         return messageService.resend(message);
+    }
+
+    @DeleteMapping
+    public Object delete(@RequestBody List<QueryMessage> messages) {
+        if (CollectionUtils.isEmpty(messages)) {
+            return ResponseData.create().failed("params is null");
+        }
+        return messageService.delete(messages);
     }
 }

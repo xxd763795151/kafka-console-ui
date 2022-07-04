@@ -11,6 +11,9 @@
         <a-tab-pane key="3" tab="在线发送">
           <SendMessage :topic-list="topicList"></SendMessage>
         </a-tab-pane>
+        <a-tab-pane key="4" tab="在线删除">
+          <DeleteMessage :topic-list="topicList"></DeleteMessage>
+        </a-tab-pane>
       </a-tabs>
     </a-spin>
   </div>
@@ -23,9 +26,10 @@ import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
 import SendMessage from "@/views/message/SendMessage";
+import DeleteMessage from "./DeleteMessage";
 export default {
   name: "Message",
-  components: { SearchByTime, SearchByOffset, SendMessage },
+  components: { DeleteMessage, SearchByTime, SearchByOffset, SendMessage },
   data() {
     return {
       loading: false,

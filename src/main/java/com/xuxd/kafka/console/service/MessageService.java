@@ -4,6 +4,8 @@ import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.SendMessage;
 
+import java.util.List;
+
 /**
  * kafka-console-ui.
  *
@@ -23,4 +25,6 @@ public interface MessageService {
     ResponseData send(SendMessage message);
 
     ResponseData resend(SendMessage message);
+
+    ResponseData delete(List<QueryMessage> messages);
 }

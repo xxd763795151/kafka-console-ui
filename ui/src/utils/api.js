@@ -276,4 +276,8 @@ export const KafkaMessageApi = {
     url: "/message/resend",
     method: "post",
   },
+  delete: {
+    url: "/message",
+    method: "delete",
+  },
 };

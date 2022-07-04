@@ -24,6 +24,7 @@ import kafka.console.TopicConsole;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.admin.RecordsToDelete;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -240,6 +241,18 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
         Tuple2<Object, String> tuple2 = messageConsole.sendSync(producerRecord);
         boolean success = (boolean) tuple2._1();
         return success ? ResponseData.create().success("success: " + tuple2._2()) : ResponseData.create().failed(tuple2._2());
+    }
+
+    @Override
+    public ResponseData delete(List<QueryMessage> messages) {
+        Map<TopicPartition, RecordsToDelete> params = new HashMap<>(messages.size(), 1f);
+
+        messages.forEach(message -> {
+            params.put(new TopicPartition(message.getTopic(), message.getPartition()), RecordsToDelete.beforeOffset(message.getOffset()));
+        });
+        Tuple2<Object, String> tuple2 = messageConsole.delete(params);
+        boolean success = (boolean) tuple2._1();
+        return success ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
     private Map<TopicPartition, ConsumerRecord<byte[], byte[]>> searchRecordByOffset(QueryMessage queryMessage) {

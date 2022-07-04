@@ -4,13 +4,14 @@ import com.xuxd.kafka.console.beans.MessageFilter
 import com.xuxd.kafka.console.beans.enums.FilterType
 import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import org.apache.commons.lang3.StringUtils
+import org.apache.kafka.clients.admin.{DeleteRecordsOptions, RecordsToDelete}
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.TopicPartition
 
 import java.time.Duration
 import java.util
-import java.util.Properties
+import java.util.{Properties}
 import scala.collection.immutable
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, MapHasAsScala, SeqHasAsJava}
 
@@ -235,5 +236,15 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
             log.error("send error.", e)
             (false, e.getMessage)
         }).asInstanceOf[(Boolean, String)]
+    }
+
+    def delete(recordsToDelete: util.Map[TopicPartition, RecordsToDelete]): (Boolean, String) = {
+      withAdminClientAndCatchError(admin => {
+        admin.deleteRecords(recordsToDelete, withTimeoutMs(new DeleteRecordsOptions())).all().get()
+        (true, "")
+      }, e => {
+        log.error("delete message error.", e)
+        (false, "delete error :" + e.getMessage)
+      }).asInstanceOf[(Boolean, String)]
     }
 }
