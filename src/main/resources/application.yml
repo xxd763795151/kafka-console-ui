@@ -12,6 +12,10 @@ kafka:
     # 集群其它属性配置
     properties:
 #      request.timeout.ms: 5000
+    # 缓存连接
+    cache-admin-connection: true
+    cache-producer-connection: false
+    cache-consumer-connection: true
 
 spring:
   application:

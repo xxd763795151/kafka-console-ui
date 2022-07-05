@@ -1,4 +1,4 @@
-package com.xuxd.kafka.console.interceptor;
+package com.xuxd.kafka.console.service.interceptor;
 
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.ClusterInfoDO;

@@ -20,6 +20,12 @@ public class KafkaConfig {
 
     private Properties properties;
 
+    private boolean cacheAdminConnection;
+
+    private boolean cacheProducerConnection;
+
+    private boolean cacheConsumerConnection;
+
     public String getBootstrapServer() {
         return bootstrapServer;
     }
@@ -42,5 +48,29 @@ public class KafkaConfig {
 
     public void setProperties(Properties properties) {
         this.properties = properties;
+    }
+
+    public boolean isCacheAdminConnection() {
+        return cacheAdminConnection;
+    }
+
+    public void setCacheAdminConnection(boolean cacheAdminConnection) {
+        this.cacheAdminConnection = cacheAdminConnection;
+    }
+
+    public boolean isCacheProducerConnection() {
+        return cacheProducerConnection;
+    }
+
+    public void setCacheProducerConnection(boolean cacheProducerConnection) {
+        this.cacheProducerConnection = cacheProducerConnection;
+    }
+
+    public boolean isCacheConsumerConnection() {
+        return cacheConsumerConnection;
+    }
+
+    public void setCacheConsumerConnection(boolean cacheConsumerConnection) {
+        this.cacheConsumerConnection = cacheConsumerConnection;
     }
 }
