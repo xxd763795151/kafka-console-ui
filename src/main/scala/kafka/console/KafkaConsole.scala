@@ -63,6 +63,7 @@ class KafkaConsole(config: KafkaConfig) {
             case er: Exception => eh(er)
         }
         finally {
+            ConsumerCache.clearProperties()
             if (!config.isCacheConsumerConnection) {
                 consumer.close()
             }
@@ -252,7 +253,7 @@ object ConsumerCache {
         threadLocal.set(props)
     }
 
-    def clear() : Unit = {
+    def clearProperties() : Unit = {
         threadLocal.remove()
     }
 }
