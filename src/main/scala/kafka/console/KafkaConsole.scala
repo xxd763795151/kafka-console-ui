@@ -72,17 +72,18 @@ class KafkaConsole(config: KafkaConfig) {
 
     protected def withProducerAndCatchError(f: KafkaProducer[String, String] => Any, eh: Exception => Any,
         extra: Properties = new Properties()): Any = {
-        val props = getProps()
-        props.putAll(extra)
-        props.put(ConsumerConfig.CLIENT_ID_CONFIG, String.valueOf(System.currentTimeMillis()))
-        val producer = new KafkaProducer[String, String](props, new StringSerializer, new StringSerializer)
+        ProducerCache.setProperties(extra)
+        val producer = if (config.isCacheProducerConnection) ProducerCache.cache.get(ContextConfigHolder.CONTEXT_CONFIG.get().getBootstrapServer) else KafkaConsole.createProducer(extra)
         try {
             f(producer)
         } catch {
             case er: Exception => eh(er)
         }
         finally {
-            producer.close()
+            ProducerCache.clearProperties()
+            if (!config.isCacheProducerConnection) {
+                producer.close()
+            }
         }
     }
 
@@ -90,7 +91,6 @@ class KafkaConsole(config: KafkaConfig) {
         extra: Properties = new Properties()): Any = {
         val props = getProps()
         props.putAll(extra)
-        props.put(ConsumerConfig.CLIENT_ID_CONFIG, String.valueOf(System.currentTimeMillis()))
         val producer = new KafkaProducer[Array[Byte], Array[Byte]](props, new ByteArraySerializer, new ByteArraySerializer)
         try {
             f(producer)
@@ -144,6 +144,18 @@ object KafkaConsole {
         props.putAll(extra)
         props.put(ConsumerConfig.CLIENT_ID_CONFIG, String.valueOf(System.currentTimeMillis()))
         new KafkaConsumer(props, new ByteArrayDeserializer, new ByteArrayDeserializer)
+    }
+
+    def createProducer(extra: Properties) : KafkaProducer[String, String] = {
+        val props = getProps()
+        props.putAll(extra)
+        new KafkaProducer(props, new StringSerializer, new StringSerializer)
+    }
+
+    def createByteArrayStringProducer(extra: Properties) : KafkaProducer[Array[Byte], Array[Byte]] = {
+        val props = getProps()
+        props.putAll(extra)
+        new KafkaProducer(props, new ByteArraySerializer, new ByteArraySerializer)
     }
 
     def getProps(): Properties = {
@@ -248,6 +260,37 @@ object ConsumerCache {
         }
     }
     val cache = new TimeBasedCache[String, KafkaConsumer[Array[Byte], Array[Byte]]](cacheLoader, removeListener)
+
+    def setProperties(props : Properties) : Unit = {
+        threadLocal.set(props)
+    }
+
+    def clearProperties() : Unit = {
+        threadLocal.remove()
+    }
+}
+
+object ProducerCache {
+
+    private val log: Logger = LoggerFactory.getLogger(this.getClass)
+
+    private val threadLocal = new ThreadLocal[Properties]
+
+    private val cacheLoader = new CacheLoader[String, KafkaProducer[String, String]] {
+        override def load(key: String): KafkaProducer[String, String] = KafkaConsole.createProducer(threadLocal.get())
+    }
+
+    private val removeListener = new RemovalListener[String, KafkaProducer[String, String]] {
+        override def onRemoval(notification: RemovalNotification[String, KafkaProducer[String, String]]): Unit = {
+            Future {
+                log.warn("Close expired producer connection: {}", notification.getKey)
+                notification.getValue.close()
+                log.warn("Close expired producer connection complete: {}", notification.getKey)
+            }(KafkaConsole.ec)
+
+        }
+    }
+    val cache = new TimeBasedCache[String, KafkaProducer[String, String]](cacheLoader, removeListener)
 
     def setProperties(props : Properties) : Unit = {
         threadLocal.set(props)
