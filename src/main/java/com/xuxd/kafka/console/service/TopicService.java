@@ -4,6 +4,8 @@ import com.xuxd.kafka.console.beans.ReplicaAssignment;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.enums.TopicThrottleSwitch;
 import com.xuxd.kafka.console.beans.enums.TopicType;
+
+import java.util.Collection;
 import java.util.List;
 import org.apache.kafka.clients.admin.NewTopic;
 
@@ -19,7 +21,7 @@ public interface TopicService {
 
     ResponseData getTopicList(String topic, TopicType type);
 
-    ResponseData deleteTopic(String topic);
+    ResponseData deleteTopics(Collection<String> topics);
 
     ResponseData getTopicPartitionInfo(String topic);
 

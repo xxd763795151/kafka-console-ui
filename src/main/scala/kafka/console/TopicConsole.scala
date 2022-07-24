@@ -66,17 +66,17 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
     /**
      * delete topic by topic name.
      *
-     * @param topic topic name.
+     * @param topics topic name list.
      * @return result or : fail message.
      */
-    def deleteTopic(topic: String): (Boolean, String) = {
+    def deleteTopics(topics: util.Collection[String]): (Boolean, String) = {
         withAdminClientAndCatchError(admin => {
             val timeoutMs = ContextConfigHolder.CONTEXT_CONFIG.get().getRequestTimeoutMs()
-            admin.deleteTopics(Collections.singleton(topic), new DeleteTopicsOptions().retryOnQuotaViolation(false)).all().get(timeoutMs, TimeUnit.MILLISECONDS)
+            admin.deleteTopics(topics, new DeleteTopicsOptions().retryOnQuotaViolation(false)).all().get(timeoutMs, TimeUnit.MILLISECONDS)
             (true, "")
         },
             e => {
-                log.error("delete topic error, topic: " + topic, e)
+                log.error("delete topic error, topic: " + topics, e)
                 (false, e.getMessage)
             }).asInstanceOf[(Boolean, String)]
     }

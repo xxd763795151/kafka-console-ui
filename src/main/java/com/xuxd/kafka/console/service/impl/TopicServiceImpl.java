@@ -9,16 +9,6 @@ import com.xuxd.kafka.console.beans.vo.TopicDescriptionVO;
 import com.xuxd.kafka.console.beans.vo.TopicPartitionVO;
 import com.xuxd.kafka.console.service.TopicService;
 import com.xuxd.kafka.console.utils.GsonUtil;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import kafka.console.MessageConsole;
 import kafka.console.TopicConsole;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +22,10 @@ import org.apache.kafka.common.TopicPartitionInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * kafka-console-ui.
@@ -87,8 +81,8 @@ public class TopicServiceImpl implements TopicService {
         return ResponseData.create().data(topicDescriptions.stream().map(d -> TopicDescriptionVO.from(d))).success();
     }
 
-    @Override public ResponseData deleteTopic(String topic) {
-        Tuple2<Object, String> tuple2 = topicConsole.deleteTopic(topic);
+    @Override public ResponseData deleteTopics(Collection<String> topics) {
+        Tuple2<Object, String> tuple2 = topicConsole.deleteTopics(topics);
         return (Boolean) tuple2._1 ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2);
     }
 

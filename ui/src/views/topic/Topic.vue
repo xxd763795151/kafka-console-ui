@@ -49,10 +49,26 @@
           <a-button type="primary" @click="openCreateTopicDialog"
             >新增</a-button
           >
+          <a-popconfirm
+              title="删除这些Topic?"
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="deleteTopics(selectedRowKeys)"
+          >
+            <a-button type="danger" class="btn-left" :disabled="!hasSelected" :loading="loading">
+              批量删除
+            </a-button>
+          </a-popconfirm>
+          <span style="margin-left: 8px">
+        <template v-if="hasSelected">
+          {{ `已选择 ${selectedRowKeys.length} 个Topic` }}
+        </template>
+      </span>
         </div>
         <a-table
           :columns="columns"
           :data-source="filteredData"
+          :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
           bordered
           row-key="name"
         >
@@ -225,7 +241,13 @@ export default {
       filterTopic: "",
       filteredData: [],
       type: "normal",
+      selectedRowKeys: [], // Check here to configure the default column
     };
+  },
+  computed: {
+    hasSelected() {
+      return this.selectedRowKeys.length > 0;
+    },
   },
   methods: {
     handleSearch(e) {
@@ -256,14 +278,16 @@ export default {
         }
       });
     },
-    deleteTopic(topic) {
+    deleteTopics(topics) {
       request({
-        url: KafkaTopicApi.deleteTopic.url + "?topic=" + topic,
+        url: KafkaTopicApi.deleteTopic.url,
         method: KafkaTopicApi.deleteTopic.method,
+        data: topics
       }).then((res) => {
         if (res.code == 0) {
           this.$message.success(res.msg);
           this.getTopicList();
+          this.selectedRowKeys = [];
         } else {
           notification.error({
             message: "error",
@@ -271,6 +295,9 @@ export default {
           });
         }
       });
+    },
+    deleteTopic(topic) {
+      this.deleteTopics([topic])
     },
     onTopicUpdate(input) {
       this.filterTopic = input.target.value;
@@ -342,9 +369,13 @@ export default {
     closeThrottleDialog() {
       this.showThrottleDialog = false;
     },
+    onSelectChange(selectedRowKeys) {
+      this.selectedRowKeys = selectedRowKeys;
+    },
   },
   created() {
     this.getTopicList();
+    this.selectedRowKeys = [];
   },
 };
 
@@ -430,5 +461,9 @@ const columns = [
 
 .type-select {
   width: 200px !important;
+}
+
+.btn-left {
+  margin-left: 1%;
 }
 </style>

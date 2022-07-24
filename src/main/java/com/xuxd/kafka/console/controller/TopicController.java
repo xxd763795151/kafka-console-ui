@@ -43,8 +43,8 @@ public class TopicController {
     }
 
     @DeleteMapping
-    public Object deleteTopic(@RequestParam String topic) {
-        return topicService.deleteTopic(topic);
+    public Object deleteTopic(@RequestBody List<String> topics) {
+        return topicService.deleteTopics(topics);
     }
 
     @GetMapping("/partition")
