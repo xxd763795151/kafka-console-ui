@@ -1,4 +1,4 @@
-package com.xuxd.kafka.console.service.interceptor;
+package com.xuxd.kafka.console.interceptor;
 
 import com.xuxd.kafka.console.beans.ResponseData;
 import javax.servlet.http.HttpServletRequest;
