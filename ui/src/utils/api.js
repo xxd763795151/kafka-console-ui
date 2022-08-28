@@ -47,6 +47,18 @@ export const KafkaAclApi = {
     url: "/acl",
     method: "delete",
   },
+  clearAcl: {
+    url: "/acl/clear",
+    method: "delete",
+  },
+  getSaslScramUserList: {
+    url: "/user/scram",
+    method: "get",
+  },
+  deleteSaslScramUser: {
+    url: "/user",
+    method: "delete",
+  },
 };
 
 export const KafkaConfigApi = {

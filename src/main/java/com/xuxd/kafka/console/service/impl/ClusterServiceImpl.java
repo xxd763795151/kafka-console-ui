@@ -73,6 +73,10 @@ public class ClusterServiceImpl implements ClusterService {
     }
 
     @Override public ResponseData updateClusterInfo(ClusterInfoDO infoDO) {
+        if (infoDO.getProperties() == null) {
+            // null 的话不更新，这个是bug，设置为空字符串解决
+            infoDO.setProperties("");
+        }
         clusterInfoMapper.updateById(infoDO);
         return ResponseData.create().success();
     }

@@ -132,9 +132,9 @@ export default {
                 if (
                   clusterInfo &&
                   clusterInfo.id &&
-                  clusterInfo.id == this.clusterInfo.id &&
-                  clusterInfo.clusterName != data.clusterName
+                  clusterInfo.id == this.clusterInfo.id
                 ) {
+                  //  &&clusterInfo.clusterName != data.clusterName
                   this.switchCluster(data);
                 }
               }

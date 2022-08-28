@@ -11,10 +11,8 @@
       ><router-link to="/group-page" class="pad-l-r">消费组</router-link>
       <span>|</span
       ><router-link to="/message-page" class="pad-l-r">消息</router-link>
-      <span v-show="enableSasl">|</span
-      ><router-link to="/acl-page" class="pad-l-r" v-show="enableSasl"
-        >Acl</router-link
-      >
+      <span>|</span
+      ><router-link to="/acl-page" class="pad-l-r">Acl</router-link>
       <span>|</span
       ><router-link to="/op-page" class="pad-l-r">运维</router-link>
       <span class="right">集群：{{ clusterName }}</span>

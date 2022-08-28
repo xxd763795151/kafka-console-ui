@@ -42,4 +42,7 @@ public interface AclService {
 
     ResponseData getUserDetail(String username);
 
+    ResponseData clearAcl(AclEntry entry);
+
+    ResponseData getSaslScramUserList(AclEntry entry);
 }

@@ -1,7 +1,9 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.beans.AclEntry;
 import com.xuxd.kafka.console.beans.AclUser;
 import com.xuxd.kafka.console.service.AclService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * kafka-console-ui.
+ * kafka-console-ui. sasl scram user.
  *
  * @author xuxd
  * @date 2021-08-28 21:13:05
@@ -48,5 +50,12 @@ public class AclUserController {
     @GetMapping("/detail")
     public Object getUserDetail(@RequestParam String username) {
         return aclService.getUserDetail(username);
+    }
+
+    @GetMapping("/scram")
+    public Object getSaslScramUserList(@RequestParam(required = false) String username) {
+        AclEntry entry = new AclEntry();
+        entry.setPrincipal(StringUtils.isNotBlank(username) ? username : null);
+        return aclService.getSaslScramUserList(entry);
     }
 }

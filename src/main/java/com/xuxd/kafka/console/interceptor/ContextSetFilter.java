@@ -72,6 +72,7 @@ public class ContextSetFilter implements Filter {
                         config.setProperties(ConvertUtil.toProperties(infoDO.getProperties()));
                     }
                     ContextConfigHolder.CONTEXT_CONFIG.set(config);
+//                    log.info("current kafka config: {}", config);
                 }
             }
             chain.doFilter(req, response);

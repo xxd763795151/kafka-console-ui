@@ -50,25 +50,33 @@
             >新增</a-button
           >
           <a-popconfirm
-              title="删除这些Topic?"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="deleteTopics(selectedRowKeys)"
+            title="删除这些Topic?"
+            ok-text="确认"
+            cancel-text="取消"
+            @confirm="deleteTopics(selectedRowKeys)"
           >
-            <a-button type="danger" class="btn-left" :disabled="!hasSelected" :loading="loading">
+            <a-button
+              type="danger"
+              class="btn-left"
+              :disabled="!hasSelected"
+              :loading="loading"
+            >
               批量删除
             </a-button>
           </a-popconfirm>
           <span style="margin-left: 8px">
-        <template v-if="hasSelected">
-          {{ `已选择 ${selectedRowKeys.length} 个Topic` }}
-        </template>
-      </span>
+            <template v-if="hasSelected">
+              {{ `已选择 ${selectedRowKeys.length} 个Topic` }}
+            </template>
+          </span>
         </div>
         <a-table
           :columns="columns"
           :data-source="filteredData"
-          :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+          :row-selection="{
+            selectedRowKeys: selectedRowKeys,
+            onChange: onSelectChange,
+          }"
           bordered
           row-key="name"
         >
@@ -282,7 +290,7 @@ export default {
       request({
         url: KafkaTopicApi.deleteTopic.url,
         method: KafkaTopicApi.deleteTopic.method,
-        data: topics
+        data: topics,
       }).then((res) => {
         if (res.code == 0) {
           this.$message.success(res.msg);
@@ -297,7 +305,7 @@ export default {
       });
     },
     deleteTopic(topic) {
-      this.deleteTopics([topic])
+      this.deleteTopics([topic]);
     },
     onTopicUpdate(input) {
       this.filterTopic = input.target.value;

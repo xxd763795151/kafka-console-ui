@@ -118,4 +118,14 @@ public class AclAuthController {
         return aclService.deleteConsumerAcl(param.toTopicEntry(), param.toGroupEntry());
     }
 
+    /**
+     * clear principal acls.
+     *
+     * @param param acl principal.
+     * @return true or false.
+     */
+    @DeleteMapping("/clear")
+    public Object clearAcl(@RequestBody DeleteAclDTO param) {
+        return aclService.clearAcl(param.toUserEntry());
+    }
 }
