@@ -8,7 +8,9 @@
 ## 集群迁移支持说明
 当前主分支及日后版本不再提供消息同步、集群迁移的解决方案，如有需要，查看：[集群迁移说明](./document/datasync/集群迁移.md)
 ## ACL说明
-acl配置说明，如果kafka集群启用了ACL，但是控制台没看到Acl菜单，可以查看：[Acl配置启用说明](./document/acl/Acl.md)
+最新代码运行即可看到acl菜单，将权限管理和认证的用户管理（SASL_SCRAM)进行了分离。分离之后，支持只开启SASL_SCRAM认证的时候（未开启鉴权），用户变更操作。或者使用其它认证机制下的权限管理操作（可视化的权限管理），但是可视化的认证用户管理目前只支持Scram。
+
+v1.0.6版本之前，如果kafka集群启用了ACL，但是控制台没看到Acl菜单，可以查看：[Acl配置启用说明](./document/acl/Acl.md)
 ## 功能支持
 * 多集群支持
 * 集群信息
@@ -86,9 +88,10 @@ sh bin/shutdown.sh
 
 ## 联系方式
 + 微信群
-<img src="./document/contact/weixin_contact.jpg" width="40%"/>
 
-[//]: # (<img src="https://github.com/xxd763795151/kafka-console-ui/blob/main/document/contact/weixin_contact.jpeg" width="40%"/>)
+[//]: # (<img src="./document/contact/weixin_contact.jpg" width="40%"/>)
+
+<img src="https://github.com/xxd763795151/kafka-console-ui/blob/main/document/contact/weixin_contact.jpeg" width="40%"/>
 
 + 若联系方式失效, 请联系加一下微信, 说明意图
     - xxd763795151
