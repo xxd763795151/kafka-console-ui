@@ -1,7 +1,7 @@
 <template>
   <div class="acl">
     <a-spin :spinning="loading">
-      <div v-show="!hint" class="acl">
+      <div class="acl">
         <div id="components-form-acl-advanced-search">
           <a-form
             class="ant-advanced-search-form"
@@ -49,6 +49,9 @@
         <div class="operation-row-button">
           <a-button type="primary" @click="onAddPrincipalAuth"
             >新增主体权限</a-button
+          >
+          <span v-show="hint != ''" class="hint"
+            >broker未启用权限管理，所以不支持授权相关操作[{{ hint }}]</span
           >
         </div>
         <a-table :columns="columns" :data-source="data" bordered>
@@ -135,9 +138,6 @@
           :visible="openAddPrincipalAuthDialog"
           @closeAddPrincipalAuthDialog="closeAddPrincipalAuthDialog"
         ></AddPrincipalAuth>
-      </div>
-      <div v-show="hint">
-        <h2>{{ hint }}</h2>
       </div>
     </a-spin>
   </div>
@@ -440,5 +440,10 @@ const columns = [
 
 .operation-btn {
   margin-right: 3%;
+}
+
+.hint {
+  margin-left: 1%;
+  color: red;
 }
 </style>

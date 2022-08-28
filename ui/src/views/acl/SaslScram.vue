@@ -28,6 +28,9 @@
       </div>
       <div class="operation-row-button">
         <a-button type="primary" @click="updateUser">新增/更新用户</a-button>
+        <span class="hint" v-show="!enableSasl"
+          >未启用SASL SCRAM认证，不支持相关操作</span
+        >
         <UpdateUser
           :visible="showUpdateUser"
           @updateUserDialogData="closeUpdateUserDialog"
@@ -399,5 +402,10 @@ const columns = [
 
 .operation-btn {
   margin-right: 3%;
+}
+
+.hint {
+  margin-left: 1%;
+  color: red;
 }
 </style>
