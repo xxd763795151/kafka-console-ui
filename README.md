@@ -91,7 +91,7 @@ sh bin/shutdown.sh
 
 [//]: # (<img src="./document/contact/weixin_contact.jpg" width="40%"/>)
 
-<img src="https://github.com/xxd763795151/kafka-console-ui/blob/main/document/contact/weixin_contact.jpeg" width="40%"/>
+<img src="https://github.com/xxd763795151/kafka-console-ui/blob/main/document/contact/weixin_contact.jpg" width="40%"/>
 
 + 若联系方式失效, 请联系加一下微信, 说明意图
     - xxd763795151
