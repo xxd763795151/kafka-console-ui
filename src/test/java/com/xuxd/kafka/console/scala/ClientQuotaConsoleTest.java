@@ -17,7 +17,7 @@ public class ClientQuotaConsoleTest {
     void testGetClientQuotasConfigs() {
         ClientQuotaConsole console = new ClientQuotaConsole(new KafkaConfig());
         ContextConfig config = new ContextConfig();
-        config.setBootstrapServer("10.1.18.222:9092");
+        config.setBootstrapServer("127.0.0.1:9092");
         ContextConfigHolder.CONTEXT_CONFIG.set(config);
         Map<ClientQuotaEntity, Map<String, Object>> configs = console.getClientQuotasConfigs(Arrays.asList(ConfigType.User()), Arrays.asList());
         configs.forEach((k, v) -> {
