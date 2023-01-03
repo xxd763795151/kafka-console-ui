@@ -36,8 +36,10 @@ public class ClientQuotaConsoleTest {
         config.setBootstrapServer(bootstrapServer);
         ContextConfigHolder.CONTEXT_CONFIG.set(config);
         Map<String, String> configsToBeAddedMap = new HashMap<>();
-        configsToBeAddedMap.put(QuotaConfigs.PRODUCER_BYTE_RATE_OVERRIDE_CONFIG, "102400");
+        configsToBeAddedMap.put(QuotaConfigs.PRODUCER_BYTE_RATE_OVERRIDE_CONFIG, "1024000000");
 
         console.addQuotaConfigs(Arrays.asList(ClientQuotaEntity.USER), Arrays.asList("user-test"), configsToBeAddedMap);
+        console.addQuotaConfigs(Arrays.asList(ClientQuotaEntity.USER), Arrays.asList(""), configsToBeAddedMap);
+        console.deleteQuotaConfigs(Arrays.asList(ClientQuotaEntity.USER), Arrays.asList(""), Arrays.asList(QuotaConfigs.PRODUCER_BYTE_RATE_OVERRIDE_CONFIG));
     }
 }

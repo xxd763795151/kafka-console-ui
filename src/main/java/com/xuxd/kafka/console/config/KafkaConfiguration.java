@@ -1,13 +1,6 @@
 package com.xuxd.kafka.console.config;
 
-import kafka.console.ClusterConsole;
-import kafka.console.ConfigConsole;
-import kafka.console.ConsumerConsole;
-import kafka.console.KafkaAclConsole;
-import kafka.console.KafkaConfigConsole;
-import kafka.console.MessageConsole;
-import kafka.console.OperationConsole;
-import kafka.console.TopicConsole;
+import kafka.console.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -52,12 +45,17 @@ public class KafkaConfiguration {
 
     @Bean
     public OperationConsole operationConsole(KafkaConfig config, TopicConsole topicConsole,
-        ConsumerConsole consumerConsole) {
+                                             ConsumerConsole consumerConsole) {
         return new OperationConsole(config, topicConsole, consumerConsole);
     }
 
     @Bean
     public MessageConsole messageConsole(KafkaConfig config) {
         return new MessageConsole(config);
+    }
+
+    @Bean
+    public ClientQuotaConsole clientQuotaConsole(KafkaConfig config) {
+        return new ClientQuotaConsole(config);
     }
 }
