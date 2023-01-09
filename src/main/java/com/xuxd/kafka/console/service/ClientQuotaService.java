@@ -4,7 +4,10 @@ import com.xuxd.kafka.console.beans.vo.ClientQuotaEntityVO;
 
 import java.util.List;
 
+/**
+ * @author 晓东哥哥
+ */
 public interface ClientQuotaService {
 
-    List<ClientQuotaEntityVO> getClientQuotaConfigs(String type, String name);
+    List<ClientQuotaEntityVO> getClientQuotaConfigs(List<String> types, List<String> names);
 }

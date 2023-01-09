@@ -22,7 +22,7 @@ public class ClientQuotaConsoleTest {
         ContextConfig config = new ContextConfig();
         config.setBootstrapServer(bootstrapServer);
         ContextConfigHolder.CONTEXT_CONFIG.set(config);
-        Map<ClientQuotaEntity, Map<String, Object>> configs = console.getClientQuotasConfigs(Arrays.asList(ClientQuotaEntity.USER), Arrays.asList());
+        Map<ClientQuotaEntity, Map<String, Object>> configs = console.getClientQuotasConfigs(Arrays.asList(ClientQuotaEntity.USER, ClientQuotaEntity.CLIENT_ID), Arrays.asList("user1", "clientA"));
         configs.forEach((k, v) -> {
             System.out.println(k);
             System.out.println(v);

@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @author 晓东哥哥
+ */
 @Slf4j
 @Service
 public class ClientQuotaServiceImpl implements ClientQuotaService {
@@ -30,14 +33,28 @@ public class ClientQuotaServiceImpl implements ClientQuotaService {
     }
 
     @Override
-    public List<ClientQuotaEntityVO> getClientQuotaConfigs(String type, String name) {
-        List<String> entityNames = StringUtils.isNotBlank(name) ? Arrays.asList(name) : Collections.emptyList();
-        String entityType = typeDict.get(type);
-        if (StringUtils.isEmpty(entityType)) {
-            throw new IllegalArgumentException("type不正确：" + type);
+    public List<ClientQuotaEntityVO> getClientQuotaConfigs(List<String> types, List<String> names) {
+        List<String> entityNames = names == null ? Collections.emptyList() : new ArrayList<>(names);
+        List<String> entityTypes = types.stream().map(e -> typeDict.get(e)).filter(e -> e != null).collect(Collectors.toList());
+        if (entityTypes.isEmpty() || entityTypes.size() != types.size()) {
+            throw new IllegalArgumentException("types illegal.");
         }
-        Map<ClientQuotaEntity, Map<String, Object>> clientQuotasConfigs = clientQuotaConsole.getClientQuotasConfigs(Arrays.asList(entityType), entityNames);
 
-        return clientQuotasConfigs.entrySet().stream().map(entry -> ClientQuotaEntityVO.from(entry.getKey(), entityType, entry.getValue())).collect(Collectors.toList());
+        boolean userWithClientFilterClientOnly = false;
+        if (entityTypes.size() == 2) {
+            if (names.size() == 2 && StringUtils.isBlank(names.get(0)) && StringUtils.isNotBlank(names.get(1))) {
+                userWithClientFilterClientOnly = true;
+            }
+        }
+        Map<ClientQuotaEntity, Map<String, Object>> clientQuotasConfigs = clientQuotaConsole.getClientQuotasConfigs(entityTypes,
+                userWithClientFilterClientOnly ? Collections.emptyList() : entityNames);
+
+        List<ClientQuotaEntityVO> voList = clientQuotasConfigs.entrySet().stream().map(entry -> ClientQuotaEntityVO.from(
+                entry.getKey(), entityTypes, entry.getValue())).collect(Collectors.toList());
+        if (!userWithClientFilterClientOnly) {
+            return voList;
+        }
+        return voList.stream().filter(e -> names.get(1).equals(e.getClient())).collect(Collectors.toList());
     }
+
 }
