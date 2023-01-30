@@ -12,6 +12,8 @@
       <span>|</span
       ><router-link to="/message-page" class="pad-l-r">消息</router-link>
       <span>|</span
+      ><router-link to="/client-quota-page" class="pad-l-r">限流</router-link>
+      <span>|</span
       ><router-link to="/acl-page" class="pad-l-r">Acl</router-link>
       <span>|</span
       ><router-link to="/op-page" class="pad-l-r">运维</router-link>

@@ -293,3 +293,14 @@ export const KafkaMessageApi = {
     method: "delete",
   },
 };
+
+export const KafkaClientQuotaApi = {
+  getClientQuotaConfigs: {
+    url: "/client/quota/list",
+    method: "post",
+  },
+  alterClientQuotaConfigs: {
+    url: "/client/quota",
+    method: "post",
+  },
+};

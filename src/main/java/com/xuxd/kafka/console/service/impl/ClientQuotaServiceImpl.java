@@ -1,5 +1,7 @@
 package com.xuxd.kafka.console.service.impl;
 
+import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.dto.AlterClientQuotaDTO;
 import com.xuxd.kafka.console.beans.vo.ClientQuotaEntityVO;
 import com.xuxd.kafka.console.service.ClientQuotaService;
 import kafka.console.ClientQuotaConsole;
@@ -55,6 +57,12 @@ public class ClientQuotaServiceImpl implements ClientQuotaService {
             return voList;
         }
         return voList.stream().filter(e -> names.get(1).equals(e.getClient())).collect(Collectors.toList());
+    }
+
+    @Override
+    public Object alterClientQuotaConfigs(AlterClientQuotaDTO request) {
+
+        return ResponseData.create().failed();
     }
 
 }

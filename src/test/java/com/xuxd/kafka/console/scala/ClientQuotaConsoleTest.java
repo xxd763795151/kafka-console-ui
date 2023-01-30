@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class ClientQuotaConsoleTest {
 
-    String bootstrapServer = "127.0.0.1:9092";
+    String bootstrapServer = "10.1.18.222:9092";
 
     @Test
     void testGetClientQuotasConfigs() {
@@ -38,8 +38,8 @@ public class ClientQuotaConsoleTest {
         Map<String, String> configsToBeAddedMap = new HashMap<>();
         configsToBeAddedMap.put(QuotaConfigs.PRODUCER_BYTE_RATE_OVERRIDE_CONFIG, "1024000000");
 
-        console.addQuotaConfigs(Arrays.asList(ClientQuotaEntity.USER), Arrays.asList("user-test"), configsToBeAddedMap);
-        console.addQuotaConfigs(Arrays.asList(ClientQuotaEntity.USER), Arrays.asList(""), configsToBeAddedMap);
-        console.deleteQuotaConfigs(Arrays.asList(ClientQuotaEntity.USER), Arrays.asList(""), Arrays.asList(QuotaConfigs.PRODUCER_BYTE_RATE_OVERRIDE_CONFIG));
+//        console.addQuotaConfigs(Arrays.asList(ClientQuotaEntity.USER), Arrays.asList("user-test"), configsToBeAddedMap);
+//        console.addQuotaConfigs(Arrays.asList(ClientQuotaEntity.USER), Arrays.asList(""), configsToBeAddedMap);
+        console.deleteQuotaConfigs(Arrays.asList(ClientQuotaEntity.CLIENT_ID), Arrays.asList(""), Arrays.asList(QuotaConfigs.CONSUMER_BYTE_RATE_OVERRIDE_CONFIG));
     }
 }

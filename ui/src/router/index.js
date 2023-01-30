@@ -49,6 +49,12 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "cluster" */ "../views/message/Message.vue"),
   },
+  {
+    path: "/client-quota-page",
+    name: "ClientQuota",
+    component: () =>
+        import(/* webpackChunkName: "cluster" */ "../views/quota/ClientQuota.vue"),
+  },
 ];
 
 const router = new VueRouter({
