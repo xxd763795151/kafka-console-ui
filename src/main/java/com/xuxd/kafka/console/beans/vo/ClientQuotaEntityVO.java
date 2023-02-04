@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.beans.vo;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.config.internals.QuotaConfigs;
 import org.apache.kafka.common.quota.ClientQuotaEntity;
 
@@ -43,10 +44,39 @@ public class ClientQuotaEntityVO {
                     break;
             }
         });
-        entityVO.setConsumerRate(config.getOrDefault(QuotaConfigs.CONSUMER_BYTE_RATE_OVERRIDE_CONFIG, "").toString());
-        entityVO.setProducerRate(config.getOrDefault(QuotaConfigs.PRODUCER_BYTE_RATE_OVERRIDE_CONFIG, "").toString());
+        entityVO.setConsumerRate(convert(config.getOrDefault(QuotaConfigs.CONSUMER_BYTE_RATE_OVERRIDE_CONFIG, "")));
+        entityVO.setProducerRate(convert(config.getOrDefault(QuotaConfigs.PRODUCER_BYTE_RATE_OVERRIDE_CONFIG, "")));
         entityVO.setRequestPercentage(config.getOrDefault(QuotaConfigs.REQUEST_PERCENTAGE_OVERRIDE_CONFIG, "").toString());
-
         return entityVO;
+    }
+
+
+    public static String convert(Object num) {
+        if (num == null) {
+            return null;
+        }
+
+        if (num instanceof String) {
+            if ((StringUtils.isBlank((String) num))) {
+                return (String) num;
+            }
+        }
+
+        if (num instanceof Number) {
+            Number number = (Number) num;
+            double value = number.doubleValue();
+            double _1kb = 1024;
+            double _1mb = 1024 * _1kb;
+            if (value < _1kb) {
+                return value + "Byte";
+            }
+            if (value < _1mb) {
+                return String.format("%.1f KB", (value / _1kb));
+            }
+            if (value >= _1mb) {
+                return String.format("%.1f MB", (value / _1mb));
+            }
+        }
+        return String.valueOf(num);
     }
 }

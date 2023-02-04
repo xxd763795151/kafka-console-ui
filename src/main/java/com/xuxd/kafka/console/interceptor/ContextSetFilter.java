@@ -6,20 +6,17 @@ import com.xuxd.kafka.console.config.ContextConfig;
 import com.xuxd.kafka.console.config.ContextConfigHolder;
 import com.xuxd.kafka.console.dao.ClusterInfoMapper;
 import com.xuxd.kafka.console.utils.ConvertUtil;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * kafka-console-ui.
@@ -27,7 +24,7 @@ import org.springframework.http.MediaType;
  * @author xuxd
  * @date 2022-01-05 19:56:25
  **/
-@WebFilter(filterName = "context-set-filter", urlPatterns = {"/acl/*","/user/*","/cluster/*","/config/*","/consumer/*","/message/*","/topic/*","/op/*"})
+@WebFilter(filterName = "context-set-filter", urlPatterns = {"/acl/*", "/user/*", "/cluster/*", "/config/*", "/consumer/*", "/message/*", "/topic/*", "/op/*", "/client/*"})
 @Slf4j
 public class ContextSetFilter implements Filter {
 
@@ -42,8 +39,9 @@ public class ContextSetFilter implements Filter {
     @Autowired
     private ClusterInfoMapper clusterInfoMapper;
 
-    @Override public void doFilter(ServletRequest req, ServletResponse response,
-        FilterChain chain) throws IOException, ServletException {
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse response,
+                         FilterChain chain) throws IOException, ServletException {
         try {
             HttpServletRequest request = (HttpServletRequest) req;
             String uri = request.getRequestURI();

@@ -3,6 +3,7 @@
     <a-spin :spinning="loading">
       <a-tabs default-active-key="1" size="large" tabPosition="top">
         <a-tab-pane key="1" tab="客户端ID">
+          <ClientIDQuota></ClientIDQuota>
         </a-tab-pane>
         <a-tab-pane key="2" tab="用户">
         </a-tab-pane>
@@ -18,38 +19,15 @@
 </template>
 
 <script>
-import request from "@/utils/request";
-import {KafkaTopicApi} from "@/utils/api";
-import notification from "ant-design-vue/lib/notification";
+import ClientIDQuota from "@/views/quota/ClientIDQuota.vue";
 
 export default {
   name: "ClientQuota",
-  components: {},
+  components: {ClientIDQuota},
   data() {
     return {
       loading: false,
-      topicList: [],
     };
-  },
-  methods: {
-    getTopicNameList() {
-      request({
-        url: KafkaTopicApi.getTopicNameList.url,
-        method: KafkaTopicApi.getTopicNameList.method,
-      }).then((res) => {
-        if (res.code == 0) {
-          this.topicList = res.data;
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    },
-  },
-  created() {
-    this.getTopicNameList();
   },
 };
 </script>
