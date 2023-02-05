@@ -15,6 +15,9 @@
         <div slot="client" slot-scope="text">
           <span v-if="text">{{ text }}</span><span v-else style="color: red">默认配置</span>
         </div>
+        <div slot="user" slot-scope="text">
+          <span v-if="text">{{ text }}</span><span v-else style="color: red">默认配置</span>
+        </div>
 
         <div slot="operation" slot-scope="record">
           <a-popconfirm

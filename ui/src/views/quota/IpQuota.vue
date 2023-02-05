@@ -9,12 +9,12 @@
         >
           <a-row :gutter="24">
             <a-col :span="16">
-              <a-form-item label="客户端ID">
+              <a-form-item label="IP">
                 <a-input
                     v-decorator="[
-                    'id',
+                    'ip',
                   ]"
-                    placeholder="请输入生产者/消费者客户端ID!"
+                    placeholder="请输入ip!"
                 />
               </a-form-item>
             </a-col>
@@ -31,8 +31,8 @@
         >新增配置
         </a-button>
       </div>
-      <QuotaList type="client-id" :columns="columns" :data="data" @refreshQuotaList="refresh"></QuotaList>
-      <AddQuotaConfig type="client-id" :visible="showAddQuotaDialog" :showClientId="true" @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
+      <QuotaList type="ip" :columns="columns" :data="data" @refreshQuotaList="refresh"></QuotaList>
+      <AddQuotaConfig type="ip" :visible="showAddQuotaDialog" :showIP="true" @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
     </a-spin>
   </div>
 </template>
@@ -45,7 +45,7 @@ import QuotaList from "@/views/quota/QuotaList.vue";
 import AddQuotaConfig from "@/views/quota/AddQuotaConfig.vue";
 
 export default {
-  name: "ClientIDQuota",
+  name: "IpQuota",
   components: {QuotaList, AddQuotaConfig},
   props: {
     topicList: {
@@ -55,17 +55,17 @@ export default {
   data() {
     return {
       loading: false,
-      form: this.$form.createForm(this, {name: "client_id_quota"}),
+      form: this.$form.createForm(this, {name: "ip_quota"}),
       data: [],
       showAlterQuotaDialog: false,
       showAddQuotaDialog: false,
       columns: [
         {
-          title: "客户端ID",
-          dataIndex: "client",
-          key: "client",
-          slots: {title: "client"},
-          scopedSlots: {customRender: "client"},
+          title: "IP",
+          dataIndex: "ip",
+          key: "ip",
+          slots: {title: "ip"},
+          scopedSlots: {customRender: "ip"},
         },
         {
           title: "生产速率(带宽/秒)",
@@ -90,9 +90,9 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true;
-          const params = {types: ["client-id"]};
-          if (values.id) {
-            params.names = [values.id.trim()];
+          const params = {types: ["ip"]};
+          if (values.ip) {
+            params.names = [values.ip.trim()];
           }
           request({
             url: KafkaClientQuotaApi.getClientQuotaConfigs.url,

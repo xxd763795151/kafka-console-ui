@@ -9,12 +9,12 @@
         >
           <a-row :gutter="24">
             <a-col :span="16">
-              <a-form-item label="客户端ID">
+              <a-form-item label="用户标识">
                 <a-input
                     v-decorator="[
-                    'id',
+                    'user',
                   ]"
-                    placeholder="请输入生产者/消费者客户端ID!"
+                    placeholder="请输入用户标识，如：用户名!"
                 />
               </a-form-item>
             </a-col>
@@ -31,8 +31,8 @@
         >新增配置
         </a-button>
       </div>
-      <QuotaList type="client-id" :columns="columns" :data="data" @refreshQuotaList="refresh"></QuotaList>
-      <AddQuotaConfig type="client-id" :visible="showAddQuotaDialog" :showClientId="true" @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
+      <QuotaList type="user&client-id" :columns="columns" :data="data" @refreshQuotaList="refresh"></QuotaList>
+      <AddQuotaConfig type="user&client-id" :visible="showAddQuotaDialog" :showUser="true" :showClientId="true" @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
     </a-spin>
   </div>
 </template>
@@ -45,7 +45,7 @@ import QuotaList from "@/views/quota/QuotaList.vue";
 import AddQuotaConfig from "@/views/quota/AddQuotaConfig.vue";
 
 export default {
-  name: "ClientIDQuota",
+  name: "UserAndClientIDQuota",
   components: {QuotaList, AddQuotaConfig},
   props: {
     topicList: {
@@ -55,11 +55,18 @@ export default {
   data() {
     return {
       loading: false,
-      form: this.$form.createForm(this, {name: "client_id_quota"}),
+      form: this.$form.createForm(this, {name: "user_client_id_quota"}),
       data: [],
       showAlterQuotaDialog: false,
       showAddQuotaDialog: false,
       columns: [
+        {
+          title: "用户标识",
+          dataIndex: "user",
+          key: "user",
+          slots: {title: "user"},
+          scopedSlots: {customRender: "user"},
+        },
         {
           title: "客户端ID",
           dataIndex: "client",
@@ -90,9 +97,9 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true;
-          const params = {types: ["client-id"]};
-          if (values.id) {
-            params.names = [values.id.trim()];
+          const params = {types: ["user"]};
+          if (values.user) {
+            params.names = [values.user.trim()];
           }
           request({
             url: KafkaClientQuotaApi.getClientQuotaConfigs.url,

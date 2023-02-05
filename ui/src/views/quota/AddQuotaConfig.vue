@@ -145,28 +145,29 @@ export default {
             params.producerRate = params.producerRate * unitMap[this.producerRateUnit];
           }
           params.types = [];
+          params.names = [];
           if (this.showUser) {
             params.types.push("user");
             if (params.user) {
-              params.names = [params.user.trim()];
+              params.names.push(params.user.trim());
             } else {
-              params.names = [""];
+              params.names.push("");
             }
           }
           if (this.showClientId) {
             params.types.push("client-id");
             if (params.client) {
-              params.names = [params.client.trim()];
+              params.names.push(params.client.trim());
             } else {
-              params.names = [""];
+              params.names.push("");
             }
           }
           if (this.showIP) {
             params.types.push("ip");
             if (params.ip) {
-              params.names = [params.ip.trim()];
+              params.names.push(params.ip.trim());
             } else {
-              params.names = [""];
+              params.names.push("");
             }
           }
           this.loading = true;

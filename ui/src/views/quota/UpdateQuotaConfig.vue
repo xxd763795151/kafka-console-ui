@@ -148,7 +148,7 @@ export default {
             params.deleteConfigs.push("consumerRate");
           }
           if (values.producerRate) {
-            const num = typeof (values.producerRate) && values.producerRate.indexOf(" ") > 0 ? values.producerRate.split(" ")[0] : values.producerRate;
+            const num = typeof (values.producerRate) == "string" && values.producerRate.indexOf(" ") > 0 ? values.producerRate.split(" ")[0] : values.producerRate;
             params.producerRate = num * unitMap[this.producerRateUnit];
           } else {
             params.deleteConfigs.push("producerRate");
@@ -183,7 +183,6 @@ export default {
               params.names = [""];
             }
           }
-          console.log(params)
           this.loading = true;
           request({
             url: KafkaClientQuotaApi.alterClientQuotaConfigs.url,
