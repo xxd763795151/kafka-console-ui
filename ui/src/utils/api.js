@@ -303,4 +303,8 @@ export const KafkaClientQuotaApi = {
     url: "/client/quota",
     method: "post",
   },
+  deleteClientQuotaConfigs: {
+    url: "/client/quota",
+    method: "delete",
+  },
 };

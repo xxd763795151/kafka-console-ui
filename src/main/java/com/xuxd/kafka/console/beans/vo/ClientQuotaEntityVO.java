@@ -68,7 +68,7 @@ public class ClientQuotaEntityVO {
             double _1kb = 1024;
             double _1mb = 1024 * _1kb;
             if (value < _1kb) {
-                return value + "Byte";
+                return value + " Byte";
             }
             if (value < _1mb) {
                 return String.format("%.1f KB", (value / _1kb));

@@ -13,4 +13,6 @@ public interface ClientQuotaService {
     ResponseData getClientQuotaConfigs(List<String> types, List<String> names);
 
     ResponseData alterClientQuotaConfigs(AlterClientQuotaDTO request);
+
+    ResponseData deleteClientQuotaConfigs(AlterClientQuotaDTO request);
 }

@@ -31,8 +31,8 @@
         >新增配置
         </a-button>
       </div>
-      <QuotaList :columns="columns" :data="data"></QuotaList>
-      <AddQuotaConfig :visible="showAddQuotaDialog" @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
+      <QuotaList type="client-id" :columns="columns" :data="data" @refreshQuotaList="refresh"></QuotaList>
+      <AddQuotaConfig type="client-id" :visible="showAddQuotaDialog" :showClientId="true" @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
     </a-spin>
   </div>
 </template>
@@ -116,8 +116,14 @@ export default {
     openAddQuotaDialog() {
       this.showAddQuotaDialog = true;
     },
-    closeAddQuotaDialog() {
+    closeAddQuotaDialog(p) {
+      if (p.refresh) {
+        this.handleSearch();
+      }
       this.showAddQuotaDialog = false;
+    },
+    refresh() {
+      this.handleSearch();
     },
   },
   created() {

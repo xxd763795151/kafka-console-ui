@@ -11,6 +11,8 @@ import java.util.List;
 @Data
 public class AlterClientQuotaDTO {
 
+    private String type;
+
     private List<String> types;
 
     private List<String> names;
@@ -20,4 +22,6 @@ public class AlterClientQuotaDTO {
     private String producerRate;
 
     private String requestPercentage;
+
+    private List<String> deleteConfigs;
 }
