@@ -28,20 +28,24 @@ public class ClientQuotaController {
 
     @PostMapping
     public Object alterClientQuotaConfigs(@RequestBody AlterClientQuotaDTO request) {
-        if (CollectionUtils.isEmpty(request.getTypes())
-                || CollectionUtils.isEmpty(request.getNames())
-                || request.getTypes().size() != request.getNames().size()) {
-            return ResponseData.create().failed("types length and names length is invalid.");
+        if (request.getTypes().size() != 2) {
+            if (CollectionUtils.isEmpty(request.getTypes())
+                    || CollectionUtils.isEmpty(request.getNames())
+                    || request.getTypes().size() != request.getNames().size()) {
+                return ResponseData.create().failed("types length and names length is invalid.");
+            }
         }
         return clientQuotaService.alterClientQuotaConfigs(request);
     }
 
     @DeleteMapping
     public Object deleteClientQuotaConfigs(@RequestBody AlterClientQuotaDTO request) {
-        if (CollectionUtils.isEmpty(request.getTypes())
-                || CollectionUtils.isEmpty(request.getNames())
-                || request.getTypes().size() != request.getNames().size()) {
-            return ResponseData.create().failed("types length and names length is invalid.");
+        if (request.getTypes().size() != 2) {
+            if (CollectionUtils.isEmpty(request.getTypes())
+                    || CollectionUtils.isEmpty(request.getNames())
+                    || request.getTypes().size() != request.getNames().size()) {
+                return ResponseData.create().failed("types length and names length is invalid.");
+            }
         }
         return clientQuotaService.deleteClientQuotaConfigs(request);
     }

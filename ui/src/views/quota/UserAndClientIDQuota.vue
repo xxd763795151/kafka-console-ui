@@ -8,13 +8,23 @@
             @submit="handleSearch"
         >
           <a-row :gutter="24">
-            <a-col :span="16">
+            <a-col :span="10">
               <a-form-item label="用户标识">
                 <a-input
                     v-decorator="[
                     'user',
                   ]"
                     placeholder="请输入用户标识，如：用户名!"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="10">
+              <a-form-item label="客户端ID">
+                <a-input
+                    v-decorator="[
+                    'client',
+                  ]"
+                    placeholder="请输入客户端ID!"
                 />
               </a-form-item>
             </a-col>
@@ -32,7 +42,8 @@
         </a-button>
       </div>
       <QuotaList type="user&client-id" :columns="columns" :data="data" @refreshQuotaList="refresh"></QuotaList>
-      <AddQuotaConfig type="user&client-id" :visible="showAddQuotaDialog" :showUser="true" :showClientId="true" @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
+      <AddQuotaConfig type="user&client-id" :visible="showAddQuotaDialog" :showUser="true" :showClientId="true"
+                      @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
     </a-spin>
   </div>
 </template>
@@ -97,9 +108,15 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true;
-          const params = {types: ["user"]};
+          const params = {types: ["user", "client-id"], names: []};
           if (values.user) {
-            params.names = [values.user.trim()];
+            params.names.push(values.user.trim());
+          }
+          if (values.client) {
+            if (params.names.length == 0) {
+              params.names.push("");
+            }
+            params.names.push(values.client.trim());
           }
           request({
             url: KafkaClientQuotaApi.getClientQuotaConfigs.url,

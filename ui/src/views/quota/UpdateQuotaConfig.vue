@@ -159,28 +159,43 @@ export default {
             params.deleteConfigs.push("requestPercentage");
           }
           params.types = [];
+          params.names = [];
           if (this.showUser) {
             params.types.push("user");
             if (values.user) {
-              params.names = [values.user.trim()];
+              params.names.push(values.user.trim());
             } else {
-              params.names = [""];
+              params.names.push("");
             }
           }
           if (this.showClientId) {
             params.types.push("client-id");
             if (values.client) {
-              params.names = [values.client.trim()];
+              params.names.push(values.client.trim());
             } else {
-              params.names = [""];
+              params.names.push("");
             }
           }
           if (this.showIP) {
             params.types.push("ip");
             if (values.ip) {
-              params.names = [values.ip.trim()];
+              params.names.push(values.ip.trim());
             } else {
-              params.names = [""];
+              params.names.push("");
+            }
+          }
+          if (this.showUser && this.showClientId) {
+            params.types.push("user");
+            params.types.push("client-id");
+            if (values.user) {
+              params.names.push(values.user.trim());
+            } else {
+              params.names.push("");
+            }
+            if (values.client) {
+              params.names.push(values.client.trim());
+            } else {
+              params.names.push("");
             }
           }
           this.loading = true;

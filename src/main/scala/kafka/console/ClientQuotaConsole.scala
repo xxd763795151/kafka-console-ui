@@ -34,12 +34,14 @@ class ClientQuotaConsole(config: KafkaConfig) extends KafkaConsole(config: Kafka
   }
 
   def alterQuotaConfigs(entityTypes: java.util.List[String], entityNames: java.util.List[String], configsToBeAddedMap: java.util.Map[String, String], configsToBeDeleted: java.util.List[String]): (Boolean, String) = {
-    withAdminClientAndCatchError(admin => alterQuotaConfigsInner(admin, entityTypes.asScala.toList, entityNames.asScala.toList, configsToBeAddedMap.asScala.toMap, configsToBeDeleted.asScala.toSeq),
+    withAdminClientAndCatchError(admin => {
+      alterQuotaConfigsInner(admin, entityTypes.asScala.toList, entityNames.asScala.toList, configsToBeAddedMap.asScala.toMap, configsToBeDeleted.asScala.toSeq)
+      (true, "")
+    },
       e => {
         log.error("getAllClientQuotasConfigs error.", e)
         (false, e.getMessage)
-      })
-    (true, "")
+      }).asInstanceOf[(Boolean, String)]
   }
 
   private def getAllClientQuotasConfigs(adminClient: Admin, entityTypes: List[String], entityNames: List[String]): java.util.Map[ClientQuotaEntity, java.util.Map[String, Double]] = {

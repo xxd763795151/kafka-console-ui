@@ -13,9 +13,9 @@
         <a-tab-pane key="4" tab="用户_客户端ID">
           <UserAndClientIDQuota></UserAndClientIDQuota>
         </a-tab-pane>
-        <a-tab-pane key="5" tab="IP">
-          <IpQuota></IpQuota>
-        </a-tab-pane>
+        <!--        <a-tab-pane key="5" tab="IP">-->
+        <!--          <IpQuota></IpQuota>-->
+        <!--        </a-tab-pane>-->
       </a-tabs>
     </a-spin>
   </div>
@@ -25,11 +25,10 @@
 import ClientIDQuota from "@/views/quota/ClientIDQuota.vue";
 import UserQuota from "@/views/quota/UserQuota.vue";
 import UserAndClientIDQuota from "@/views/quota/UserAndClientIDQuota.vue";
-import IpQuota from "@/views/quota/IpQuota.vue";
 
 export default {
   name: "ClientQuota",
-  components: {ClientIDQuota, UserQuota, UserAndClientIDQuota, IpQuota},
+  components: {ClientIDQuota, UserQuota, UserAndClientIDQuota},
   data() {
     return {
       loading: false,

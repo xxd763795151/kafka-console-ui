@@ -90,27 +90,42 @@ export default {
       this.loading = true;
       const params = {type: this.type};
       params.types = [];
+      params.names = [];
       if (this.type == "user") {
         params.types.push("user");
         if (record.user) {
-          params.names = [record.user.trim()];
+          params.names.push(record.user.trim());
         } else {
-          params.names = [""];
+          params.names.push("");
         }
       } else if (this.type == "client-id") {
         params.types.push("client-id");
         if (record.client) {
-          params.names = [record.client.trim()];
+          params.names.push(record.client.trim());
         } else {
-          params.names = [""];
+          params.names.push("");
         }
       }
       if (this.type == "ip") {
         params.types.push("ip");
         if (record.ip) {
-          params.names = [record.ip.trim()];
+          params.names.push(record.ip.trim());
         } else {
-          params.names = [""];
+          params.names.push("");
+        }
+      }
+      if (this.type == "user&client-id") {
+        params.types.push("user");
+        params.types.push("client-id");
+        if (record.user) {
+          params.names.push(record.user.trim());
+        } else {
+          params.names.push("");
+        }
+        if (record.client) {
+          params.names.push(record.client.trim());
+        } else {
+          params.names.push("");
         }
       }
       request({
