@@ -297,7 +297,7 @@ export default {
           });
           return;
         }
-        if (!response.data.total) {
+        if (!response.data.total && response.data.hint) {
           this.hint = response.data.hint;
           return;
         }

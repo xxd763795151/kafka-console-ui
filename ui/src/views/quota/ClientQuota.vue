@@ -3,6 +3,7 @@
     <a-spin :spinning="loading">
       <a-tabs default-active-key="1" size="large" tabPosition="top">
         <a-tab-pane key="1" tab="使用说明">
+          <ClientQuotaIntroduce></ClientQuotaIntroduce>
         </a-tab-pane>
         <a-tab-pane key="2" tab="用户">
           <UserQuota></UserQuota>
@@ -25,10 +26,11 @@
 import ClientIDQuota from "@/views/quota/ClientIDQuota.vue";
 import UserQuota from "@/views/quota/UserQuota.vue";
 import UserAndClientIDQuota from "@/views/quota/UserAndClientIDQuota.vue";
+import ClientQuotaIntroduce from "@/views/quota/ClientQuotaIntroduce.vue";
 
 export default {
   name: "ClientQuota",
-  components: {ClientIDQuota, UserQuota, UserAndClientIDQuota},
+  components: {ClientIDQuota, UserQuota, UserAndClientIDQuota, ClientQuotaIntroduce},
   data() {
     return {
       loading: false,
