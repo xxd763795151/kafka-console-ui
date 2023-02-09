@@ -2,7 +2,7 @@
   <a-modal
     title="消费端成员"
     :visible="show"
-    :width="1500"
+    :width="1300"
     :mask="false"
     :destroyOnClose="true"
     :footer="null"
@@ -96,16 +96,19 @@ const columns = [
     title: "成员ID",
     dataIndex: "memberId",
     key: "memberId",
+    width: 300,
   },
   {
     title: "客户端ID",
     dataIndex: "clientId",
     key: "clientId",
+    width: 300,
   },
   {
     title: "实例ID",
     dataIndex: "groupInstanceId",
     key: "groupInstanceId",
+    width: 150,
   },
   {
     title: "主机",
@@ -117,6 +120,7 @@ const columns = [
     dataIndex: "partitions",
     key: "partitions",
     scopedSlots: { customRender: "partitions" },
+    width: 300,
   },
 ];
 </script>

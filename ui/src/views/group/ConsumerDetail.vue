@@ -272,6 +272,7 @@ const columns = [
     dataIndex: "clientId",
     key: "clientId",
     scopedSlots: { customRender: "clientId" },
+    width: 400,
   },
   {
     title: "日志位点",
