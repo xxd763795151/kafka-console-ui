@@ -85,7 +85,7 @@ docker run -d -p 7766:7766 -v $PWD/data:/app/data -v $PWD/log:/app/log wdkang/ka
 
 解压后 将Dockerfile放入文件夹的根目录
 
-**Dockefile**
+**Dockerfile**
 
 ```dockerfile
 # jdk
