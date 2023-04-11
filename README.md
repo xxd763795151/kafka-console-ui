@@ -25,11 +25,11 @@ v1.0.6版本之前，如果kafka集群启用了ACL，但是控制台没看到Acl
 ![功能特性](./document/img/功能特性.png)
 
 ## 安装包下载
-点击下载(v1.0.6版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.6/kafka-console-ui.zip)  
+点击下载(v1.0.7版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.7/kafka-console-ui.zip)  
 
 如果安装包下载的比较慢，可以查看下面的源码打包说明，把代码下载下来，本地快速打包.  
 
-github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.6/kafka-console-ui.zip)
+github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.7/kafka-console-ui.zip)
 
 ## 快速使用
 ### Windows
