@@ -55,6 +55,12 @@ const routes = [
     component: () =>
         import(/* webpackChunkName: "cluster" */ "../views/quota/ClientQuota.vue"),
   },
+  {
+    path: "/user-page",
+    name: "UserManage",
+    component: () =>
+        import(/* webpackChunkName: "cluster" */ "../views/user/UserManage.vue"),
+  },
 ];
 
 const router = new VueRouter({

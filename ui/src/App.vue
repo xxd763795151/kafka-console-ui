@@ -16,6 +16,8 @@
       <span>|</span
       ><router-link to="/acl-page" class="pad-l-r">Acl</router-link>
       <span>|</span
+      ><router-link to="/user-page" class="pad-l-r">用户</router-link>
+      <span>|</span
       ><router-link to="/op-page" class="pad-l-r">运维</router-link>
       <span class="right">集群：{{ clusterName }}</span>
     </div>

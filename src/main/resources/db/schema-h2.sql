@@ -35,3 +35,34 @@ CREATE TABLE IF NOT EXISTS T_CLUSTER_INFO
     PRIMARY KEY (ID),
     UNIQUE (CLUSTER_NAME)
 );
+
+-- 登录用户的角色权限配置
+CREATE TABLE IF NOT EXISTS t_sys_permission
+(
+    ID         IDENTITY   NOT NULL COMMENT '主键ID',
+    name       varchar(100)        DEFAULT NULL COMMENT '权限名称',
+    type       tinyint(1) NOT NULL DEFAULT 0 COMMENT '权限类型: 0：菜单，1：按钮',
+    parent_id  bigint(20)          DEFAULT NULL COMMENT '所属父权限ID',
+    permission varchar(100)        DEFAULT NULL COMMENT '权限字符串',
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS t_sys_role
+(
+    ID             IDENTITY     NOT NULL COMMENT '主键ID',
+    role_name      varchar(100) NOT NULL COMMENT '角色名称',
+    description    varchar(100) DEFAULT NULL COMMENT '角色描述',
+    permission_ids varchar(500) DEFAULT NULL COMMENT '分配的权限ID',
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS t_sys_user
+(
+    ID       IDENTITY NOT NULL COMMENT '主键ID',
+    username varchar(100) DEFAULT NULL COMMENT '用户名',
+    password varchar(100) DEFAULT NULL COMMENT '用户密码',
+    salt     varchar(100) DEFAULT NULL COMMENT '加密的盐值',
+    role_ids varchar(100) DEFAULT NULL COMMENT '分配角色的ID',
+    PRIMARY KEY (id),
+    UNIQUE (username)
+);
