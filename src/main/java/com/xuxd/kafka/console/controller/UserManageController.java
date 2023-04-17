@@ -5,10 +5,7 @@ import com.xuxd.kafka.console.beans.dto.SysPermissionDTO;
 import com.xuxd.kafka.console.beans.dto.SysRoleDTO;
 import com.xuxd.kafka.console.beans.dto.SysUserDTO;
 import com.xuxd.kafka.console.service.UserManageService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author: xuxd
@@ -40,5 +37,10 @@ public class UserManageController {
     @PostMapping("/permission")
     public Object addPermission(@RequestBody SysPermissionDTO permissionDTO) {
         return userManageService.addPermission(permissionDTO);
+    }
+
+    @GetMapping("/permission")
+    public Object selectPermission() {
+        return userManageService.selectPermission();
     }
 }

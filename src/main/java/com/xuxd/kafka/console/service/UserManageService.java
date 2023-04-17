@@ -21,4 +21,6 @@ public interface UserManageService {
     ResponseData addRole(SysRoleDTO roleDTO);
 
     ResponseData addUser(SysUserDTO userDTO);
+
+    ResponseData selectPermission();
 }

@@ -308,3 +308,14 @@ export const KafkaClientQuotaApi = {
     method: "delete",
   },
 };
+
+export const UserManageApi = {
+  getPermissions: {
+    url: "/sys/user/manage/permission",
+    method: "get",
+  },
+  addPermission: {
+    url: "/sys/user/manage/permission",
+    method: "post",
+  },
+};
