@@ -318,4 +318,8 @@ export const UserManageApi = {
     url: "/sys/user/manage/permission",
     method: "post",
   },
+  getRole: {
+    url: "/sys/user/manage/role",
+    method: "get",
+  },
 };

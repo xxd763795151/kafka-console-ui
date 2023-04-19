@@ -3,10 +3,12 @@ package com.xuxd.kafka.console.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.SysPermissionDO;
+import com.xuxd.kafka.console.beans.dos.SysRoleDO;
 import com.xuxd.kafka.console.beans.dto.SysPermissionDTO;
 import com.xuxd.kafka.console.beans.dto.SysRoleDTO;
 import com.xuxd.kafka.console.beans.dto.SysUserDTO;
 import com.xuxd.kafka.console.beans.vo.SysPermissionVO;
+import com.xuxd.kafka.console.beans.vo.SysRoleVO;
 import com.xuxd.kafka.console.dao.SysPermissionMapper;
 import com.xuxd.kafka.console.dao.SysRoleMapper;
 import com.xuxd.kafka.console.dao.SysUserMapper;
@@ -56,6 +58,12 @@ public class UserManageServiceImpl implements UserManageService {
     public ResponseData addUser(SysUserDTO userDTO) {
         userMapper.insert(userDTO.toDO());
         return ResponseData.create().success();
+    }
+
+    @Override
+    public ResponseData selectRole() {
+        List<SysRoleDO> dos = roleMapper.selectList(new QueryWrapper<>());
+        return ResponseData.create().data(dos.stream().map(SysRoleVO::from).collect(Collectors.toList())).success();
     }
 
     @Override

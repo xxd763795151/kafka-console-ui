@@ -3,7 +3,9 @@
     <a-spin :spinning="loading">
       <a-tabs default-active-key="1" size="large" tabPosition="top">
         <a-tab-pane key="1" tab="用户列表"> </a-tab-pane>
-        <a-tab-pane key="2" tab="角色列表"> </a-tab-pane>
+        <a-tab-pane key="2" tab="角色列表">
+          <Role></Role>
+        </a-tab-pane>
         <a-tab-pane key="3" tab="权限列表">
           <Permission></Permission>
         </a-tab-pane>
@@ -15,9 +17,10 @@
 
 <script>
 import Permission from "@/views/user/Permission.vue";
+import Role from "@/views/user/Role.vue";
 export default {
   name: "UserManage",
-  components: { Permission },
+  components: { Permission, Role },
   data() {
     return {
       loading: false,

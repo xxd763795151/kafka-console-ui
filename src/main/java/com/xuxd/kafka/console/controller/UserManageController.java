@@ -39,6 +39,11 @@ public class UserManageController {
         return userManageService.addPermission(permissionDTO);
     }
 
+    @GetMapping("/role")
+    public Object selectRole() {
+        return userManageService.selectRole();
+    }
+
     @GetMapping("/permission")
     public Object selectPermission() {
         return userManageService.selectPermission();
