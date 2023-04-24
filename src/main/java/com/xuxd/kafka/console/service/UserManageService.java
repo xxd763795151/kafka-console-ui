@@ -25,4 +25,8 @@ public interface UserManageService {
     ResponseData selectRole();
 
     ResponseData selectPermission();
+
+    ResponseData updateUser(SysUserDTO userDTO);
+
+    ResponseData updateRole(SysRoleDTO roleDTO);
 }

@@ -12,6 +12,8 @@ import java.util.List;
 @Data
 public class SysPermissionVO {
 
+    private Long id;
+
     private String name;
 
     /**
@@ -35,6 +37,7 @@ public class SysPermissionVO {
         permissionVO.setName(permissionDO.getName());
         permissionVO.setParentId(permissionDO.getParentId());
         permissionVO.setKey(permissionDO.getId());
+        permissionVO.setId(permissionDO.getId());
         return permissionVO;
     }
 }

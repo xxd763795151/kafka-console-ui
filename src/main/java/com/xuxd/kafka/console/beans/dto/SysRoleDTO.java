@@ -10,6 +10,8 @@ import lombok.Data;
 @Data
 public class SysRoleDTO {
 
+    private Long id;
+
     private String roleName;
 
     private String description;
@@ -18,6 +20,7 @@ public class SysRoleDTO {
 
     public SysRoleDO toDO() {
         SysRoleDO roleDO = new SysRoleDO();
+        roleDO.setId(this.id);
         roleDO.setRoleName(this.roleName);
         roleDO.setDescription(this.description);
         roleDO.setPermissionIds(this.permissionIds);

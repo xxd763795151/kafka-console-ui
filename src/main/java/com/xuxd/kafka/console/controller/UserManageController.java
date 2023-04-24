@@ -39,6 +39,12 @@ public class UserManageController {
         return userManageService.addPermission(permissionDTO);
     }
 
+    @ControllerLog("更新角色")
+    @PutMapping("/role")
+    public Object updateRole(@RequestBody SysRoleDTO roleDTO) {
+        return userManageService.updateRole(roleDTO);
+    }
+
     @GetMapping("/role")
     public Object selectRole() {
         return userManageService.selectRole();

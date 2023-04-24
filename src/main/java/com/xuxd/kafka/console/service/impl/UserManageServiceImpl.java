@@ -120,4 +120,16 @@ public class UserManageServiceImpl implements UserManageService {
         }
         return ResponseData.create().data(vos).success();
     }
+
+    @Override
+    public ResponseData updateUser(SysUserDTO userDTO) {
+        userMapper.updateById(userDTO.toDO());
+        return ResponseData.create().success();
+    }
+
+    @Override
+    public ResponseData updateRole(SysRoleDTO roleDTO) {
+        roleMapper.updateById(roleDTO.toDO());
+        return ResponseData.create().success();
+    }
 }

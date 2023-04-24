@@ -66,7 +66,45 @@
                   />
                 </a-form-item>
 
-                <a-form-item label="拥有权限"> </a-form-item>
+                <a-form-item label="权限配置">
+                  <div
+                    v-for="(menuPermission, index) in selectedPermissions"
+                    :key="index"
+                  >
+                    <a-row>
+                      <a-col :span="18" :style="{ fontWeight: 'bold' }"
+                        >{{ menuPermission.name }}
+                      </a-col>
+                      <a-col :span="6" :style="{ textAlign: 'right' }">
+                        <!--                        <a-checkbox :checked="menuPermission.checked">-->
+                        <!--                          可见</a-checkbox-->
+                        <!--                        >-->
+                        <a-switch v-model="menuPermission.checked" />
+                      </a-col>
+                    </a-row>
+                    <a-divider type="horizontal" :style="{ margin: '0px' }" />
+                    <a-row
+                      :gutter="16"
+                      v-for="(
+                        checkboxPermission, index2
+                      ) in menuPermission.children"
+                      :key="index2"
+                    >
+                      <a-col :xl="3" :lg="24">
+                        {{ checkboxPermission.name }}：
+                      </a-col>
+                      <a-col :xl="18" :lg="24">
+                        <a-checkbox-group
+                          :options="checkboxPermission.children"
+                          v-model="checkboxPermission.selected"
+                        />
+                      </a-col>
+                      <a-col :span="3" :style="{ textAlign: 'right' }">
+                        <a-checkbox> 全选</a-checkbox>
+                      </a-col>
+                    </a-row>
+                  </div>
+                </a-form-item>
                 <a-form-item>
                   <a-button type="primary" :loading="loading">保存</a-button>
                 </a-form-item>
@@ -101,7 +139,55 @@ export default {
   methods: {
     selected(role) {
       this.selectedRole = Object.assign({}, role);
-      
+      const idSet = this.selectedRole.permissionIds
+        ? new Set(this.selectedRole.permissionIds)
+        : new Set();
+      this.selectedPermissions = [];
+      let recursive = function (e, res) {
+        if (e.children) {
+          const children = e.children;
+          children.forEach((c) => {
+            const child = Object.assign({}, c);
+            child.name = e.name + "-" + c.name;
+            child.label = child.name;
+            child.value = child.id;
+            res.push(child);
+            if (child.children) {
+              recursive(child, res);
+            }
+            delete child.children;
+          });
+        }
+      };
+      // 1 级都是菜单，其它的都分到2级按钮
+      this.permissions.forEach((e) => {
+        const menu = Object.assign({}, e);
+        if (menu.children) {
+          const arr = [];
+          menu.children.forEach((c) => {
+            // 菜单下的按扭，按扭下面还有按扭的话，都合并
+            const btn = Object.assign({}, c);
+            arr.push(btn);
+            if (btn.children) {
+              const self = Object.assign({}, btn);
+              self.name = btn.name;
+              self.label = btn.name;
+              self.value = btn.id;
+              delete self.children;
+              const btnArr = [self];
+              recursive(btn, btnArr);
+              btn.children = btnArr;
+              const selected = btn.children
+                .map((bc) => bc.id)
+                .filter((id) => idSet.has(id));
+              btn.selected = selected || [];
+            }
+          });
+          menu.children = arr;
+          menu.checked = idSet.has(menu.id);
+        }
+        this.selectedPermissions.push(menu);
+      });
     },
     getRoles() {
       this.loading = true;

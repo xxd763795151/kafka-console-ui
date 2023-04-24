@@ -10,6 +10,8 @@ import lombok.Data;
 @Data
 public class SysUserDTO {
 
+    private Long id;
+
     private String username;
 
     private String password;
@@ -20,6 +22,7 @@ public class SysUserDTO {
 
     public SysUserDO toDO() {
         SysUserDO userDO = new SysUserDO();
+        userDO.setId(this.id);
         userDO.setUsername(this.username);
         userDO.setPassword(this.password);
         userDO.setSalt(this.salt);
