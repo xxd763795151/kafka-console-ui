@@ -18,7 +18,7 @@ public interface UserManageService {
      */
     ResponseData addPermission(SysPermissionDTO permissionDTO);
 
-    ResponseData addRole(SysRoleDTO roleDTO);
+    ResponseData addOrUdpateRole(SysRoleDTO roleDTO);
 
     ResponseData addUser(SysUserDTO userDTO);
 
@@ -29,4 +29,6 @@ public interface UserManageService {
     ResponseData updateUser(SysUserDTO userDTO);
 
     ResponseData updateRole(SysRoleDTO roleDTO);
+
+    ResponseData deleteRole(Long id);
 }

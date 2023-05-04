@@ -4,7 +4,6 @@
       <a-table
         :columns="columns"
         :data-source="data"
-        :row-selection="rowSelection"
         :expanded-row-keys.sync="expandedRowKeys"
       >
         <div slot="type" slot-scope="text">
@@ -32,13 +31,7 @@ const columns = [
     width: "12%",
     slots: { title: "type" },
     scopedSlots: { customRender: "type" },
-  },
-  {
-    title: "权限标记",
-    dataIndex: "permission",
-    width: "30%",
-    key: "permission",
-  },
+  }
 ];
 
 const rowSelection = {

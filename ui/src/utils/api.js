@@ -322,4 +322,12 @@ export const UserManageApi = {
     url: "/sys/user/manage/role",
     method: "get",
   },
+  addOrUpdateRole: {
+    url: "/sys/user/manage/role",
+    method: "post",
+  },
+  deleteRole: {
+    url: "/sys/user/manage/role",
+    method: "delete",
+  },
 };

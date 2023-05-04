@@ -49,8 +49,13 @@ public class UserManageServiceImpl implements UserManageService {
     }
 
     @Override
-    public ResponseData addRole(SysRoleDTO roleDTO) {
-        roleMapper.insert(roleDTO.toDO());
+    public ResponseData addOrUdpateRole(SysRoleDTO roleDTO) {
+        SysRoleDO roleDO = roleDTO.toDO();
+        if (roleDO.getId() == null) {
+            roleMapper.insert(roleDO);
+        } else {
+            roleMapper.updateById(roleDO);
+        }
         return ResponseData.create().success();
     }
 
@@ -130,6 +135,12 @@ public class UserManageServiceImpl implements UserManageService {
     @Override
     public ResponseData updateRole(SysRoleDTO roleDTO) {
         roleMapper.updateById(roleDTO.toDO());
+        return ResponseData.create().success();
+    }
+
+    @Override
+    public ResponseData deleteRole(Long id) {
+        roleMapper.deleteById(id);
         return ResponseData.create().success();
     }
 }

@@ -20,7 +20,12 @@
                     item.roleName
                   }}</a>
                 </a-list-item-meta>
-                <a-popconfirm title="确定删除角色？">
+                <a-popconfirm
+                  title="确定删除角色？"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @confirm="deleteRole(item.id)"
+                >
                   <a :style="{ display: 'flex' }">
                     <a-icon type="delete" />
                   </a>
@@ -79,7 +84,7 @@
                         <!--                        <a-checkbox :checked="menuPermission.checked">-->
                         <!--                          可见</a-checkbox-->
                         <!--                        >-->
-                        <a-switch v-model="menuPermission.checked" />
+                        <!--                        <a-switch v-model="menuPermission.checked" />-->
                       </a-col>
                     </a-row>
                     <a-divider type="horizontal" :style="{ margin: '0px' }" />
@@ -100,13 +105,20 @@
                         />
                       </a-col>
                       <a-col :span="3" :style="{ textAlign: 'right' }">
-                        <a-checkbox> 全选</a-checkbox>
+                        <a-checkbox
+                          v-model="checkboxPermission.selectAll"
+                          @click="onCheckboxSelectAll(checkboxPermission)"
+                        >
+                          全选</a-checkbox
+                        >
                       </a-col>
                     </a-row>
                   </div>
                 </a-form-item>
                 <a-form-item>
-                  <a-button type="primary" :loading="loading">保存</a-button>
+                  <a-button type="primary" :loading="loading" @click="onSave()"
+                    >保存</a-button
+                  >
                 </a-form-item>
               </a-form>
             </div>
@@ -139,6 +151,16 @@ export default {
   methods: {
     selected(role) {
       this.selectedRole = Object.assign({}, role);
+      this.form.getFieldDecorator("description", {
+        rules: [{ required: true, message: "请填写备注说明!" }],
+        initialValue: this.selectedRole.description,
+      });
+      this.form.getFieldDecorator("roleName", {
+        rules: [{ required: true, message: "请填写角色名称!" }],
+        initialValue: this.selectedRole.roleName,
+      });
+      this.form.setFieldsValue({ roleName: this.selectedRole.roleName });
+      this.form.setFieldsValue({ description: this.selectedRole.description });
       const idSet = this.selectedRole.permissionIds
         ? new Set(this.selectedRole.permissionIds)
         : new Set();
@@ -181,13 +203,77 @@ export default {
                 .map((bc) => bc.id)
                 .filter((id) => idSet.has(id));
               btn.selected = selected || [];
+              btn.selectAll = btn.selected.length == btn.children.length;
             }
           });
           menu.children = arr;
-          menu.checked = idSet.has(menu.id);
+          // menu.checked = idSet.has(menu.id);
         }
         this.selectedPermissions.push(menu);
       });
+    },
+    deleteRole(id) {
+      this.loading = true;
+      request({
+        url: UserManageApi.deleteRole.url + "?id=" + id,
+        method: UserManageApi.deleteRole.method,
+      }).then((res) => {
+        this.loading = false;
+        if (res.code == 0) {
+          this.$message.success(res.msg);
+          this.getRoles();
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    },
+    onSave() {
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          const params = Object.assign({}, this.selectedRole, values);
+          params.permissionIds = [];
+          this.selectedPermissions.forEach((e) => {
+            if (e.children) {
+              e.children.forEach((child) => {
+                if (child.selected) {
+                  params.permissionIds.push(...child.selected);
+                }
+              });
+            }
+          });
+          this.loading = true;
+          request({
+            url: UserManageApi.addOrUpdateRole.url,
+            method: UserManageApi.addOrUpdateRole.method,
+            data: params,
+          }).then((res) => {
+            this.loading = false;
+            if (res.code == 0) {
+              this.$message.success(res.msg);
+              this.getRoles();
+            } else {
+              notification.error({
+                message: "error",
+                description: res.msg,
+              });
+            }
+          });
+        }
+      });
+    },
+    onCheckboxSelectAll(record) {
+      if (!record.children) {
+        record.selected = [];
+        return;
+      }
+      if (!record.selectAll) {
+        record.selected = record.children.map((bc) => bc.id);
+      } else {
+        record.selected = [];
+      }
     },
     getRoles() {
       this.loading = true;
