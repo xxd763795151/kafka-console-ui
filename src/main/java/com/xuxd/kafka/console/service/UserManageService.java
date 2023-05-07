@@ -20,15 +20,19 @@ public interface UserManageService {
 
     ResponseData addOrUdpateRole(SysRoleDTO roleDTO);
 
-    ResponseData addUser(SysUserDTO userDTO);
+    ResponseData addOrUpdateUser(SysUserDTO userDTO);
 
     ResponseData selectRole();
 
     ResponseData selectPermission();
+
+    ResponseData selectUser();
 
     ResponseData updateUser(SysUserDTO userDTO);
 
     ResponseData updateRole(SysRoleDTO roleDTO);
 
     ResponseData deleteRole(Long id);
+
+    ResponseData deleteUser(Long id);
 }

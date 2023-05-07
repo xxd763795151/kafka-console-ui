@@ -330,4 +330,16 @@ export const UserManageApi = {
     url: "/sys/user/manage/role",
     method: "delete",
   },
+  getUsers: {
+    url: "/sys/user/manage/user",
+    method: "get",
+  },
+  addOrUpdateUser: {
+    url: "/sys/user/manage/user",
+    method: "post",
+  },
+  deleteUser: {
+    url: "/sys/user/manage/user",
+    method: "delete",
+  },
 };

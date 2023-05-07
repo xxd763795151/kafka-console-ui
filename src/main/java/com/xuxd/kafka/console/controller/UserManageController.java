@@ -21,10 +21,10 @@ public class UserManageController {
         this.userManageService = userManageService;
     }
 
-    @ControllerLog("新增用户")
+    @ControllerLog("新增/更新用户")
     @PostMapping("/user")
-    public Object addUser(@RequestBody SysUserDTO userDTO) {
-        return userManageService.addUser(userDTO);
+    public Object addOrUpdateUser(@RequestBody SysUserDTO userDTO) {
+        return userManageService.addOrUpdateUser(userDTO);
     }
 
     @ControllerLog("新增/更新角色")
@@ -55,8 +55,20 @@ public class UserManageController {
         return userManageService.selectPermission();
     }
 
+    @GetMapping("/user")
+    public Object selectUser() {
+        return userManageService.selectUser();
+    }
+
+    @ControllerLog("删除角色")
     @DeleteMapping("/role")
     public Object deleteRole(@RequestParam Long id) {
         return userManageService.deleteRole(id);
+    }
+
+    @ControllerLog("删除用户")
+    @DeleteMapping("/user")
+    public Object deleteUser(@RequestParam Long id) {
+        return userManageService.deleteUser(id);
     }
 }

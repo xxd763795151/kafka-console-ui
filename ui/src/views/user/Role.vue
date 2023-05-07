@@ -24,7 +24,7 @@
                   title="确定删除角色？"
                   ok-text="确认"
                   cancel-text="取消"
-                  @confirm="deleteRole(item.id)"
+                  @confirm="deleteRole(item)"
                 >
                   <a :style="{ display: 'flex' }">
                     <a-icon type="delete" />
@@ -35,7 +35,7 @@
             <span
               :style="{ margin: '25px', fontSize: '15px', display: 'block' }"
             >
-              <a><a-icon type="plus" /> 新增角色</a>
+              <a @click="addRole()"><a-icon type="plus" /> 新增角色</a>
             </span>
           </a-col>
           <a-col :md="20">
@@ -212,16 +212,23 @@ export default {
         this.selectedPermissions.push(menu);
       });
     },
-    deleteRole(id) {
+    deleteRole(role) {
+      if (role.adding) {
+        this.roles.pop();
+        return;
+      }
       this.loading = true;
       request({
-        url: UserManageApi.deleteRole.url + "?id=" + id,
+        url: UserManageApi.deleteRole.url + "?id=" + role.id,
         method: UserManageApi.deleteRole.method,
       }).then((res) => {
         this.loading = false;
         if (res.code == 0) {
           this.$message.success(res.msg);
           this.getRoles();
+          if (role.id == this.selectedRole.id) {
+            this.selectedRole = {};
+          }
         } else {
           notification.error({
             message: "error",
@@ -229,6 +236,15 @@ export default {
           });
         }
       });
+    },
+    addRole() {
+      const role = {
+        roleName: "角色名称",
+        description: "角色描述",
+        adding: true,
+      };
+      this.roles.push(role);
+      this.selected(role);
     },
     onSave() {
       this.form.validateFields((err, values) => {
