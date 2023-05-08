@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    title="新增用户"
+    title="分配用户角色"
     :visible="show"
     :width="800"
     :mask="false"
@@ -19,11 +19,8 @@
         >
           <a-form-item label="用户名">
             <a-input
-              v-decorator="[
-                'username',
-                { rules: [{ required: true, message: '输入用户名' }] },
-              ]"
-              placeholder="输入用户名"
+              :disabled="true"
+              v-decorator="['username', { initialValue: user.username }]"
             />
           </a-form-item>
           <a-form-item label="角色">
@@ -60,17 +57,17 @@ import notification from "ant-design-vue/es/notification";
 import { UserManageApi } from "@/utils/api";
 
 export default {
-  name: "CreateUser",
+  name: "UpdateUserRole",
   props: {
     visible: {
       type: Boolean,
       default: false,
     },
+    user: {},
   },
   data() {
     return {
       show: this.visible,
-      data: [],
       loading: false,
       form: this.$form.createForm(this, { name: "coordinated" }),
       roles: [],
@@ -86,16 +83,21 @@ export default {
       e.preventDefault();
       this.form.validateFields((err, values) => {
         if (!err) {
+          const params = Object.assign({}, this.user, values);
+          params.roleIds = values.roleIds;
           this.loading = true;
           request({
             url: UserManageApi.addOrUpdateUser.url,
             method: UserManageApi.addOrUpdateUser.method,
-            data: values,
+            data: params,
           }).then((res) => {
             this.loading = false;
             if (res.code == 0) {
               this.$message.success(res.msg);
-              this.$emit("closeCreateUserDialog", { refresh: true, data: res.data });
+              this.$emit("closeUpdateUserRoleDialog", {
+                refresh: true,
+                data: res.data,
+              });
             } else {
               notification.error({
                 message: "error",
@@ -124,8 +126,7 @@ export default {
       });
     },
     handleCancel() {
-      this.data = [];
-      this.$emit("closeCreateUserDialog", { refresh: false });
+      this.$emit("closeUpdateUserRoleDialog", { refresh: false });
     },
   },
   created() {

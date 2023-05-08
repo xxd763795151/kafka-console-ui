@@ -20,6 +20,8 @@ public class SysUserDTO {
 
     private String roleIds;
 
+    private Boolean resetPassword = false;
+
     public SysUserDO toDO() {
         SysUserDO userDO = new SysUserDO();
         userDO.setId(this.id);

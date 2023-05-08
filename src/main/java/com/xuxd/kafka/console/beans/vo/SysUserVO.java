@@ -18,6 +18,8 @@ public class SysUserVO {
 
     private String roleIds;
 
+    private String roleNames;
+
     public static SysUserVO from(SysUserDO userDO) {
         SysUserVO userVO = new SysUserVO();
         userVO.setId(userDO.getId());

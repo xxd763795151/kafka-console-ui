@@ -53,8 +53,22 @@
               >删除
             </a-button>
           </a-popconfirm>
-          <a-button size="small" href="javascript:;" class="operation-btn"
-            >重置密码
+          <a-popconfirm
+            :title="'重置用户: ' + record.username + '密码？'"
+            ok-text="确认"
+            cancel-text="取消"
+            @confirm="resetPassword(record)"
+          >
+            <a-button size="small" href="javascript:;" class="operation-btn"
+              >重置密码
+            </a-button>
+          </a-popconfirm>
+          <a-button
+            size="small"
+            href="javascript:;"
+            class="operation-btn"
+            @click="openUpdateUserRoleDialog(record)"
+            >分配角色
           </a-button>
         </div>
       </a-table>
@@ -62,6 +76,16 @@
         @closeCreateUserDialog="closeCreateUserDialog"
         :visible="showCreateUserDialog"
       ></CreateUser>
+      <MessageBox
+        :visible="showMessageBox"
+        :message="messageBoxContent"
+        @closeMessageBox="closeMessageBox"
+      ></MessageBox>
+      <UpdateUserRole
+        :visible="showUpdateUserRole"
+        :user="selectUser"
+        @closeUpdateUserRoleDialog="closeUpdateUserRoleDialog"
+      ></UpdateUserRole>
     </a-spin>
   </div>
 </template>
@@ -72,10 +96,12 @@ import request from "@/utils/request";
 import notification from "ant-design-vue/lib/notification";
 import { UserManageApi } from "@/utils/api";
 import CreateUser from "@/views/user/CreateUser.vue";
+import MessageBox from "@/views/components/MessageBox.vue";
+import UpdateUserRole from "@/views/user/UpdateUserRole.vue";
 
 export default {
   name: "User",
-  components: { CreateUser },
+  components: { CreateUser, MessageBox, UpdateUserRole },
   props: {
     topicList: {
       type: Array,
@@ -89,6 +115,10 @@ export default {
       filteredData: [],
       filterUsername: "",
       showCreateUserDialog: false,
+      showMessageBox: false,
+      showUpdateUserRole: false,
+      messageBoxContent: "",
+      selectUser: {},
       columns: [
         {
           title: "用户名",
@@ -97,8 +127,8 @@ export default {
         },
         {
           title: "角色",
-          dataIndex: "roleIds",
-          key: "roleIds",
+          dataIndex: "roleNames",
+          key: "roleNames",
         },
         {
           title: "操作",
@@ -150,7 +180,22 @@ export default {
       this.showCreateUserDialog = false;
       if (p.refresh) {
         this.refresh();
+        this.messageBoxContent = "用户初始密码：" + p.data;
+        this.showMessageBox = true;
       }
+    },
+    openUpdateUserRoleDialog(user) {
+      this.selectUser = user;
+      this.showUpdateUserRole = true;
+    },
+    closeUpdateUserRoleDialog(p) {
+      this.showUpdateUserRole = false;
+      if (p.refresh) {
+        this.refresh();
+      }
+    },
+    closeMessageBox() {
+      this.showMessageBox = false;
     },
     deleteUser(user) {
       this.loading = true;
@@ -161,6 +206,27 @@ export default {
         this.loading = false;
         if (res.code == 0) {
           this.refresh();
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    },
+    resetPassword(record) {
+      this.loading = true;
+      const params = Object.assign({}, record);
+      params.resetPassword = true;
+      request({
+        url: UserManageApi.addOrUpdateUser.url,
+        method: UserManageApi.addOrUpdateUser.method,
+        data: params,
+      }).then((res) => {
+        this.loading = false;
+        if (res.code == 0) {
+          this.messageBoxContent = "密码重置成功，新密码：" + res.data;
+          this.showMessageBox = true;
         } else {
           notification.error({
             message: "error",
@@ -221,5 +287,9 @@ export default {
   text-align: left;
   margin-bottom: 5px;
   margin-top: 5px;
+}
+
+.operation-btn {
+  margin-right: 3%;
 }
 </style>

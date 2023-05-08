@@ -15,12 +15,15 @@ import com.xuxd.kafka.console.dao.SysPermissionMapper;
 import com.xuxd.kafka.console.dao.SysRoleMapper;
 import com.xuxd.kafka.console.dao.SysUserMapper;
 import com.xuxd.kafka.console.service.UserManageService;
+import com.xuxd.kafka.console.utils.RandomStringUtil;
 import com.xuxd.kafka.console.utils.UUIDStrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -64,8 +67,18 @@ public class UserManageServiceImpl implements UserManageService {
 
     @Override
     public ResponseData addOrUpdateUser(SysUserDTO userDTO) {
+
         if (userDTO.getId() == null) {
+            if (StringUtils.isEmpty(userDTO.getPassword())) {
+                userDTO.setPassword(RandomStringUtil.random6Str());
+            }
             SysUserDO userDO = userDTO.toDO();
+            QueryWrapper<SysUserDO> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq(true, "username", userDO.getUsername());
+            SysUserDO exist = userMapper.selectOne(queryWrapper);
+            if (exist != null) {
+                return ResponseData.create().failed("用户已存在：" + userDO.getUsername());
+            }
             userDO.setSalt(UUIDStrUtil.random());
             userDO.setPassword(UUIDStrUtil.generate(userDTO.getPassword(), userDO.getSalt()));
             userMapper.insert(userDTO.toDO());
@@ -76,14 +89,16 @@ public class UserManageServiceImpl implements UserManageService {
                 return ResponseData.create().failed("Unknown User.");
             }
             // 判断是否更新密码
-            String oldPass = UUIDStrUtil.generate(userDO.getPassword(), userDO.getSalt());
-            if (!userDTO.getPassword().equals(oldPass)) {
+            if (userDTO.getResetPassword()) {
+                userDTO.setPassword(RandomStringUtil.random6Str());
                 userDO.setSalt(UUIDStrUtil.random());
                 userDO.setPassword(UUIDStrUtil.generate(userDTO.getPassword(), userDO.getSalt()));
             }
+            userDO.setRoleIds(userDTO.getRoleIds());
+            userDO.setUsername(userDTO.getUsername());
             userMapper.updateById(userDO);
         }
-        return ResponseData.create().success();
+        return ResponseData.create().data(userDTO.getPassword()).success();
     }
 
     @Override
@@ -151,7 +166,16 @@ public class UserManageServiceImpl implements UserManageService {
     public ResponseData selectUser() {
         QueryWrapper<SysUserDO> queryWrapper = new QueryWrapper<>();
         List<SysUserDO> userDOS = userMapper.selectList(queryWrapper);
-        return ResponseData.create().data(userDOS.stream().map(SysUserVO::from).collect(Collectors.toList())).success();
+        List<SysRoleDO> roleDOS = roleMapper.selectList(null);
+        Map<Long, SysRoleDO> roleDOMap = roleDOS.stream().collect(Collectors.toMap(SysRoleDO::getId, Function.identity(), (e1, e2) -> e1));
+        List<SysUserVO> voList = userDOS.stream().map(SysUserVO::from).collect(Collectors.toList());
+        voList.forEach(vo -> {
+            if (vo.getRoleIds() != null) {
+                Long roleId = Long.valueOf(vo.getRoleIds());
+                vo.setRoleNames(roleDOMap.containsKey(roleId) ? roleDOMap.get(roleId).getRoleName() : null);
+            }
+        });
+        return ResponseData.create().data(voList).success();
     }
 
     @Override
