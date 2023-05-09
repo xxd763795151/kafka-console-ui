@@ -11,7 +11,9 @@
         <a-tab-pane key="3" tab="权限列表">
           <Permission></Permission>
         </a-tab-pane>
-        <a-tab-pane key="4" tab="个人设置"> </a-tab-pane>
+        <a-tab-pane key="4" tab="个人设置">
+          <UserSetting></UserSetting>
+        </a-tab-pane>
       </a-tabs>
     </a-spin>
   </div>
@@ -21,9 +23,10 @@
 import Permission from "@/views/user/Permission.vue";
 import Role from "@/views/user/Role.vue";
 import User from "@/views/user/User.vue";
+import UserSetting from "@/views/user/UserSetting.vue";
 export default {
   name: "UserManage",
-  components: { Permission, Role, User },
+  components: { Permission, Role, User, UserSetting },
   data() {
     return {
       loading: false,

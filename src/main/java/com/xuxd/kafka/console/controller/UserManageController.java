@@ -71,4 +71,10 @@ public class UserManageController {
     public Object deleteUser(@RequestParam Long id) {
         return userManageService.deleteUser(id);
     }
+
+    @ControllerLog("更新密码")
+    @PostMapping("/user/password")
+    public Object updatePassword(@RequestBody SysUserDTO userDTO) {
+        return userManageService.updatePassword(userDTO);
+    }
 }

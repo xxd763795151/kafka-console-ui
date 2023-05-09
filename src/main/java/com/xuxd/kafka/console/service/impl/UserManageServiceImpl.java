@@ -192,6 +192,12 @@ public class UserManageServiceImpl implements UserManageService {
 
     @Override
     public ResponseData deleteRole(Long id) {
+        QueryWrapper<SysUserDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(true, "role_ids", id);
+        Integer count = userMapper.selectCount(queryWrapper);
+        if (count > 0) {
+            return ResponseData.create().failed("存在用户被分配为当前角色，不允许删除");
+        }
         roleMapper.deleteById(id);
         return ResponseData.create().success();
     }
@@ -199,6 +205,15 @@ public class UserManageServiceImpl implements UserManageService {
     @Override
     public ResponseData deleteUser(Long id) {
         userMapper.deleteById(id);
+        return ResponseData.create().success();
+    }
+
+    @Override
+    public ResponseData updatePassword(SysUserDTO userDTO) {
+        SysUserDO userDO = userDTO.toDO();
+        userDO.setSalt(UUIDStrUtil.random());
+        userDO.setPassword(UUIDStrUtil.generate(userDTO.getPassword(), userDO.getSalt()));
+        userMapper.updateById(userDO);
         return ResponseData.create().success();
     }
 }

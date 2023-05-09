@@ -35,4 +35,6 @@ public interface UserManageService {
     ResponseData deleteRole(Long id);
 
     ResponseData deleteUser(Long id);
+
+    ResponseData updatePassword(SysUserDTO userDTO);
 }

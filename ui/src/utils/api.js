@@ -342,4 +342,8 @@ export const UserManageApi = {
     url: "/sys/user/manage/user",
     method: "delete",
   },
+  updatePassword: {
+    url: "/sys/user/manage/user/password",
+    method: "post",
+  },
 };

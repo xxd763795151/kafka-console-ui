@@ -96,7 +96,7 @@ import request from "@/utils/request";
 import notification from "ant-design-vue/lib/notification";
 import { UserManageApi } from "@/utils/api";
 import CreateUser from "@/views/user/CreateUser.vue";
-import MessageBox from "@/views/components/MessageBox.vue";
+import MessageBox from "@/components/MessageBox.vue";
 import UpdateUserRole from "@/views/user/UpdateUserRole.vue";
 
 export default {

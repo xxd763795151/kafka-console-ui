@@ -79,6 +79,9 @@ export default {
   watch: {
     visible(v) {
       this.show = v;
+      if (this.show) {
+        this.getRoles();
+      }
     },
   },
   methods: {
