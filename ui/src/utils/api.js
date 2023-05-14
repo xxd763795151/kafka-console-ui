@@ -347,3 +347,14 @@ export const UserManageApi = {
     method: "post",
   },
 };
+
+export const AuthApi = {
+  enable: {
+    url: "/auth/enable",
+    method: "get",
+  },
+  login: {
+    url: "/auth/login",
+    method: "post",
+  },
+};

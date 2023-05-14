@@ -2,7 +2,7 @@ import axios from "axios";
 import notification from "ant-design-vue/es/notification";
 import { VueAxios } from "./axios";
 import { getClusterInfo } from "@/utils/local-cache";
-
+import Router from "@/router";
 // 创建 axios 实例
 const request = axios.create({
   // API 请求的默认前缀
@@ -10,14 +10,24 @@ const request = axios.create({
   timeout: 120000, // 请求超时时间
 });
 
+// axios.defaults.headers.common['X-Auth-Token'] = localStorage.getItem('access_token');
+
 // 异常拦截处理器
 const errorHandler = (error) => {
   if (error.response) {
-    const data = error.response.data;
-    notification.error({
-      message: error.response.status,
-      description: JSON.stringify(data),
-    });
+    if (error.response.status == 401) {
+      notification.error({
+        message: error.response.status,
+        description: "请登录",
+      });
+      Router.push({ path: "/login-page" });
+    } else {
+      const data = error.response.data;
+      notification.error({
+        message: error.response.status,
+        description: JSON.stringify(data),
+      });
+    }
   }
   return Promise.reject(error);
 };
@@ -28,6 +38,10 @@ request.interceptors.request.use((config) => {
   if (clusterInfo) {
     config.headers["X-Cluster-Info-Id"] = clusterInfo.id;
     // config.headers["X-Cluster-Info-Name"] = encodeURIComponent(clusterInfo.clusterName);
+  }
+  const token = localStorage.getItem('access_token')
+  if (token) {
+    config.headers["X-Auth-Token"] = token;
   }
   return config;
 }, errorHandler);

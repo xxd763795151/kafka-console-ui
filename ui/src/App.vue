@@ -25,12 +25,12 @@
   </div>
 </template>
 <script>
-import { KafkaClusterApi } from "@/utils/api";
+import { KafkaClusterApi, AuthApi } from "@/utils/api";
 import request from "@/utils/request";
 import { mapMutations, mapState } from "vuex";
 import { getClusterInfo } from "@/utils/local-cache";
 import notification from "ant-design-vue/lib/notification";
-import { CLUSTER } from "@/store/mutation-types";
+import {AUTH, CLUSTER} from "@/store/mutation-types";
 
 export default {
   data() {
@@ -39,24 +39,8 @@ export default {
     };
   },
   created() {
-    const clusterInfo = getClusterInfo();
-    if (!clusterInfo) {
-      request({
-        url: KafkaClusterApi.peekClusterInfo.url,
-        method: KafkaClusterApi.peekClusterInfo.method,
-      }).then((res) => {
-        if (res.code == 0) {
-          this.switchCluster(res.data);
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    } else {
-      this.switchCluster(clusterInfo);
-    }
+    this.intAuthState();
+    this.initClusterInfo();
   },
   computed: {
     ...mapState({
@@ -67,7 +51,40 @@ export default {
   methods: {
     ...mapMutations({
       switchCluster: CLUSTER.SWITCH,
+      enableAuth: AUTH.ENABLE,
     }),
+    intAuthState() {
+      request({
+        url: AuthApi.enable.url,
+        method: AuthApi.enable.method,
+      }).then((res) => {
+        const enable = res;
+        this.enableAuth(enable);
+        // if (!enable){
+        //   this.initClusterInfo();
+        // }
+      });
+    },
+    initClusterInfo() {
+      const clusterInfo = getClusterInfo();
+      if (!clusterInfo) {
+        request({
+          url: KafkaClusterApi.peekClusterInfo.url,
+          method: KafkaClusterApi.peekClusterInfo.method,
+        }).then((res) => {
+          if (res.code == 0) {
+            this.switchCluster(res.data);
+          } else {
+            notification.error({
+              message: "error",
+              description: res.msg,
+            });
+          }
+        });
+      } else {
+        this.switchCluster(clusterInfo);
+      }
+    },
   },
 };
 </script>
