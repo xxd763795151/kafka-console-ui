@@ -4,5 +4,6 @@ export const CLUSTER = {
 
 export const AUTH = {
   ENABLE: "enable",
-  SET: "setToken",
+  SET_TOKEN: "setToken",
+  SET_USERNAME: "setUsername",
 };

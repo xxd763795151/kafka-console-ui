@@ -204,6 +204,18 @@ export default {
                 .filter((id) => idSet.has(id));
               btn.selected = selected || [];
               btn.selectAll = btn.selected.length == btn.children.length;
+            } else {
+              const self = Object.assign({}, btn);
+              self.name = btn.name;
+              self.label = btn.name;
+              self.value = btn.id;
+              const btnArr = [self];
+              btn.children = btnArr;
+              const selected = btn.children
+                  .map((bc) => bc.id)
+                  .filter((id) => idSet.has(id));
+              btn.selected = selected || [];
+              btn.selectAll = btn.selected.length == btn.children.length;
             }
           });
           menu.children = arr;

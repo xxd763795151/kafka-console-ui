@@ -19,7 +19,23 @@
       ><router-link to="/user-page" class="pad-l-r">用户</router-link>
       <span>|</span
       ><router-link to="/op-page" class="pad-l-r">运维</router-link>
-      <span class="right">集群：{{ clusterName }}</span>
+      <div class="right">
+        <span>集群：{{ clusterName }} </span>
+        <a-dropdown v-show="showUsername">
+          <span>
+            <span> | </span><a-icon type="smile"></a-icon>
+            <span>{{ username }}</span>
+          </span>
+          <a-menu slot="overlay">
+            <a-menu-item key="1">
+              <a href="javascript:;" @click="logout">
+                <!--              <a-icon type="logout"/>-->
+                <span>退出</span>
+              </a>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
+      </div>
     </div>
     <router-view class="content" />
   </div>
@@ -28,9 +44,9 @@
 import { KafkaClusterApi, AuthApi } from "@/utils/api";
 import request from "@/utils/request";
 import { mapMutations, mapState } from "vuex";
-import { getClusterInfo } from "@/utils/local-cache";
+import {deleteToken, deleteUsername, getClusterInfo, getUsername} from "@/utils/local-cache";
 import notification from "ant-design-vue/lib/notification";
-import {AUTH, CLUSTER} from "@/store/mutation-types";
+import { AUTH, CLUSTER } from "@/store/mutation-types";
 
 export default {
   data() {
@@ -46,13 +62,19 @@ export default {
     ...mapState({
       clusterName: (state) => state.clusterInfo.clusterName,
       enableSasl: (state) => state.clusterInfo.enableSasl,
+      showUsername: (state) => state.auth.enable && state.auth.username,
+      username: (state) => state.auth.username,
     }),
   },
   methods: {
     ...mapMutations({
       switchCluster: CLUSTER.SWITCH,
       enableAuth: AUTH.ENABLE,
+      setUsername: AUTH.SET_USERNAME,
     }),
+    beforeLoadFn() {
+      this.setUsername(getUsername());
+    },
     intAuthState() {
       request({
         url: AuthApi.enable.url,
@@ -85,6 +107,14 @@ export default {
         this.switchCluster(clusterInfo);
       }
     },
+    logout() {
+      deleteToken();
+      deleteUsername();
+      this.$router.push("/login-page");
+    },
+  },
+  mounted() {
+    this.beforeLoadFn();
   },
 };
 </script>

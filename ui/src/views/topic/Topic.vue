@@ -46,7 +46,7 @@
           </a-form>
         </div>
         <div class="operation-row-button">
-          <a-button type="primary" @click="openCreateTopicDialog"
+          <a-button type="primary" @click="openCreateTopicDialog" v-action:action
             >新增</a-button
           >
           <a-popconfirm
@@ -60,6 +60,7 @@
               class="btn-left"
               :disabled="!hasSelected"
               :loading="loading"
+              v-action:action
             >
               批量删除
             </a-button>

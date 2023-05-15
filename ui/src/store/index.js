@@ -1,7 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import { CLUSTER, AUTH } from "@/store/mutation-types";
-import { setClusterInfo } from "@/utils/local-cache";
+import { setClusterInfo, setToken, setUsername } from "@/utils/local-cache";
 
 Vue.use(Vuex);
 
@@ -14,6 +14,7 @@ export default new Vuex.Store({
     },
     auth: {
       enable: false,
+      username: "",
     },
   },
   mutations: {
@@ -34,8 +35,12 @@ export default new Vuex.Store({
     [AUTH.ENABLE](state, enable) {
       state.auth.enable = enable;
     },
-    [AUTH.SET](state, info) {
-      localStorage.setItem("access_token", info);
+    [AUTH.SET_TOKEN](state, info) {
+      setToken(info);
+    },
+    [AUTH.SET_USERNAME](state, username) {
+      setUsername(username);
+      state.auth.username = username;
     },
   },
   actions: {},
