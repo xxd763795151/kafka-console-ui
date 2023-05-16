@@ -37,6 +37,14 @@ export function getUsername() {
   return localStorage.getItem(Cache.username);
 }
 
+export function setPermissions(permissions) {
+  localStorage.setItem(Cache.permissions, permissions);
+}
+
+export function getPermissions() {
+  return localStorage.getItem(Cache.permissions);
+}
+
 // export function setEnableAuth(enable) {
 //   localStorage.setItem()
 // }

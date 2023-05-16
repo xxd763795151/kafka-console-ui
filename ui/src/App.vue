@@ -44,7 +44,7 @@
 import { KafkaClusterApi, AuthApi } from "@/utils/api";
 import request from "@/utils/request";
 import { mapMutations, mapState } from "vuex";
-import {deleteToken, deleteUsername, getClusterInfo, getUsername} from "@/utils/local-cache";
+import {deleteToken, deleteUsername, getClusterInfo, getPermissions, getUsername} from "@/utils/local-cache";
 import notification from "ant-design-vue/lib/notification";
 import { AUTH, CLUSTER } from "@/store/mutation-types";
 
@@ -71,9 +71,11 @@ export default {
       switchCluster: CLUSTER.SWITCH,
       enableAuth: AUTH.ENABLE,
       setUsername: AUTH.SET_USERNAME,
+      setPermissions: AUTH.SET_PERMISSIONS,
     }),
     beforeLoadFn() {
       this.setUsername(getUsername());
+      this.setPermissions(getPermissions());
     },
     intAuthState() {
       request({

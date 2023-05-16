@@ -8,4 +8,5 @@ export const Cache = {
   token: "access_token",
   username: "login_user",
   enableAuth: "enable_auth",
+  permissions: "permissions",
 };

@@ -66,6 +66,7 @@ export default {
             if (res.code == 0) {
               this.setToken(res.data.token);
               this.setUsername(params.username);
+              this.setPermissions(res.data.permissions);
               this.$router.push("/");
             } else {
               notification.error({
@@ -80,6 +81,7 @@ export default {
     ...mapMutations({
       setToken: AUTH.SET_TOKEN,
       setUsername: AUTH.SET_USERNAME,
+      setPermissions: AUTH.SET_PERMISSIONS,
     }),
   },
 };

@@ -213,7 +213,9 @@ public class UserManageServiceImpl implements UserManageService {
         SysUserDO userDO = userDTO.toDO();
         userDO.setSalt(UUIDStrUtil.random());
         userDO.setPassword(UUIDStrUtil.generate(userDTO.getPassword(), userDO.getSalt()));
-        userMapper.updateById(userDO);
+        QueryWrapper<SysUserDO> wrapper = new QueryWrapper<>();
+        wrapper.eq("username", userDTO.getUsername());
+        userMapper.update(userDO, wrapper);
         return ResponseData.create().success();
     }
 }

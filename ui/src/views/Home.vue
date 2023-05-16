@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <a-card v-action:action title="控制台默认配置" class="card-style">
+    <a-card title="控制台默认配置" class="card-style">
       <p v-for="(v, k) in config" :key="k">{{ k }}={{ v }}</p>
     </a-card>
     <p></p>

@@ -58,6 +58,7 @@ public class AuthFilter implements Filter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
+        request.setAttribute("credentials", credentials);
 
         filterChain.doFilter(servletRequest, servletResponse);
     }

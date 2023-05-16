@@ -4,15 +4,25 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xuxd.kafka.console.beans.Credentials;
 import com.xuxd.kafka.console.beans.LoginResult;
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.dos.SysPermissionDO;
+import com.xuxd.kafka.console.beans.dos.SysRoleDO;
 import com.xuxd.kafka.console.beans.dos.SysUserDO;
 import com.xuxd.kafka.console.beans.dto.LoginUserDTO;
 import com.xuxd.kafka.console.config.AuthConfig;
+import com.xuxd.kafka.console.dao.SysPermissionMapper;
+import com.xuxd.kafka.console.dao.SysRoleMapper;
 import com.xuxd.kafka.console.dao.SysUserMapper;
 import com.xuxd.kafka.console.service.AuthService;
 import com.xuxd.kafka.console.utils.AuthUtil;
 import com.xuxd.kafka.console.utils.UUIDStrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author: xuxd
@@ -20,14 +30,25 @@ import org.springframework.stereotype.Service;
  **/
 @Slf4j
 @Service
-public class AuthServiceImpl implements AuthService {
+public class AuthServiceImpl implements AuthService, SmartInitializingSingleton {
 
     private final SysUserMapper userMapper;
 
+    private final SysRoleMapper roleMapper;
+
+    private final SysPermissionMapper permissionMapper;
+
     private final AuthConfig authConfig;
 
-    public AuthServiceImpl(SysUserMapper userMapper, AuthConfig authConfig) {
+    private final Map<Long, SysPermissionDO> permCache = new HashMap<>();
+
+    public AuthServiceImpl(SysUserMapper userMapper,
+                           SysRoleMapper roleMapper,
+                           SysPermissionMapper permissionMapper,
+                           AuthConfig authConfig) {
         this.userMapper = userMapper;
+        this.roleMapper = roleMapper;
+        this.permissionMapper = permissionMapper;
         this.authConfig = authConfig;
     }
 
@@ -48,7 +69,37 @@ public class AuthServiceImpl implements AuthService {
         credentials.setExpiration(System.currentTimeMillis() + authConfig.getExpireHours() * 3600 * 1000);
         String token = AuthUtil.generateToken(authConfig.getSecret(), credentials);
         LoginResult loginResult = new LoginResult();
+        List<String> permissions = new ArrayList<>();
+        String roleIds = userDO.getRoleIds();
+        if (StringUtils.isNotEmpty(roleIds)) {
+            List<String> roleIdList = Arrays.stream(roleIds.split(",")).map(String::trim).filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+            roleIdList.forEach(roleId -> {
+                Long rId = Long.valueOf(roleId);
+                SysRoleDO roleDO = roleMapper.selectById(rId);
+                String permissionIds = roleDO.getPermissionIds();
+                if (StringUtils.isNotEmpty(permissionIds)) {
+                    List<Long> permIds = Arrays.stream(permissionIds.split(",")).map(String::trim).
+                            filter(StringUtils::isNotEmpty).map(Long::valueOf).collect(Collectors.toList());
+                    permIds.forEach(id -> {
+                        String permission = permCache.get(id).getPermission();
+                        if (StringUtils.isNotEmpty(permission)) {
+                            permissions.add(permission);
+                        } else {
+                            log.error("角色：{}，权限id: {}，不存在", roleId, id);
+                        }
+                    });
+                }
+            });
+        }
         loginResult.setToken(token);
+        loginResult.setPermissions(permissions);
         return ResponseData.create().data(loginResult).success();
+    }
+
+    @Override
+    public void afterSingletonsInstantiated() {
+        List<SysPermissionDO> roleDOS = permissionMapper.selectList(null);
+        Map<Long, SysPermissionDO> map = roleDOS.stream().collect(Collectors.toMap(SysPermissionDO::getId, Function.identity(), (e1, e2) -> e1));
+        permCache.putAll(map);
     }
 }

@@ -1,11 +1,14 @@
 package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
+import com.xuxd.kafka.console.beans.Credentials;
 import com.xuxd.kafka.console.beans.dto.SysPermissionDTO;
 import com.xuxd.kafka.console.beans.dto.SysRoleDTO;
 import com.xuxd.kafka.console.beans.dto.SysUserDTO;
 import com.xuxd.kafka.console.service.UserManageService;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author: xuxd
@@ -74,7 +77,11 @@ public class UserManageController {
 
     @ControllerLog("更新密码")
     @PostMapping("/user/password")
-    public Object updatePassword(@RequestBody SysUserDTO userDTO) {
+    public Object updatePassword(@RequestBody SysUserDTO userDTO, HttpServletRequest request) {
+        Credentials credentials = (Credentials)request.getAttribute("credentials");
+        if (credentials != null && !credentials.isInvalid()) {
+            userDTO.setUsername(credentials.getUsername());
+        }
         return userManageService.updatePassword(userDTO);
     }
 }
