@@ -1,14 +1,11 @@
--- DELETE FROM t_kafka_user;
---
--- INSERT INTO t_kafka_user (id, username, password) VALUES
--- (1, 'Jone', 'p1'),
--- (2, 'Jack', 'p2');
-
+-- 不要随便修改下面的注释，要根据这个注释初始化加载数据
+-- t_sys_permission start--
 insert into t_sys_permission(id, name,type,parent_id,permission) values(0,'主页',0,null,'home');
 
 insert into t_sys_permission(id, name,type,parent_id,permission) values(11,'集群',0,null,'cluster');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(12,'属性配置',1,11,'cluster:property-config');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(13,'日志配置',1,11,'cluster:log-config');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(14,'编辑配置',1,11,'cluster:edit');
 
 insert into t_sys_permission(id, name,type,parent_id,permission) values(21,'Topic',0,null,'topic');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(22,'刷新',1,21,'topic:load');
@@ -49,11 +46,26 @@ insert into t_sys_permission(id, name,type,parent_id,permission) values(83,'客�
 insert into t_sys_permission(id, name,type,parent_id,permission) values(84,'新增配置',1,83,'quota:client:add');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(85,'用户和客户端ID',1,80,'quota:user-client');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(86,'新增配置',1,85,'quota:user-client:add');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(87,'删除',1,80,'quota:del');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(88,'修改',1,80,'quota:edit');
 
 
 insert into t_sys_permission(id, name,type,parent_id,permission) values(100,'Acl',0,null,'acl');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(101,'资源授权',1,100,'acl:authority');
-insert into t_sys_permission(id, name,type,parent_id,permission) values(102,'新增权限',1,101,'acl:authority:add');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(102,'新增主体权限',1,101,'acl:authority:add-principal');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(103,'权限详情',1,101,'acl:authority:detail');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(104,'管理生产权限',1,101,'acl:authority:producer');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(105,'管理消费权限',1,101,'acl:authority:consumer');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(106,'增加权限',1,101,'acl:authority:add');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(107,'清除权限',1,101,'acl:authority:clean');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(108,'SaslScram用户管理',1,100,'acl:sasl-scram');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(109,'新增/更新用户',1,108,'acl:sasl-scram:add-update');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(110,'详情',1,108,'acl:sasl-scram:detail');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(111,'删除',1,108,'acl:sasl-scram:del');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(112,'管理生产权限',1,108,'acl:sasl-scram:producer');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(113,'管理消费权限',1,108,'acl:sasl-scram:consumer');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(114,'增加权限',1,108,'acl:sasl-scram:add-auth');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(115,'彻底删除',1,108,'acl:sasl-scram:pure');
 
 insert into t_sys_permission(id, name,type,parent_id,permission) values(140,'用户',0,null,'user-manage');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(141,'用户列表',1,140,'user-manage:user');
@@ -78,8 +90,13 @@ insert into t_sys_permission(id, name,type,parent_id,permission) values(167,'解
 insert into t_sys_permission(id, name,type,parent_id,permission) values(168,'首选副本作leader',1,160,'op:replication-preferred');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(169,'副本变更详情',1,160,'op:replication-update-detail');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(170,'副本重分配',1,160,'op:replication-reassign');
+-- t_sys_permission end--
 
+-- t_sys_role start--
+insert into t_sys_role(id, role_name, description, permission_ids) VALUES (1,'超级管理员','超级管理员','12,13,14,22,23,24,25,26,27,28,29,30,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,81,82,83,84,85,86,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,142,143,144,145,146,147,148,149,150,161,162,163,164,165,166,167,168,169,170');
+-- insert into t_sys_role(id, role_name, description, permission_ids) VALUES (2,'访客','访客','12,13,22,26,29,32,44,45,50,62,63,81,83,85,141,146,149,150,161,163');
+-- t_sys_role end--
 
-insert into t_sys_role(id, role_name, description, permission_ids) VALUES ( 1,'超级管理员','超级管理员','12,13,22,23,24,25,26,27,28,29,30,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,81,82,83,84,85,86,101,102,141,142,143,144,145,146,147,148,149,150,161,162,163,164,165,166,167,168,169,170' );
-
-insert into t_sys_user(id, username, password, salt, role_ids) VALUES ( 1,'admin','3a3e4d32-5247-321b-9efb-9cbf60b2bf6c','e6973cfc-7583-4baa-8802-65ded1268ab6','1' );
+-- t_sys_user start--
+insert into t_sys_user(id, username, password, salt, role_ids) VALUES (1,'admin','3a3e4d32-5247-321b-9efb-9cbf60b2bf6c','e6973cfc-7583-4baa-8802-65ded1268ab6','1' );
+-- t_sys_user end--

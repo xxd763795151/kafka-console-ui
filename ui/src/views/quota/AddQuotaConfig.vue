@@ -1,56 +1,49 @@
 <script src="../../store/index.js"></script>
 <template>
   <a-modal
-      title="新增配置"
-      :visible="show"
-      :width="800"
-      :mask="false"
-      :destroyOnClose="true"
-      :footer="null"
-      :maskClosable="false"
-      @cancel="handleCancel"
+    title="新增配置"
+    :visible="show"
+    :width="800"
+    :mask="false"
+    :destroyOnClose="true"
+    :footer="null"
+    :maskClosable="false"
+    @cancel="handleCancel"
   >
     <div>
       <a-spin :spinning="loading">
         <a-form
-            :form="form"
-            :label-col="{ span: 5 }"
-            :wrapper-col="{ span: 12 }"
-            @submit="handleSubmit"
+          :form="form"
+          :label-col="{ span: 5 }"
+          :wrapper-col="{ span: 12 }"
+          @submit="handleSubmit"
         >
           <a-form-item label="用户" v-show="showUser">
             <a-input
-                v-decorator="[
-                'user',
-              ]"
-                placeholder="输入用户主体标识，比如：用户名，未指定表示用户默认设置"
+              v-decorator="['user']"
+              placeholder="输入用户主体标识，比如：用户名，未指定表示用户默认设置"
             />
           </a-form-item>
           <a-form-item label="客户端ID" v-show="showClientId">
             <a-input
-                v-decorator="[
-                'client',
-              ]"
-                placeholder="输入用户客户端ID，未指定表示默认客户端设置"
+              v-decorator="['client']"
+              placeholder="输入用户客户端ID，未指定表示默认客户端设置"
             />
           </a-form-item>
           <a-form-item label="IP" v-show="showIP">
-            <a-input
-                v-decorator="[
-                'ip',
-              ]"
-                placeholder="输入客户端IP"
-            />
+            <a-input v-decorator="['ip']" placeholder="输入客户端IP" />
           </a-form-item>
           <a-form-item label="生产速率">
             <a-input-number
-                :min="1"
-                :max="102400000"
-                v-decorator="[
-                'producerRate',
-              ]"
+              :min="1"
+              :max="102400000"
+              v-decorator="['producerRate']"
             />
-            <a-select default-value="MB" v-model="producerRateUnit" style="width: 100px">
+            <a-select
+              default-value="MB"
+              v-model="producerRateUnit"
+              style="width: 100px"
+            >
               <a-select-option value="MB"> MB/s</a-select-option>
               <a-select-option value="KB"> KB/s</a-select-option>
               <a-select-option value="Byte"> Byte/s</a-select-option>
@@ -58,13 +51,15 @@
           </a-form-item>
           <a-form-item label="消费速率">
             <a-input-number
-                :min="1"
-                :max="102400000"
-                v-decorator="[
-                'consumerRate',
-              ]"
+              :min="1"
+              :max="102400000"
+              v-decorator="['consumerRate']"
             />
-            <a-select default-value="MB" v-model="consumerRateUnit" style="width: 100px">
+            <a-select
+              default-value="MB"
+              v-model="consumerRateUnit"
+              style="width: 100px"
+            >
               <a-select-option value="MB"> MB/s</a-select-option>
               <a-select-option value="KB"> KB/s</a-select-option>
               <a-select-option value="Byte"> Byte/s</a-select-option>
@@ -72,11 +67,9 @@
           </a-form-item>
           <a-form-item label="吞吐量">
             <a-input-number
-                :min="1"
-                :max="102400000"
-                v-decorator="[
-                'requestPercentage',
-              ]"
+              :min="1"
+              :max="102400000"
+              v-decorator="['requestPercentage']"
             />
           </a-form-item>
           <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
@@ -90,7 +83,7 @@
 
 <script>
 import request from "@/utils/request";
-import {KafkaClientQuotaApi} from "@/utils/api";
+import { KafkaClientQuotaApi } from "@/utils/api";
 import notification from "ant-design-vue/es/notification";
 
 export default {
@@ -122,7 +115,7 @@ export default {
       show: this.visible,
       data: [],
       loading: false,
-      form: this.$form.createForm(this, {name: "coordinated"}),
+      form: this.$form.createForm(this, { name: "coordinated" }),
       producerRateUnit: "MB",
       consumerRateUnit: "MB",
     };
@@ -136,13 +129,15 @@ export default {
     handleSubmit() {
       this.form.validateFields((err, values) => {
         if (!err) {
-          const params = Object.assign({type: this.type}, values);
-          const unitMap = {MB: 1024 * 1024, KB: 1024, Byte: 1};
+          const params = Object.assign({ type: this.type }, values);
+          const unitMap = { MB: 1024 * 1024, KB: 1024, Byte: 1 };
           if (values.consumerRate) {
-            params.consumerRate = params.consumerRate * unitMap[this.consumerRateUnit];
+            params.consumerRate =
+              params.consumerRate * unitMap[this.consumerRateUnit];
           }
           if (values.producerRate) {
-            params.producerRate = params.producerRate * unitMap[this.producerRateUnit];
+            params.producerRate =
+              params.producerRate * unitMap[this.producerRateUnit];
           }
           params.types = [];
           params.names = [];
@@ -179,7 +174,7 @@ export default {
             this.loading = false;
             if (res.code == 0) {
               this.$message.success(res.msg);
-              this.$emit("closeAddQuotaDialog", {refresh: true});
+              this.$emit("closeAddQuotaDialog", { refresh: true });
             } else {
               notification.error({
                 message: "error",
@@ -192,7 +187,7 @@ export default {
     },
     handleCancel() {
       this.data = [];
-      this.$emit("closeAddQuotaDialog", {refresh: false});
+      this.$emit("closeAddQuotaDialog", { refresh: false });
       this.producerRateUnit = "MB";
       this.consumerRateUnit = "MB";
     },

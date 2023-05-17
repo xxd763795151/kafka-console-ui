@@ -32,7 +32,10 @@
         </a-form>
       </div>
       <div class="operation-row-button">
-        <a-button type="primary" @click="openCreateUserDialog()"
+        <a-button
+          type="primary"
+          @click="openCreateUserDialog()"
+          v-action:user-manage:user:add
           >新增用户</a-button
         >
       </div>
@@ -49,7 +52,11 @@
             cancel-text="取消"
             @confirm="deleteUser(record)"
           >
-            <a-button size="small" href="javascript:;" class="operation-btn"
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              v-action:user-manage:user:del
               >删除
             </a-button>
           </a-popconfirm>
@@ -59,7 +66,11 @@
             cancel-text="取消"
             @confirm="resetPassword(record)"
           >
-            <a-button size="small" href="javascript:;" class="operation-btn"
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              v-action:user-manage:user:reset-pass
               >重置密码
             </a-button>
           </a-popconfirm>
@@ -68,6 +79,7 @@
             href="javascript:;"
             class="operation-btn"
             @click="openUpdateUserRoleDialog(record)"
+            v-action:user-manage:user:change-role
             >分配角色
           </a-button>
         </div>

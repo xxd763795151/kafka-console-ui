@@ -3,19 +3,14 @@
     <a-spin :spinning="loading">
       <div id="search-offset-form-advanced-search">
         <a-form
-            class="ant-advanced-search-form"
-            :form="form"
-            @submit="handleSearch"
+          class="ant-advanced-search-form"
+          :form="form"
+          @submit="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="16">
               <a-form-item label="IP">
-                <a-input
-                    v-decorator="[
-                    'ip',
-                  ]"
-                    placeholder="请输入ip!"
-                />
+                <a-input v-decorator="['ip']" placeholder="请输入ip!" />
               </a-form-item>
             </a-col>
             <a-col :span="2" :style="{ textAlign: 'right' }">
@@ -28,25 +23,35 @@
       </div>
       <div class="operation-row-button">
         <a-button type="primary" @click="openAddQuotaDialog"
-        >新增配置
+          >新增配置
         </a-button>
       </div>
-      <QuotaList type="ip" :columns="columns" :data="data" @refreshQuotaList="refresh"></QuotaList>
-      <AddQuotaConfig type="ip" :visible="showAddQuotaDialog" :showIP="true" @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
+      <QuotaList
+        type="ip"
+        :columns="columns"
+        :data="data"
+        @refreshQuotaList="refresh"
+      ></QuotaList>
+      <AddQuotaConfig
+        type="ip"
+        :visible="showAddQuotaDialog"
+        :showIP="true"
+        @closeAddQuotaDialog="closeAddQuotaDialog"
+      ></AddQuotaConfig>
     </a-spin>
   </div>
 </template>
 
 <script>
 import request from "@/utils/request";
-import {KafkaClientQuotaApi} from "@/utils/api";
+import { KafkaClientQuotaApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
 import QuotaList from "@/views/quota/QuotaList.vue";
 import AddQuotaConfig from "@/views/quota/AddQuotaConfig.vue";
 
 export default {
   name: "IpQuota",
-  components: {QuotaList, AddQuotaConfig},
+  components: { QuotaList, AddQuotaConfig },
   props: {
     topicList: {
       type: Array,
@@ -55,7 +60,7 @@ export default {
   data() {
     return {
       loading: false,
-      form: this.$form.createForm(this, {name: "ip_quota"}),
+      form: this.$form.createForm(this, { name: "ip_quota" }),
       data: [],
       showAlterQuotaDialog: false,
       showAddQuotaDialog: false,
@@ -64,8 +69,8 @@ export default {
           title: "IP",
           dataIndex: "ip",
           key: "ip",
-          slots: {title: "ip"},
-          scopedSlots: {customRender: "ip"},
+          slots: { title: "ip" },
+          scopedSlots: { customRender: "ip" },
         },
         {
           title: "生产速率(带宽/秒)",
@@ -90,7 +95,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true;
-          const params = {types: ["ip"]};
+          const params = { types: ["ip"] };
           if (values.ip) {
             params.names = [values.ip.trim()];
           }

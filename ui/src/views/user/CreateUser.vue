@@ -98,7 +98,10 @@ export default {
             this.loading = false;
             if (res.code == 0) {
               this.$message.success(res.msg);
-              this.$emit("closeCreateUserDialog", { refresh: true, data: res.data });
+              this.$emit("closeCreateUserDialog", {
+                refresh: true,
+                data: res.data,
+              });
             } else {
               notification.error({
                 message: "error",

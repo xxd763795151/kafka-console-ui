@@ -23,7 +23,11 @@
             cancel-text="取消"
             @confirm="resetTopicOffsetToEndpoint(group, k, 1)"
           >
-            <a-button size="small" type="danger" style="margin-right: 1%"
+            <a-button
+              size="small"
+              type="danger"
+              style="margin-right: 1%"
+              v-action:group:consumer-detail:min
               >最小位点
             </a-button>
           </a-popconfirm>
@@ -35,7 +39,11 @@
             cancel-text="取消"
             @confirm="resetTopicOffsetToEndpoint(group, k, 2)"
           >
-            <a-button size="small" type="danger" style="margin-right: 1%"
+            <a-button
+              size="small"
+              type="danger"
+              style="margin-right: 1%"
+              v-action:group:consumer-detail:last
               >最新位点
             </a-button>
           </a-popconfirm>
@@ -45,6 +53,7 @@
             type="danger"
             style="margin-right: 1%"
             @click="openResetOffsetByTimeDialog(k)"
+            v-action:group:consumer-detail:timestamp
             >时间戳
           </a-button>
           <a-button
@@ -75,6 +84,7 @@
                 @click="
                   openResetPartitionOffsetDialog(record.topic, record.partition)
                 "
+                v-action:group:consumer-detail:any
                 >重置位点
               </a-button>
             </div>

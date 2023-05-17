@@ -81,7 +81,7 @@ public class UserManageServiceImpl implements UserManageService {
             }
             userDO.setSalt(UUIDStrUtil.random());
             userDO.setPassword(UUIDStrUtil.generate(userDTO.getPassword(), userDO.getSalt()));
-            userMapper.insert(userDTO.toDO());
+            userMapper.insert(userDO);
         } else {
             SysUserDO userDO = userMapper.selectById(userDTO.getId());
             if (userDO == null) {

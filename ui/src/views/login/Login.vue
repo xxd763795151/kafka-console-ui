@@ -37,10 +37,10 @@
 
 <script>
 import request from "@/utils/request";
-import {AuthApi} from "@/utils/api";
+import { AuthApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
-import {mapMutations} from "vuex";
-import {AUTH} from "@/store/mutation-types";
+import { mapMutations } from "vuex";
+import { AUTH } from "@/store/mutation-types";
 
 export default {
   name: "Login",

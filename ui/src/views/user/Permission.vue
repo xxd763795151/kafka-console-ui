@@ -31,24 +31,9 @@ const columns = [
     width: "12%",
     slots: { title: "type" },
     scopedSlots: { customRender: "type" },
-  }
+  },
 ];
 
-const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(
-      `selectedRowKeys: ${selectedRowKeys}`,
-      "selectedRows: ",
-      selectedRows
-    );
-  },
-  onSelect: (record, selected, selectedRows) => {
-    console.log(record, selected, selectedRows);
-  },
-  onSelectAll: (selected, selectedRows, changeRows) => {
-    console.log(selected, selectedRows, changeRows);
-  },
-};
 import { UserManageApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
 
@@ -60,7 +45,6 @@ export default {
       loading: false,
       data: [],
       columns,
-      rowSelection,
       expandedRowKeys: [],
     };
   },

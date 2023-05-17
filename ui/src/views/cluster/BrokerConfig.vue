@@ -35,6 +35,7 @@
               class="operation-btn"
               v-show="!record.readOnly"
               @click="openEditConfigDialog(record)"
+              v-action:cluster:edit
               >编辑
             </a-button>
             <a-popconfirm
@@ -44,7 +45,11 @@
               v-show="isDynamic(record.source)"
               @confirm="deleteBrokerConfig(record)"
             >
-              <a-button size="small" href="javascript:;" class="operation-btn"
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                v-action:cluster:edit
                 >删除
               </a-button>
             </a-popconfirm>

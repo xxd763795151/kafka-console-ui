@@ -15,8 +15,10 @@
       ><router-link to="/client-quota-page" class="pad-l-r">限流</router-link>
       <span>|</span
       ><router-link to="/acl-page" class="pad-l-r">Acl</router-link>
-      <span>|</span
-      ><router-link to="/user-page" class="pad-l-r">用户</router-link>
+      <span v-show="showUserMenu">|</span
+      ><router-link to="/user-page" class="pad-l-r" v-show="showUserMenu"
+        >用户</router-link
+      >
       <span>|</span
       ><router-link to="/op-page" class="pad-l-r">运维</router-link>
       <div class="right">
@@ -44,7 +46,13 @@
 import { KafkaClusterApi, AuthApi } from "@/utils/api";
 import request from "@/utils/request";
 import { mapMutations, mapState } from "vuex";
-import {deleteToken, deleteUsername, getClusterInfo, getPermissions, getUsername} from "@/utils/local-cache";
+import {
+  deleteToken,
+  deleteUsername,
+  getClusterInfo,
+  getPermissions,
+  getUsername,
+} from "@/utils/local-cache";
 import notification from "ant-design-vue/lib/notification";
 import { AUTH, CLUSTER } from "@/store/mutation-types";
 
@@ -64,6 +72,7 @@ export default {
       enableSasl: (state) => state.clusterInfo.enableSasl,
       showUsername: (state) => state.auth.enable && state.auth.username,
       username: (state) => state.auth.username,
+      showUserMenu: (state) => state.auth.enable,
     }),
   },
   methods: {

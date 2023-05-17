@@ -39,7 +39,7 @@ request.interceptors.request.use((config) => {
     config.headers["X-Cluster-Info-Id"] = clusterInfo.id;
     // config.headers["X-Cluster-Info-Name"] = encodeURIComponent(clusterInfo.clusterName);
   }
-  const token = localStorage.getItem('access_token')
+  const token = localStorage.getItem("access_token");
   if (token) {
     config.headers["X-Auth-Token"] = token;
   }

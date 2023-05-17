@@ -3,18 +3,16 @@
     <a-spin :spinning="loading">
       <div id="search-offset-form-advanced-search">
         <a-form
-            class="ant-advanced-search-form"
-            :form="form"
-            @submit="handleSearch"
+          class="ant-advanced-search-form"
+          :form="form"
+          @submit="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="16">
               <a-form-item label="用户标识">
                 <a-input
-                    v-decorator="[
-                    'user',
-                  ]"
-                    placeholder="请输入用户标识，如：用户名!"
+                  v-decorator="['user']"
+                  placeholder="请输入用户标识，如：用户名!"
                 />
               </a-form-item>
             </a-col>
@@ -27,26 +25,39 @@
         </a-form>
       </div>
       <div class="operation-row-button">
-        <a-button type="primary" @click="openAddQuotaDialog"
-        >新增配置
+        <a-button
+          type="primary"
+          @click="openAddQuotaDialog"
+          v-action:quota:user:add
+          >新增配置
         </a-button>
       </div>
-      <QuotaList type="user" :columns="columns" :data="data" @refreshQuotaList="refresh"></QuotaList>
-      <AddQuotaConfig type="user" :visible="showAddQuotaDialog" :showUser="true" @closeAddQuotaDialog="closeAddQuotaDialog"></AddQuotaConfig>
+      <QuotaList
+        type="user"
+        :columns="columns"
+        :data="data"
+        @refreshQuotaList="refresh"
+      ></QuotaList>
+      <AddQuotaConfig
+        type="user"
+        :visible="showAddQuotaDialog"
+        :showUser="true"
+        @closeAddQuotaDialog="closeAddQuotaDialog"
+      ></AddQuotaConfig>
     </a-spin>
   </div>
 </template>
 
 <script>
 import request from "@/utils/request";
-import {KafkaClientQuotaApi} from "@/utils/api";
+import { KafkaClientQuotaApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
 import QuotaList from "@/views/quota/QuotaList.vue";
 import AddQuotaConfig from "@/views/quota/AddQuotaConfig.vue";
 
 export default {
   name: "UserQuota",
-  components: {QuotaList, AddQuotaConfig},
+  components: { QuotaList, AddQuotaConfig },
   props: {
     topicList: {
       type: Array,
@@ -55,7 +66,7 @@ export default {
   data() {
     return {
       loading: false,
-      form: this.$form.createForm(this, {name: "user_quota"}),
+      form: this.$form.createForm(this, { name: "user_quota" }),
       data: [],
       showAlterQuotaDialog: false,
       showAddQuotaDialog: false,
@@ -65,8 +76,8 @@ export default {
           dataIndex: "user",
           key: "user",
           width: 300,
-          slots: {title: "user"},
-          scopedSlots: {customRender: "user"},
+          slots: { title: "user" },
+          scopedSlots: { customRender: "user" },
         },
         {
           title: "生产速率(带宽/秒)",
@@ -91,7 +102,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true;
-          const params = {types: ["user"]};
+          const params = { types: ["user"] };
           if (values.user) {
             params.names = [values.user.trim()];
           }

@@ -50,6 +50,6 @@ cron:
 
 # 权限认证设置，设置为true，需要先登录才能访问
 auth:
-  enable: false
+  enable: true
   # 登录用户token的过期时间，单位：小时
   expire-hours: 24

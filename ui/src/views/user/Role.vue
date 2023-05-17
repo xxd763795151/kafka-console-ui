@@ -26,7 +26,7 @@
                   cancel-text="取消"
                   @confirm="deleteRole(item)"
                 >
-                  <a :style="{ display: 'flex' }">
+                  <a :style="{ display: 'flex' }" v-action:user-manage:role:del>
                     <a-icon type="delete" />
                   </a>
                 </a-popconfirm>
@@ -35,7 +35,9 @@
             <span
               :style="{ margin: '25px', fontSize: '15px', display: 'block' }"
             >
-              <a @click="addRole()"><a-icon type="plus" /> 新增角色</a>
+              <a @click="addRole()" v-action:user-manage:role:save
+                ><a-icon type="plus" /> 新增角色</a
+              >
             </span>
           </a-col>
           <a-col :md="20">
@@ -116,7 +118,11 @@
                   </div>
                 </a-form-item>
                 <a-form-item>
-                  <a-button type="primary" :loading="loading" @click="onSave()"
+                  <a-button
+                    type="primary"
+                    :loading="loading"
+                    @click="onSave()"
+                    v-action:user-manage:role:save
                     >保存</a-button
                   >
                 </a-form-item>
@@ -212,8 +218,8 @@ export default {
               const btnArr = [self];
               btn.children = btnArr;
               const selected = btn.children
-                  .map((bc) => bc.id)
-                  .filter((id) => idSet.has(id));
+                .map((bc) => bc.id)
+                .filter((id) => idSet.has(id));
               btn.selected = selected || [];
               btn.selectAll = btn.selected.length == btn.children.length;
             }

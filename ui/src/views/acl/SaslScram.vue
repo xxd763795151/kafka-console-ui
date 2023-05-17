@@ -27,7 +27,12 @@
         </a-form>
       </div>
       <div class="operation-row-button">
-        <a-button type="primary" @click="updateUser">新增/更新用户</a-button>
+        <a-button
+          type="primary"
+          @click="updateUser"
+          v-action:acl:sasl-scram:add-update
+          >新增/更新用户</a-button
+        >
         <span class="hint" v-show="!enableSasl"
           >未启用SASL SCRAM认证，不支持相关操作</span
         >
@@ -45,6 +50,7 @@
             type="dashed"
             style="float: right"
             @click="onUserDetail(username)"
+            v-action:acl:sasl-scram:detail
             >详情</a-button
           >
         </div>
@@ -58,6 +64,7 @@
             ok-text="确认"
             cancel-text="取消"
             @confirm="onDeleteUser(record)"
+            v-action:acl:sasl-scram:del
           >
             <a-button size="small" href="javascript:;" class="operation-btn"
               >删除</a-button
@@ -68,6 +75,7 @@
             href="javascript:;"
             class="operation-btn"
             @click="onManageProducerAuth(record)"
+            v-action:acl:sasl-scram:producer
             >管理生产权限
           </a-button>
 
@@ -76,6 +84,7 @@
             href="javascript:;"
             class="operation-btn"
             @click="onManageConsumerAuth(record)"
+            v-action:acl:sasl-scram:consumer
             >管理消费权限
           </a-button>
           <a-button
@@ -83,6 +92,7 @@
             href="javascript:;"
             class="operation-btn"
             @click="onAddAuth(record)"
+            v-action:acl:sasl-scram:add-auth
             >增加权限
           </a-button>
           <a-popconfirm
@@ -91,7 +101,11 @@
             cancel-text="取消"
             @confirm="onDeleteUserAndAuth(record)"
           >
-            <a-button size="small" href="javascript:;" class="operation-btn"
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              v-action:acl:sasl-scram:pure
               >彻底删除</a-button
             >
           </a-popconfirm>
