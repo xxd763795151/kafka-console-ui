@@ -61,7 +61,10 @@
           </a-form>
         </div>
         <div class="operation-row-button">
-          <a-button type="primary" @click="openAddSubscriptionDialog"
+          <a-button
+            type="primary"
+            @click="openAddSubscriptionDialog"
+            v-action:group:add
             >新增订阅</a-button
           >
         </div>
@@ -89,7 +92,11 @@
               cancel-text="取消"
               @confirm="deleteGroup(record.groupId)"
             >
-              <a-button size="small" href="javascript:;" class="operation-btn"
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                v-action:group:del
                 >删除
               </a-button>
             </a-popconfirm>
@@ -98,6 +105,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openConsumerMemberDialog(record.groupId)"
+              v-action:group:client
               >消费端
             </a-button>
             <a-button
@@ -105,6 +113,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openConsumerDetailDialog(record.groupId)"
+              v-action:group:consumer-detail
               >消费详情
             </a-button>
             <a-button
@@ -112,6 +121,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openOffsetPartitionDialog(record.groupId)"
+              v-action:group:offset-partition
               >位移分区
             </a-button>
           </div>

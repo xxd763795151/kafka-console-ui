@@ -6,6 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+/**
+ * @author 晓东哥哥
+ */
 @MapperScan("com.xuxd.kafka.console.dao")
 @SpringBootApplication
 @EnableScheduling

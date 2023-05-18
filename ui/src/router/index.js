@@ -1,6 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
+import Store from "@/store";
 
 Vue.use(VueRouter);
 
@@ -53,7 +54,21 @@ const routes = [
     path: "/client-quota-page",
     name: "ClientQuota",
     component: () =>
-        import(/* webpackChunkName: "cluster" */ "../views/quota/ClientQuota.vue"),
+      import(
+        /* webpackChunkName: "cluster" */ "../views/quota/ClientQuota.vue"
+      ),
+  },
+  {
+    path: "/user-page",
+    name: "UserManage",
+    component: () =>
+      import(/* webpackChunkName: "cluster" */ "../views/user/UserManage.vue"),
+  },
+  {
+    path: "/login-page",
+    name: "Login",
+    component: () =>
+      import(/* webpackChunkName: "cluster" */ "../views/login/Login.vue"),
   },
 ];
 
@@ -63,5 +78,50 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes,
 });
+
+router.beforeEach((to, from, next) => {
+  const enableAuth = Store.state.auth.enable;
+  if (!enableAuth) {
+    next();
+  } else {
+    if (to.path === "/login-page") {
+      next();
+    } else {
+      let token = localStorage.getItem("access_token");
+      if (token === null || token === "") {
+        next("/login-page");
+      } else {
+        next();
+      }
+    }
+  }
+});
+
+let originPush = VueRouter.prototype.push;
+let originReplace = VueRouter.prototype.replace;
+VueRouter.prototype.push = function (location, resolve, reject) {
+  if (resolve && reject) {
+    originPush.call(this, location, resolve, reject);
+  } else {
+    originPush.call(
+      this,
+      location,
+      () => {},
+      () => {}
+    );
+  }
+};
+VueRouter.prototype.replace = function (location, resolve, reject) {
+  if (resolve && reject) {
+    originReplace.call(this, location, resolve, reject);
+  } else {
+    originReplace.call(
+      this,
+      location,
+      () => {},
+      () => {}
+    );
+  }
+};
 
 export default router;

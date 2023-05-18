@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.SendMessage;
@@ -24,16 +25,19 @@ public class MessageController {
     @Autowired
     private MessageService messageService;
 
+    @Permission("message:search-time")
     @PostMapping("/search/time")
     public Object searchByTime(@RequestBody QueryMessageDTO dto) {
         return messageService.searchByTime(dto.toQueryMessage());
     }
 
+    @Permission("message:search-offset")
     @PostMapping("/search/offset")
     public Object searchByOffset(@RequestBody QueryMessageDTO dto) {
         return messageService.searchByOffset(dto.toQueryMessage());
     }
 
+    @Permission("message:detail")
     @PostMapping("/search/detail")
     public Object searchDetail(@RequestBody QueryMessageDTO dto) {
         return messageService.searchDetail(dto.toQueryMessage());
@@ -44,16 +48,19 @@ public class MessageController {
         return messageService.deserializerList();
     }
 
+    @Permission("message:send")
     @PostMapping("/send")
     public Object send(@RequestBody SendMessage message) {
         return messageService.send(message);
     }
 
+    @Permission("message:resend")
     @PostMapping("/resend")
     public Object resend(@RequestBody SendMessage message) {
         return messageService.resend(message);
     }
 
+    @Permission("message:del")
     @DeleteMapping
     public Object delete(@RequestBody List<QueryMessage> messages) {
         if (CollectionUtils.isEmpty(messages)) {

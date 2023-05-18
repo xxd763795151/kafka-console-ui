@@ -2,58 +2,69 @@
   <div>
     <a-spin :spinning="loading">
       <a-table
-          :columns="columns"
-          :data-source="data"
-          bordered
-          :row-key="
-        (record, index) => {
-          return index;
-        }
-      "
-          @change="handleChange"
+        :columns="columns"
+        :data-source="data"
+        bordered
+        :row-key="
+          (record, index) => {
+            return index;
+          }
+        "
+        @change="handleChange"
       >
         <div slot="client" slot-scope="text">
-          <span v-if="text">{{ text }}</span><span v-else style="color: red">默认配置</span>
+          <span v-if="text">{{ text }}</span
+          ><span v-else style="color: red">默认配置</span>
         </div>
         <div slot="user" slot-scope="text">
-          <span v-if="text">{{ text }}</span><span v-else style="color: red">默认配置</span>
+          <span v-if="text">{{ text }}</span
+          ><span v-else style="color: red">默认配置</span>
         </div>
 
         <div slot="operation" slot-scope="record">
           <a-popconfirm
-              :title="'删除当前配置？'"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="deleteConfig(record)"
+            :title="'删除当前配置？'"
+            ok-text="确认"
+            cancel-text="取消"
+            @confirm="deleteConfig(record)"
           >
-            <a-button size="small" href="javascript:;" class="operation-btn"
-            >删除
-            </a-button>
-          </a-popconfirm>
-          <a-button
+            <a-button
               size="small"
               href="javascript:;"
               class="operation-btn"
-              @click="openUpdateDialog(record)"
-          >修改
+              v-action:quota:del
+              >删除
+            </a-button>
+          </a-popconfirm>
+          <a-button
+            size="small"
+            href="javascript:;"
+            class="operation-btn"
+            @click="openUpdateDialog(record)"
+            v-action:quota:edit
+            >修改
           </a-button>
         </div>
       </a-table>
-      <UpdateQuotaConfig :type="type" :record="selectRow" :visible="showUpdateDialog"
-                         @closeUpdateQuotaDialog="closeUpdateQuotaDialog"></UpdateQuotaConfig>
+      <UpdateQuotaConfig
+        :type="type"
+        :record="selectRow"
+        :visible="showUpdateDialog"
+        @closeUpdateQuotaDialog="closeUpdateQuotaDialog"
+      ></UpdateQuotaConfig>
     </a-spin>
   </div>
 </template>
 
 <script>
-import {KafkaClientQuotaApi} from "@/utils/api";
+import { KafkaClientQuotaApi } from "@/utils/api";
 import request from "@/utils/request";
 import notification from "ant-design-vue/lib/notification";
 import UpdateQuotaConfig from "@/views/quota/UpdateQuotaConfig.vue";
 
 export default {
   name: "QuotaList",
-  components: {UpdateQuotaConfig},
+  components: { UpdateQuotaConfig },
   props: {
     columns: {
       type: Array,
@@ -88,7 +99,7 @@ export default {
     },
     deleteConfig(record) {
       this.loading = true;
-      const params = {type: this.type};
+      const params = { type: this.type };
       params.types = [];
       params.names = [];
       if (this.type == "user") {
@@ -161,7 +172,7 @@ export default {
     this.columns.push({
       title: "操作",
       key: "operation",
-      scopedSlots: {customRender: "operation"},
+      scopedSlots: { customRender: "operation" },
     });
   },
 };

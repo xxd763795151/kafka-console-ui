@@ -1,4 +1,4 @@
-package com.xuxd.kafka.console.interceptor;
+package com.xuxd.kafka.console.filter;
 
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.ClusterInfoDO;
@@ -9,6 +9,7 @@ import com.xuxd.kafka.console.utils.ConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 
 import javax.servlet.*;
@@ -24,6 +25,7 @@ import java.util.Set;
  * @author xuxd
  * @date 2022-01-05 19:56:25
  **/
+@Order(100)
 @WebFilter(filterName = "context-set-filter", urlPatterns = {"/acl/*", "/user/*", "/cluster/*", "/config/*", "/consumer/*", "/message/*", "/topic/*", "/op/*", "/client/*"})
 @Slf4j
 public class ContextSetFilter implements Filter {

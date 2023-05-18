@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dto.AlterConfigDTO;
 import com.xuxd.kafka.console.beans.enums.AlterType;
@@ -41,46 +42,55 @@ public class ConfigController {
         return ResponseData.create().data(configMap).success();
     }
 
+    @Permission("topic:property-config")
     @GetMapping("/topic")
     public Object getTopicConfig(String topic) {
         return configService.getTopicConfig(topic);
     }
 
+    @Permission("topic:property-config:edit")
     @PostMapping("/topic")
     public Object setTopicConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterTopicConfig(dto.getEntity(), dto.to(), AlterType.SET);
     }
 
+    @Permission("topic:property-config:del")
     @DeleteMapping("/topic")
     public Object deleteTopicConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterTopicConfig(dto.getEntity(), dto.to(), AlterType.DELETE);
     }
 
+    @Permission("cluster:property-config")
     @GetMapping("/broker")
     public Object getBrokerConfig(String brokerId) {
         return configService.getBrokerConfig(brokerId);
     }
 
+    @Permission("cluster:edit")
     @PostMapping("/broker")
     public Object setBrokerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerConfig(dto.getEntity(), dto.to(), AlterType.SET);
     }
 
+    @Permission("cluster:edit")
     @DeleteMapping("/broker")
     public Object deleteBrokerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerConfig(dto.getEntity(), dto.to(), AlterType.DELETE);
     }
 
+    @Permission("cluster:log-config")
     @GetMapping("/broker/logger")
     public Object getBrokerLoggerConfig(String brokerId) {
         return configService.getBrokerLoggerConfig(brokerId);
     }
 
+    @Permission("cluster:edit")
     @PostMapping("/broker/logger")
     public Object setBrokerLoggerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerLoggerConfig(dto.getEntity(), dto.to(), AlterType.SET);
     }
 
+    @Permission("cluster:edit")
     @DeleteMapping("/broker/logger")
     public Object deleteBrokerLoggerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerLoggerConfig(dto.getEntity(), dto.to(), AlterType.DELETE);

@@ -17,6 +17,7 @@
           href="javascript:;"
           class="operation-btn"
           @click="openDetailDialog(record)"
+          v-action:message:detail
           >消息详情
         </a-button>
       </div>

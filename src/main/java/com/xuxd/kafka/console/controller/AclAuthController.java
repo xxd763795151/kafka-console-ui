@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.AclEntry;
 import com.xuxd.kafka.console.beans.dto.AddAuthDTO;
 import com.xuxd.kafka.console.beans.dto.ConsumerAuthDTO;
@@ -28,6 +29,7 @@ public class AclAuthController {
     @Autowired
     private AclService aclService;
 
+    @Permission({"acl:authority:detail", "acl:sasl-scram:detail"})
     @PostMapping("/detail")
     public Object getAclDetailList(@RequestBody QueryAclDTO param) {
         return aclService.getAclDetailList(param.toEntry());
@@ -38,11 +40,13 @@ public class AclAuthController {
         return aclService.getOperationList();
     }
 
+    @Permission("acl:authority")
     @PostMapping("/list")
     public Object getAclList(@RequestBody QueryAclDTO param) {
         return aclService.getAclList(param.toEntry());
     }
 
+    @Permission({"acl:authority:add-principal", "acl:authority:add", "acl:sasl-scram:add-auth"})
     @PostMapping
     public Object addAcl(@RequestBody AddAuthDTO param) {
         return aclService.addAcl(param.toAclEntry());
@@ -54,6 +58,7 @@ public class AclAuthController {
      * @param param entry.topic && entry.username must.
      * @return
      */
+    @Permission({"acl:authority:producer", "acl:sasl-scram:producer"})
     @PostMapping("/producer")
     public Object addProducerAcl(@RequestBody ProducerAuthDTO param) {
 
@@ -66,6 +71,7 @@ public class AclAuthController {
      * @param param entry.topic && entry.groupId entry.username must.
      * @return
      */
+    @Permission({"acl:authority:consumer", "acl:sasl-scram:consumer"})
     @PostMapping("/consumer")
     public Object addConsumerAcl(@RequestBody ConsumerAuthDTO param) {
 
@@ -78,6 +84,7 @@ public class AclAuthController {
      * @param entry entry
      * @return
      */
+    @Permission({"acl:authority:clean", "acl:sasl-scram:pure"})
     @DeleteMapping
     public Object deleteAclByUser(@RequestBody AclEntry entry) {
         return aclService.deleteAcl(entry);
@@ -89,6 +96,7 @@ public class AclAuthController {
      * @param param entry.username
      * @return
      */
+    @Permission({"acl:authority:clean", "acl:sasl-scram:pure"})
     @DeleteMapping("/user")
     public Object deleteAclByUser(@RequestBody DeleteAclDTO param) {
         return aclService.deleteUserAcl(param.toUserEntry());
@@ -100,6 +108,7 @@ public class AclAuthController {
      * @param param entry.topic && entry.username must.
      * @return
      */
+    @Permission({"acl:authority:clean", "acl:sasl-scram:pure"})
     @DeleteMapping("/producer")
     public Object deleteProducerAcl(@RequestBody ProducerAuthDTO param) {
 
@@ -112,6 +121,7 @@ public class AclAuthController {
      * @param param entry.topic && entry.groupId entry.username must.
      * @return
      */
+    @Permission({"acl:authority:clean", "acl:sasl-scram:pure"})
     @DeleteMapping("/consumer")
     public Object deleteConsumerAcl(@RequestBody ConsumerAuthDTO param) {
 
@@ -124,6 +134,7 @@ public class AclAuthController {
      * @param param acl principal.
      * @return true or false.
      */
+    @Permission({"acl:authority:clean", "acl:sasl-scram:pure"})
     @DeleteMapping("/clear")
     public Object clearAcl(@RequestBody DeleteAclDTO param) {
         return aclService.clearAcl(param.toUserEntry());

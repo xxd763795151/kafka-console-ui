@@ -36,7 +36,13 @@
 
               <a-col :span="8" :style="{ textAlign: 'right' }">
                 <a-form-item>
-                  <a-button type="primary" html-type="submit"> 刷新</a-button>
+                  <a-button
+                    type="primary"
+                    html-type="submit"
+                    v-action:topic:load
+                  >
+                    刷新</a-button
+                  >
                   <!--                  <a-button :style="{ marginLeft: '8px' }" @click="handleReset">-->
                   <!--                    重置-->
                   <!--                  </a-button>-->
@@ -46,7 +52,10 @@
           </a-form>
         </div>
         <div class="operation-row-button">
-          <a-button type="primary" @click="openCreateTopicDialog"
+          <a-button
+            type="primary"
+            @click="openCreateTopicDialog"
+            v-action:topic:add
             >新增</a-button
           >
           <a-popconfirm
@@ -60,6 +69,7 @@
               class="btn-left"
               :disabled="!hasSelected"
               :loading="loading"
+              v-action:topic:batch-del
             >
               批量删除
             </a-button>
@@ -97,7 +107,11 @@
               cancel-text="取消"
               @confirm="deleteTopic(record.name)"
             >
-              <a-button size="small" href="javascript:;" class="operation-btn"
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                v-action:topic:del
                 >删除
               </a-button>
             </a-popconfirm>
@@ -106,6 +120,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openPartitionInfoDialog(record.name)"
+              v-action:topic:partition-detail
               >分区详情
             </a-button>
             <a-button
@@ -113,6 +128,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openAddPartitionDialog(record.name)"
+              v-action:topic:partition-add
               >增加分区
             </a-button>
             <a-button
@@ -120,6 +136,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openConsumedDetailDialog(record.name)"
+              v-action:topic:consumer-detail
               >消费详情
             </a-button>
             <a-button
@@ -127,6 +144,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openTopicConfigDialog(record.name)"
+              v-action:topic:property-config
               >属性配置
             </a-button>
             <a-button
@@ -134,6 +152,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openUpdateReplicaDialog(record.name)"
+              v-action:topic:replication-modify
               >变更副本
             </a-button>
             <a-button
@@ -141,6 +160,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openMessageStatsDialog(record.name)"
+              v-action:topic:send-count
               >发送统计
             </a-button>
             <a-button
@@ -148,6 +168,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openThrottleDialog(record.name)"
+              v-action:topic:replication-sync-throttle
               >限流
             </a-button>
           </div>

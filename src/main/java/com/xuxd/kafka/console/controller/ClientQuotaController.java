@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dto.AlterClientQuotaDTO;
 import com.xuxd.kafka.console.beans.dto.QueryClientQuotaDTO;
@@ -21,11 +22,13 @@ public class ClientQuotaController {
         this.clientQuotaService = clientQuotaService;
     }
 
+    @Permission({"quota:user", "quota:client", "quota:user-client"})
     @PostMapping("/list")
     public Object getClientQuotaConfigs(@RequestBody QueryClientQuotaDTO request) {
         return clientQuotaService.getClientQuotaConfigs(request.getTypes(), request.getNames());
     }
 
+    @Permission({"quota:user:add", "quota:client:add", "quota:user-client:add", "quota:edit"})
     @PostMapping
     public Object alterClientQuotaConfigs(@RequestBody AlterClientQuotaDTO request) {
         if (request.getTypes().size() != 2) {
@@ -38,6 +41,7 @@ public class ClientQuotaController {
         return clientQuotaService.alterClientQuotaConfigs(request);
     }
 
+    @Permission("quota:del")
     @DeleteMapping
     public Object deleteClientQuotaConfigs(@RequestBody AlterClientQuotaDTO request) {
         if (request.getTypes().size() != 2) {

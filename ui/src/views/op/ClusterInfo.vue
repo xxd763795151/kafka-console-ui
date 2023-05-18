@@ -17,6 +17,7 @@
             href="javascript:;"
             class="operation-btn"
             @click="openAddClusterInfoDialog"
+            v-action:op:cluster-switch:add
             >新增集群
           </a-button>
           <br /><br />
@@ -38,6 +39,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="switchCluster(record)"
+              v-action:op:cluster-switch:switch
               >切换
             </a-button>
             <a-button
@@ -45,6 +47,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openUpdateClusterInfoDialog(record)"
+              v-action:op:cluster-switch:edit
               >编辑
             </a-button>
             <a-popconfirm
@@ -58,6 +61,7 @@
                 href="javascript:;"
                 class="operation-btn"
                 type="danger"
+                v-action:op:cluster-switch:del
                 >删除
               </a-button>
             </a-popconfirm>

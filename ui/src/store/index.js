@@ -1,7 +1,12 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import { CLUSTER } from "@/store/mutation-types";
-import { setClusterInfo } from "@/utils/local-cache";
+import { CLUSTER, AUTH } from "@/store/mutation-types";
+import {
+  setClusterInfo,
+  setPermissions,
+  setToken,
+  setUsername,
+} from "@/utils/local-cache";
 
 Vue.use(Vuex);
 
@@ -11,6 +16,11 @@ export default new Vuex.Store({
       id: undefined,
       clusterName: undefined,
       enableSasl: false,
+    },
+    auth: {
+      enable: false,
+      username: "",
+      permissions: [],
     },
   },
   mutations: {
@@ -27,6 +37,20 @@ export default new Vuex.Store({
       }
       state.clusterInfo.enableSasl = enableSasl;
       setClusterInfo(clusterInfo);
+    },
+    [AUTH.ENABLE](state, enable) {
+      state.auth.enable = enable;
+    },
+    [AUTH.SET_TOKEN](state, info) {
+      setToken(info);
+    },
+    [AUTH.SET_USERNAME](state, username) {
+      setUsername(username);
+      state.auth.username = username;
+    },
+    [AUTH.SET_PERMISSIONS](state, permissions) {
+      setPermissions(permissions);
+      state.auth.permissions = permissions;
     },
   },
   actions: {},

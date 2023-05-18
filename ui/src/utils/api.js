@@ -308,3 +308,53 @@ export const KafkaClientQuotaApi = {
     method: "delete",
   },
 };
+
+export const UserManageApi = {
+  getPermissions: {
+    url: "/sys/user/manage/permission",
+    method: "get",
+  },
+  addPermission: {
+    url: "/sys/user/manage/permission",
+    method: "post",
+  },
+  getRole: {
+    url: "/sys/user/manage/role",
+    method: "get",
+  },
+  addOrUpdateRole: {
+    url: "/sys/user/manage/role",
+    method: "post",
+  },
+  deleteRole: {
+    url: "/sys/user/manage/role",
+    method: "delete",
+  },
+  getUsers: {
+    url: "/sys/user/manage/user",
+    method: "get",
+  },
+  addOrUpdateUser: {
+    url: "/sys/user/manage/user",
+    method: "post",
+  },
+  deleteUser: {
+    url: "/sys/user/manage/user",
+    method: "delete",
+  },
+  updatePassword: {
+    url: "/sys/user/manage/user/password",
+    method: "post",
+  },
+};
+
+export const AuthApi = {
+  enable: {
+    url: "/auth/enable",
+    method: "get",
+  },
+  login: {
+    url: "/auth/login",
+    method: "post",
+  },
+};

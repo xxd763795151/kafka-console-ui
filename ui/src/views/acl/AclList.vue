@@ -47,7 +47,10 @@
           </a-form>
         </div>
         <div class="operation-row-button">
-          <a-button type="primary" @click="onAddPrincipalAuth"
+          <a-button
+            type="primary"
+            @click="onAddPrincipalAuth"
+            v-action:acl:authority:add-principal
             >新增主体权限</a-button
           >
           <span v-show="hint != ''" class="hint"

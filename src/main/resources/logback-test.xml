@@ -3,9 +3,9 @@
     <springProperty scope="context" name="LOGGING_HOME" source="logging.home"/>
 
     <!-- 日志目录   -->
-    <property name="LOG_HOME" value="${LOGGING_HOME}/logs"/>
+    <property name="LOG_HOME" value="${LOGGING_HOME:-${user.dir}}/logs"/>
     <!--    日志文件名-->
-    <property name="APP_NAME" value="${APPLICATION_NAME:-.}"/>
+    <property name="APP_NAME" value="${APPLICATION_NAME:-kafka-console-ui}"/>
 
     <!--    使用默认的输出格式-->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>

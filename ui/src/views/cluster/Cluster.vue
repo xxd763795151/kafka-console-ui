@@ -19,6 +19,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openBrokerConfigDialog(record, false)"
+              v-action:cluster:property-config
               >属性配置
             </a-button>
             <a-button
@@ -26,6 +27,7 @@
               href="javascript:;"
               class="operation-btn"
               @click="openBrokerConfigDialog(record, true)"
+              v-action:cluster:log-config
               >日志配置
             </a-button>
           </div>

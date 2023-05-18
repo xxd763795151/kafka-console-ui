@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.TopicPartition;
 import com.xuxd.kafka.console.beans.dto.BrokerThrottleDTO;
 import com.xuxd.kafka.console.beans.dto.ProposedAssignmentDTO;
@@ -8,13 +9,7 @@ import com.xuxd.kafka.console.beans.dto.SyncDataDTO;
 import com.xuxd.kafka.console.service.OperationService;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * kafka-console-ui.
@@ -51,26 +46,31 @@ public class OperationController {
         return operationService.deleteAlignmentById(id);
     }
 
+    @Permission({"topic:partition-detail:preferred", "op:replication-preferred"})
     @PostMapping("/replication/preferred")
     public Object electPreferredLeader(@RequestBody ReplicationDTO dto) {
         return operationService.electPreferredLeader(dto.getTopic(), dto.getPartition());
     }
 
+    @Permission("op:config-throttle")
     @PostMapping("/broker/throttle")
     public Object configThrottle(@RequestBody BrokerThrottleDTO dto) {
         return operationService.configThrottle(dto.getBrokerList(), dto.getUnit().toKb(dto.getThrottle()));
     }
 
+    @Permission("op:remove-throttle")
     @DeleteMapping("/broker/throttle")
     public Object removeThrottle(@RequestBody BrokerThrottleDTO dto) {
         return operationService.removeThrottle(dto.getBrokerList());
     }
 
+    @Permission("op:replication-update-detail")
     @GetMapping("/replication/reassignments")
     public Object currentReassignments() {
         return operationService.currentReassignments();
     }
 
+    @Permission("op:replication-update-detail:cancel")
     @DeleteMapping("/replication/reassignments")
     public Object cancelReassignment(@RequestBody TopicPartition partition) {
         return operationService.cancelReassignment(new org.apache.kafka.common.TopicPartition(partition.getTopic(), partition.getPartition()));

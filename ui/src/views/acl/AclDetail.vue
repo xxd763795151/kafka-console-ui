@@ -27,6 +27,7 @@
               ok-text="确认"
               cancel-text="取消"
               @confirm="onDelete(record)"
+              v-action:acl:authority:clean
             >
               <a-button>删除</a-button>
             </a-popconfirm>

@@ -2,7 +2,7 @@
   <div class="content">
     <div class="content-module">
       <a-card title="集群管理" style="width: 100%; text-align: left">
-        <p>
+        <p v-action:op:cluster-switch>
           <a-button type="primary" @click="openClusterInfoDialog">
             集群切换
           </a-button>
@@ -15,7 +15,7 @@
     </div>
     <div class="content-module">
       <a-card title="Broker管理" style="width: 100%; text-align: left">
-        <p>
+        <p v-action:op:config-throttle>
           <a-button type="primary" @click="openConfigThrottleDialog">
             配置限流
           </a-button>
@@ -24,7 +24,7 @@
             >设置指定broker上的topic的副本之间数据同步占用的带宽，这个设置是broker级别的，但是设置后还要去对应的topic上进行限流配置，指定对这个topic的相关副本进行限制</span
           >
         </p>
-        <p>
+        <p v-action:op:remove-throttle>
           <a-button type="primary" @click="openRemoveThrottleDialog">
             解除限流
           </a-button>
@@ -35,21 +35,21 @@
     </div>
     <div class="content-module">
       <a-card title="副本管理" style="width: 100%; text-align: left">
-        <p>
+        <p v-action:op:replication-preferred>
           <a-button type="primary" @click="openElectPreferredLeaderDialog">
             首选副本作为leader
           </a-button>
           <label>说明：</label>
           <span>将集群中所有分区leader副本设置为首选副本</span>
         </p>
-        <p>
+        <p v-action:op:replication-update-detail>
           <a-button type="primary" @click="openCurrentReassignmentsDialog">
             副本变更详情
           </a-button>
           <label>说明：</label>
           <span>查看正在进行副本变更/重分配的任务，或者将其取消</span>
         </p>
-        <p>
+        <p v-action:op:replication-reassign>
           <a-button type="primary" @click="openReplicaReassignDialog">
             副本重分配
           </a-button>

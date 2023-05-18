@@ -44,7 +44,11 @@
               cancel-text="取消"
               @confirm="electPreferredLeader(record)"
             >
-              <a-button size="small" href="javascript:;" class="operation-btn"
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                v-action:topic:partition-detail:preferred
                 >首选副本作为leader
               </a-button>
             </a-popconfirm>

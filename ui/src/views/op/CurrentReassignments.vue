@@ -39,7 +39,11 @@
               cancel-text="取消"
               @confirm="cancelReassignment(record)"
             >
-              <a-button size="small" href="javascript:;" class="operation-btn"
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                v-action:op:replication-update-detail:cancel
                 >取消
               </a-button>
             </a-popconfirm>
