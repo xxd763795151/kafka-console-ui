@@ -116,7 +116,9 @@
             cancel-text="取消"
             @confirm="resend"
           >
-            <a-button type="primary" icon="reload"> 重新发送 </a-button>
+            <a-button type="primary" icon="reload" v-action:message:resend>
+              重新发送
+            </a-button>
           </a-popconfirm>
         </div>
       </a-spin>

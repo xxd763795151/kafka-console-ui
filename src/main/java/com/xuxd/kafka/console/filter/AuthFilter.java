@@ -1,4 +1,4 @@
-package com.xuxd.kafka.console.interceptor;
+package com.xuxd.kafka.console.filter;
 
 import com.xuxd.kafka.console.beans.Credentials;
 import com.xuxd.kafka.console.config.AuthConfig;
@@ -60,6 +60,11 @@ public class AuthFilter implements Filter {
         }
         request.setAttribute("credentials", credentials);
 
-        filterChain.doFilter(servletRequest, servletResponse);
+        try {
+            CredentialsContext.set(credentials);
+            filterChain.doFilter(servletRequest, servletResponse);
+        }finally {
+            CredentialsContext.remove();
+        }
     }
 }

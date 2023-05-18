@@ -21,6 +21,12 @@ const errorHandler = (error) => {
         description: "请登录",
       });
       Router.push({ path: "/login-page" });
+    } else if (error.response.status == 403) {
+      // const data = error.response.data;
+      // notification.error({
+      //   message: error.response.status,
+      //   description: data.msg,
+      // });
     } else {
       const data = error.response.data;
       notification.error({

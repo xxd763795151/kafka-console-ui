@@ -20,6 +20,8 @@ insert into t_sys_permission(id, name,type,parent_id,permission) values(30,'属�
 insert into t_sys_permission(id, name,type,parent_id,permission) values(31,'变更副本',1,21,'topic:replication-modify');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(32,'发送统计',1,21,'topic:send-count');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(33,'限流',1,21,'topic:replication-sync-throttle');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(34,'编辑属性配置',1,30,'topic:property-config:edit');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(35,'删除属性配置',1,30,'topic:property-config:del');
 
 insert into t_sys_permission(id, name,type,parent_id,permission) values(41,'消费组',0,null,'group');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(42,'新增订阅',1,41,'group:add');
@@ -38,6 +40,8 @@ insert into t_sys_permission(id, name,type,parent_id,permission) values(62,'根�
 insert into t_sys_permission(id, name,type,parent_id,permission) values(63,'根据偏移查询',1,61,'message:search-offset');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(64,'在线发送',1,61,'message:send');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(65,'在线删除',1,61,'message:del');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(66,'消息详情',1,61,'message:detail');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(67,'重新发送',1,61,'message:resend');
 
 insert into t_sys_permission(id, name,type,parent_id,permission) values(80,'限流',0,null,'quota');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(81,'用户',1,80,'quota:user');
@@ -90,13 +94,16 @@ insert into t_sys_permission(id, name,type,parent_id,permission) values(167,'解
 insert into t_sys_permission(id, name,type,parent_id,permission) values(168,'首选副本作leader',1,160,'op:replication-preferred');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(169,'副本变更详情',1,160,'op:replication-update-detail');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(170,'副本重分配',1,160,'op:replication-reassign');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(171,'取消副本重分配',1,169,'op:replication-update-detail:cancel');
 -- t_sys_permission end--
 
 -- t_sys_role start--
-insert into t_sys_role(id, role_name, description, permission_ids) VALUES (1,'超级管理员','超级管理员','12,13,14,22,23,24,25,26,27,28,29,30,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,81,82,83,84,85,86,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,142,143,144,145,146,147,148,149,150,161,162,163,164,165,166,167,168,169,170');
+insert into t_sys_role(id, role_name, description, permission_ids) VALUES (1,'超级管理员','超级管理员','12,13,14,22,23,24,25,26,27,28,29,30,34,35,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,66,67,81,82,83,84,85,86,87,88,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,142,143,144,145,146,147,148,149,150,161,162,163,164,165,166,167,168,169,171,170');
+insert into t_sys_role(id, role_name, description, permission_ids) VALUES (2,'普通管理员','普通管理员，不能更改用户信息','12,13,14,22,23,24,25,26,27,28,29,30,34,35,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,66,67,81,82,83,84,85,86,87,88,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,146,149,150,161,162,163,164,165,166,167,168,169,171,170');
 -- insert into t_sys_role(id, role_name, description, permission_ids) VALUES (2,'访客','访客','12,13,22,26,29,32,44,45,50,62,63,81,83,85,141,146,149,150,161,163');
 -- t_sys_role end--
 
 -- t_sys_user start--
-insert into t_sys_user(id, username, password, salt, role_ids) VALUES (1,'admin','3a3e4d32-5247-321b-9efb-9cbf60b2bf6c','e6973cfc-7583-4baa-8802-65ded1268ab6','1' );
+insert into t_sys_user(id, username, password, salt, role_ids) VALUES (1,'super-admin','3a3e4d32-5247-321b-9efb-9cbf60b2bf6c','e6973cfc-7583-4baa-8802-65ded1268ab6','1' );
+insert into t_sys_user(id, username, password, salt, role_ids) VALUES (2,'admin','3a3e4d32-5247-321b-9efb-9cbf60b2bf6c','e6973cfc-7583-4baa-8802-65ded1268ab6','2' );
 -- t_sys_user end--

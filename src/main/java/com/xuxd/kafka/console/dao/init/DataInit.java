@@ -1,11 +1,13 @@
 package com.xuxd.kafka.console.dao.init;
 
+import com.xuxd.kafka.console.beans.RolePermUpdateEvent;
 import com.xuxd.kafka.console.config.AuthConfig;
 import com.xuxd.kafka.console.dao.SysPermissionMapper;
 import com.xuxd.kafka.console.dao.SysRoleMapper;
 import com.xuxd.kafka.console.dao.SysUserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -33,17 +35,21 @@ public class DataInit implements SmartInitializingSingleton {
 
     private final SqlParse sqlParse;
 
+    private final ApplicationEventPublisher publisher;
+
 
     public DataInit(AuthConfig authConfig,
                     SysUserMapper userMapper,
                     SysRoleMapper roleMapper,
                     SysPermissionMapper permissionMapper,
-                    DataSource dataSource) {
+                    DataSource dataSource,
+                    ApplicationEventPublisher publisher) {
         this.authConfig = authConfig;
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
         this.permissionMapper = permissionMapper;
         this.dataSource = dataSource;
+        this.publisher = publisher;
         this.sqlParse = new SqlParse();
     }
 
@@ -69,6 +75,9 @@ public class DataInit implements SmartInitializingSingleton {
             if (permCount == null || permCount == 0) {
                 initData(connection, SqlParse.PERM_TABLE);
             }
+            RolePermUpdateEvent event = new RolePermUpdateEvent(this);
+            event.setReload(true);
+            publisher.publishEvent(event);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

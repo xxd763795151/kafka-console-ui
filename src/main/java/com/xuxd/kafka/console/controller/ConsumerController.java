@@ -1,28 +1,20 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dto.AddSubscriptionDTO;
 import com.xuxd.kafka.console.beans.dto.QueryConsumerGroupDTO;
 import com.xuxd.kafka.console.beans.dto.ResetOffsetDTO;
 import com.xuxd.kafka.console.service.ConsumerService;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
 
 /**
  * kafka-console-ui.
@@ -51,26 +43,34 @@ public class ConsumerController {
         return consumerService.getConsumerGroupList(groupIdList, stateSet);
     }
 
+    @Permission("group:del")
     @DeleteMapping("/group")
     public Object deleteConsumerGroup(@RequestParam String groupId) {
         return consumerService.deleteConsumerGroup(groupId);
     }
 
+    @Permission("group:client")
     @GetMapping("/member")
     public Object getConsumerMembers(@RequestParam String groupId) {
         return consumerService.getConsumerMembers(groupId);
     }
 
+    @Permission("group:consumer-detail")
     @GetMapping("/detail")
     public Object getConsumerDetail(@RequestParam String groupId) {
         return consumerService.getConsumerDetail(groupId);
     }
 
+    @Permission("group:add")
     @PostMapping("/subscription")
     public Object addSubscription(@RequestBody AddSubscriptionDTO subscriptionDTO) {
         return consumerService.addSubscription(subscriptionDTO.getGroupId(), subscriptionDTO.getTopic());
     }
 
+    @Permission({"group:consumer-detail:min",
+            "group:consumer-detail:last",
+            "group:consumer-detail:timestamp",
+            "group:consumer-detail:any"})
     @PostMapping("/reset/offset")
     public Object restOffset(@RequestBody ResetOffsetDTO offsetDTO) {
         ResponseData res = ResponseData.create().failed("unknown");
@@ -78,7 +78,7 @@ public class ConsumerController {
             case ResetOffsetDTO.Level.TOPIC:
                 switch (offsetDTO.getType()) {
                     case ResetOffsetDTO.Type
-                        .EARLIEST:
+                            .EARLIEST:
                         res = consumerService.resetOffsetToEndpoint(offsetDTO.getGroupId(), offsetDTO.getTopic(), OffsetResetStrategy.EARLIEST);
                         break;
                     case ResetOffsetDTO.Type.LATEST:
@@ -94,7 +94,7 @@ public class ConsumerController {
             case ResetOffsetDTO.Level.PARTITION:
                 switch (offsetDTO.getType()) {
                     case ResetOffsetDTO.Type
-                        .SPECIAL:
+                            .SPECIAL:
                         res = consumerService.resetPartitionToTargetOffset(offsetDTO.getGroupId(), new TopicPartition(offsetDTO.getTopic(), offsetDTO.getPartition()), offsetDTO.getOffset());
                         break;
                     default:
@@ -118,11 +118,13 @@ public class ConsumerController {
         return consumerService.getSubscribeTopicList(groupId);
     }
 
+    @Permission({"topic:consumer-detail"})
     @GetMapping("/topic/subscribed")
     public Object getTopicSubscribedByGroups(@RequestParam String topic) {
         return consumerService.getTopicSubscribedByGroups(topic);
     }
 
+    @Permission("group:offset-partition")
     @GetMapping("/offset/partition")
     public Object getOffsetPartition(@RequestParam String groupId) {
         return consumerService.getOffsetPartition(groupId);

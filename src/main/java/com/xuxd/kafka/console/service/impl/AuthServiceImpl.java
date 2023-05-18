@@ -4,12 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xuxd.kafka.console.beans.Credentials;
 import com.xuxd.kafka.console.beans.LoginResult;
 import com.xuxd.kafka.console.beans.ResponseData;
-import com.xuxd.kafka.console.beans.dos.SysPermissionDO;
 import com.xuxd.kafka.console.beans.dos.SysRoleDO;
 import com.xuxd.kafka.console.beans.dos.SysUserDO;
 import com.xuxd.kafka.console.beans.dto.LoginUserDTO;
+import com.xuxd.kafka.console.cache.RolePermCache;
 import com.xuxd.kafka.console.config.AuthConfig;
-import com.xuxd.kafka.console.dao.SysPermissionMapper;
 import com.xuxd.kafka.console.dao.SysRoleMapper;
 import com.xuxd.kafka.console.dao.SysUserMapper;
 import com.xuxd.kafka.console.service.AuthService;
@@ -17,11 +16,11 @@ import com.xuxd.kafka.console.utils.AuthUtil;
 import com.xuxd.kafka.console.utils.UUIDStrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -30,26 +29,24 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 @Service
-public class AuthServiceImpl implements AuthService, SmartInitializingSingleton {
+public class AuthServiceImpl implements AuthService {
 
     private final SysUserMapper userMapper;
 
     private final SysRoleMapper roleMapper;
 
-    private final SysPermissionMapper permissionMapper;
-
     private final AuthConfig authConfig;
 
-    private final Map<Long, SysPermissionDO> permCache = new HashMap<>();
+    private final RolePermCache rolePermCache;
 
     public AuthServiceImpl(SysUserMapper userMapper,
                            SysRoleMapper roleMapper,
-                           SysPermissionMapper permissionMapper,
-                           AuthConfig authConfig) {
+                           AuthConfig authConfig,
+                           RolePermCache rolePermCache) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
-        this.permissionMapper = permissionMapper;
         this.authConfig = authConfig;
+        this.rolePermCache = rolePermCache;
     }
 
     @Override
@@ -81,7 +78,7 @@ public class AuthServiceImpl implements AuthService, SmartInitializingSingleton 
                     List<Long> permIds = Arrays.stream(permissionIds.split(",")).map(String::trim).
                             filter(StringUtils::isNotEmpty).map(Long::valueOf).collect(Collectors.toList());
                     permIds.forEach(id -> {
-                        String permission = permCache.get(id).getPermission();
+                        String permission = rolePermCache.getPermCache().get(id).getPermission();
                         if (StringUtils.isNotEmpty(permission)) {
                             permissions.add(permission);
                         } else {
@@ -96,10 +93,4 @@ public class AuthServiceImpl implements AuthService, SmartInitializingSingleton 
         return ResponseData.create().data(loginResult).success();
     }
 
-    @Override
-    public void afterSingletonsInstantiated() {
-        List<SysPermissionDO> roleDOS = permissionMapper.selectList(null);
-        Map<Long, SysPermissionDO> map = roleDOS.stream().collect(Collectors.toMap(SysPermissionDO::getId, Function.identity(), (e1, e2) -> e1));
-        permCache.putAll(map);
-    }
 }

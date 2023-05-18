@@ -2,6 +2,7 @@ package com.xuxd.kafka.console.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xuxd.kafka.console.beans.ResponseData;
+import com.xuxd.kafka.console.beans.RolePermUpdateEvent;
 import com.xuxd.kafka.console.beans.dos.SysPermissionDO;
 import com.xuxd.kafka.console.beans.dos.SysRoleDO;
 import com.xuxd.kafka.console.beans.dos.SysUserDO;
@@ -20,6 +21,7 @@ import com.xuxd.kafka.console.utils.UUIDStrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -40,12 +42,16 @@ public class UserManageServiceImpl implements UserManageService {
 
     private final SysPermissionMapper permissionMapper;
 
+    private final ApplicationEventPublisher publisher;
+
     public UserManageServiceImpl(ObjectProvider<SysUserMapper> userMapper,
                                  ObjectProvider<SysRoleMapper> roleMapper,
-                                 ObjectProvider<SysPermissionMapper> permissionMapper) {
+                                 ObjectProvider<SysPermissionMapper> permissionMapper,
+                                 ApplicationEventPublisher publisher) {
         this.userMapper = userMapper.getIfAvailable();
         this.roleMapper = roleMapper.getIfAvailable();
         this.permissionMapper = permissionMapper.getIfAvailable();
+        this.publisher = publisher;
     }
 
     @Override
@@ -62,6 +68,7 @@ public class UserManageServiceImpl implements UserManageService {
         } else {
             roleMapper.updateById(roleDO);
         }
+        publisher.publishEvent(new RolePermUpdateEvent(this));
         return ResponseData.create().success();
     }
 
@@ -187,6 +194,7 @@ public class UserManageServiceImpl implements UserManageService {
     @Override
     public ResponseData updateRole(SysRoleDTO roleDTO) {
         roleMapper.updateById(roleDTO.toDO());
+        publisher.publishEvent(new RolePermUpdateEvent(this));
         return ResponseData.create().success();
     }
 
@@ -199,6 +207,7 @@ public class UserManageServiceImpl implements UserManageService {
             return ResponseData.create().failed("存在用户被分配为当前角色，不允许删除");
         }
         roleMapper.deleteById(id);
+        publisher.publishEvent(new RolePermUpdateEvent(this));
         return ResponseData.create().success();
     }
 
