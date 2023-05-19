@@ -1,15 +1,12 @@
 package com.xuxd.kafka.console.dao.init;
 
-import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.ResourceUtils;
 import scala.collection.mutable.StringBuilder;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +19,7 @@ import java.util.Map;
 @Slf4j
 public class SqlParse {
 
-    private final String FILE = "classpath:db/data-h2.sql";
+    private final String FILE = "db/data-h2.sql";
 
     private final Map<String, List<String>> sqlMap = new HashMap<>();
 
@@ -37,8 +34,7 @@ public class SqlParse {
 
         String table = null;
         try {
-            File file = ResourceUtils.getFile(FILE);
-            List<String> lines = Files.readLines(file, Charset.forName("UTF-8"));
+            List<String> lines = getSqlLines();
             for (String str : lines) {
                 if (StringUtils.isNotEmpty(str)) {
                     if (str.indexOf("start--") > 0) {
@@ -61,9 +57,7 @@ public class SqlParse {
                     }
                 }
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -81,5 +75,22 @@ public class SqlParse {
 
     private boolean isSql(String str) {
         return StringUtils.isNotEmpty(str) && str.startsWith("insert");
+    }
+
+    private List<String> getSqlLines() throws Exception {
+//        File file = ResourceUtils.getFile(FILE);
+//        List<String> lines = Files.readLines(file, Charset.forName("UTF-8"));
+        List<String> lines = new ArrayList<>();
+        try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(FILE)) {
+            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream)) {
+                try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        lines.add(line);
+                    }
+                }
+            }
+        }
+        return lines;
     }
 }

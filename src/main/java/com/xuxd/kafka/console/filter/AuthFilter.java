@@ -44,6 +44,10 @@ public class AuthFilter implements Filter {
         String accessToken = request.getHeader(TOKEN_HEADER);
 
         String requestURI = request.getRequestURI();
+        if (isResourceRequest(requestURI)) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
         if (requestURI.startsWith(AUTH_URI_PREFIX)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
@@ -63,8 +67,12 @@ public class AuthFilter implements Filter {
         try {
             CredentialsContext.set(credentials);
             filterChain.doFilter(servletRequest, servletResponse);
-        }finally {
+        } finally {
             CredentialsContext.remove();
         }
+    }
+
+    private boolean isResourceRequest(String requestURI) {
+        return requestURI.contains(".") || requestURI.equals("/");
     }
 }

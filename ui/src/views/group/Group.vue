@@ -160,6 +160,7 @@ import Member from "@/views/group/Member";
 import ConsumerDetail from "@/views/group/ConsumerDetail";
 import AddSupscription from "@/views/group/AddSupscription";
 import OffsetTopicPartition from "@/views/group/OffsetTopicPartition";
+import { isAuthorized } from "@/utils/auth";
 
 export default {
   name: "ConsumerGroup",
@@ -235,6 +236,9 @@ export default {
       });
     },
     openConsumerMemberDialog(groupId) {
+      if (!isAuthorized("group:client")) {
+        return;
+      }
       this.showConsumerGroupDialog = true;
       this.selectDetail.resourceName = groupId;
     },

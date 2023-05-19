@@ -54,12 +54,12 @@ public class AclUserController {
 
     @Permission("acl:sasl-scram:detail")
     @GetMapping("/detail")
-    public Object getUserDetail(@RequestParam String username) {
+    public Object getUserDetail(@RequestParam("username") String username) {
         return aclService.getUserDetail(username);
     }
 
     @GetMapping("/scram")
-    public Object getSaslScramUserList(@RequestParam(required = false) String username) {
+    public Object getSaslScramUserList(@RequestParam(required = false, name = "username") String username) {
         AclEntry entry = new AclEntry();
         entry.setPrincipal(StringUtils.isNotBlank(username) ? username : null);
         return aclService.getSaslScramUserList(entry);

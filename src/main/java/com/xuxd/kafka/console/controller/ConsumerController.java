@@ -45,19 +45,19 @@ public class ConsumerController {
 
     @Permission("group:del")
     @DeleteMapping("/group")
-    public Object deleteConsumerGroup(@RequestParam String groupId) {
+    public Object deleteConsumerGroup(@RequestParam("groupId") String groupId) {
         return consumerService.deleteConsumerGroup(groupId);
     }
 
     @Permission("group:client")
     @GetMapping("/member")
-    public Object getConsumerMembers(@RequestParam String groupId) {
+    public Object getConsumerMembers(@RequestParam("groupId") String groupId) {
         return consumerService.getConsumerMembers(groupId);
     }
 
     @Permission("group:consumer-detail")
     @GetMapping("/detail")
-    public Object getConsumerDetail(@RequestParam String groupId) {
+    public Object getConsumerDetail(@RequestParam("groupId") String groupId) {
         return consumerService.getConsumerDetail(groupId);
     }
 
@@ -114,19 +114,19 @@ public class ConsumerController {
     }
 
     @GetMapping("/topic/list")
-    public Object getSubscribeTopicList(@RequestParam String groupId) {
+    public Object getSubscribeTopicList(@RequestParam("groupId") String groupId) {
         return consumerService.getSubscribeTopicList(groupId);
     }
 
     @Permission({"topic:consumer-detail"})
     @GetMapping("/topic/subscribed")
-    public Object getTopicSubscribedByGroups(@RequestParam String topic) {
+    public Object getTopicSubscribedByGroups(@RequestParam("topic") String topic) {
         return consumerService.getTopicSubscribedByGroups(topic);
     }
 
     @Permission("group:offset-partition")
     @GetMapping("/offset/partition")
-    public Object getOffsetPartition(@RequestParam String groupId) {
+    public Object getOffsetPartition(@RequestParam("groupId") String groupId) {
         return consumerService.getOffsetPartition(groupId);
     }
 }

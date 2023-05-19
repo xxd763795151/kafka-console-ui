@@ -1,7 +1,7 @@
 # kafka可视化管理平台
 一款轻量级的kafka可视化管理平台，安装配置快捷、简单易用。  
 为了开发的省事，没有国际化支持，页面只支持中文展示。  
-用过rocketmq-console吧，对，前端展示风格跟那个有点类似。
+用过rocketmq-console(rocketmq-dashboard)吧，对，前端展示风格跟那个有点类似。
 
 ## 页面预览
 如果github能查看图片的话，可以点击[查看菜单页面](./document/overview/概览.md)，查看每个页面的样子
@@ -25,11 +25,11 @@ v1.0.6版本之前，如果kafka集群启用了ACL，但是控制台没看到Acl
 ![功能特性](./document/img/功能特性.png)
 
 ## 安装包下载
-点击下载(v1.0.7版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.7/kafka-console-ui.zip)  
+点击下载(v1.0.8版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.8/kafka-console-ui.zip)  
 
 如果安装包下载的比较慢，可以查看下面的源码打包说明，把代码下载下来，本地快速打包.  
 
-github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.7/kafka-console-ui.zip)
+github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.8/kafka-console-ui.zip)
 
 ## 快速使用
 ### Windows
@@ -79,10 +79,22 @@ sh bin/shutdown.sh
 如果需要本地开发，开发环境配置查看：[本地开发](./document/develop/开发配置.md)
 
 ## 登录认证和权限
-目前主分支不支持登录认证，感谢@dongyinuo 同学开发了一版支持登录认证，及相关的按钮权限（主要有两个角色：管理员和普通开发人员）。  
+1.0.7版本及之前，主分支不支持登录认证，感谢@dongyinuo 同学开发了一版支持登录认证，及相关的按钮权限（主要有两个角色：管理员和普通开发人员）。  
 在分支：feature/dongyinuo/20220501/devops 上。  
 如果有需要使用管理台登录认证的，可以切换到这个分支上进行打包，打包方式看 源码打包 说明。  
 默认登录账户：admin/kafka-console-ui521
+
+目前最新版本主分支已增加登录认证、用户、角色等权限配置，如需开启登录认证，修改配置文件config/application.yml: auth.enable=true(默认 false)，如下：
+```yaml
+# 权限认证设置，设置为true，需要先登录才能访问
+auth:
+  enable: true
+  # 登录用户token的过期时间，单位：小时
+  expire-hours: 24
+```
+默认有两个登录用户：super-admin/123465，admin/123456，登录成功后在个人设置修改密码。super-admin和admin的唯一区别是super-admin可以增加删除用户，admin不能。如果觉得不合适，请在用户菜单下删除相关用户或角色自行创建合适的角色或用户。
+注意：不开启登录认证，页面不显示用户菜单，正常现象。
+
 
 ## DockerCompose部署
 感谢@wdkang123 同学分享的部署方式，如果有需要请查看[DockerCompose部署方式](./document/deploy/docker部署.md)

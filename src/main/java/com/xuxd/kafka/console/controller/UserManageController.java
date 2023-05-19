@@ -73,14 +73,14 @@ public class UserManageController {
     @Permission("user-manage:role:del")
     @ControllerLog("删除角色")
     @DeleteMapping("/role")
-    public Object deleteRole(@RequestParam Long id) {
+    public Object deleteRole(@RequestParam("id") Long id) {
         return userManageService.deleteRole(id);
     }
 
     @Permission("user-manage:user:del")
     @ControllerLog("删除用户")
     @DeleteMapping("/user")
-    public Object deleteUser(@RequestParam Long id) {
+    public Object deleteUser(@RequestParam("id") Long id) {
         return userManageService.deleteUser(id);
     }
 

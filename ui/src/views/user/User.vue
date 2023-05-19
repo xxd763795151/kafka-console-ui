@@ -45,7 +45,11 @@
         bordered
         row-key="id"
       >
-        <div slot="operation" slot-scope="record" v-show="record.username != 'super-admin'">
+        <div
+          slot="operation"
+          slot-scope="record"
+          v-show="record.username != 'super-admin'"
+        >
           <a-popconfirm
             :title="'删除用户: ' + record.username + '？'"
             ok-text="确认"

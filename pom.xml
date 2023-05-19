@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.xuxd</groupId>
     <artifactId>kafka-console-ui</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <name>kafka-console-ui</name>
     <description>Kafka console manage ui</description>
     <properties>
@@ -174,26 +174,26 @@
                         </executions>
                     </plugin>
 
-<!--                    <plugin>-->
-<!--                        <groupId>org.codehaus.mojo</groupId>-->
-<!--                        <artifactId>build-helper-maven-plugin</artifactId>-->
-<!--                        <version>3.2.0</version>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <id>add-source</id>-->
-<!--                                <phase>generate-sources</phase>-->
-<!--                                <goals>-->
-<!--                                    <goal>add-source</goal>-->
-<!--                                </goals>-->
-<!--                                <configuration>-->
-<!--                                    <sources>-->
-<!--                                        <source>src/main/java</source>-->
-<!--                                        <source>src/main/scala</source>-->
-<!--                                    </sources>-->
-<!--                                </configuration>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                    </plugin>-->
+                    <!--                    <plugin>-->
+                    <!--                        <groupId>org.codehaus.mojo</groupId>-->
+                    <!--                        <artifactId>build-helper-maven-plugin</artifactId>-->
+                    <!--                        <version>3.2.0</version>-->
+                    <!--                        <executions>-->
+                    <!--                            <execution>-->
+                    <!--                                <id>add-source</id>-->
+                    <!--                                <phase>generate-sources</phase>-->
+                    <!--                                <goals>-->
+                    <!--                                    <goal>add-source</goal>-->
+                    <!--                                </goals>-->
+                    <!--                                <configuration>-->
+                    <!--                                    <sources>-->
+                    <!--                                        <source>src/main/java</source>-->
+                    <!--                                        <source>src/main/scala</source>-->
+                    <!--                                    </sources>-->
+                    <!--                                </configuration>-->
+                    <!--                            </execution>-->
+                    <!--                        </executions>-->
+                    <!--                    </plugin>-->
 
                     <plugin>
                         <artifactId>maven-compiler-plugin</artifactId>
@@ -201,6 +201,8 @@
                             <source>${compiler.version}</source>
                             <target>${compiler.version}</target>
                             <encoding>${project.build.sourceEncoding}</encoding>
+<!--                            <debug>false</debug>-->
+<!--                            <parameters>false</parameters>-->
                         </configuration>
                     </plugin>
                     <plugin>
@@ -225,7 +227,7 @@
                                     <goal>npm</goal>
                                 </goals>
                                 <configuration>
-<!--                                    <arguments>install &#45;&#45;registry=https://registry.npmjs.org/</arguments>-->
+                                    <!--                                    <arguments>install &#45;&#45;registry=https://registry.npmjs.org/</arguments>-->
                                     <arguments>install --registry=https://registry.npm.taobao.org</arguments>
                                 </configuration>
                             </execution>

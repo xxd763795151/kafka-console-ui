@@ -3,8 +3,8 @@
 # 设置jvm堆大小及栈大小，栈大小最少设置为256K，不要小于这个值，比如设置为128，太小了
 JAVA_MEM_OPTS="-Xmx512m -Xms512m -Xmn256m -Xss256k"
 
-SCRIPT_DIR=`dirname $0`
-PROJECT_DIR="$SCRIPT_DIR/.."
+SCRIPT_DIR=$(dirname "`pwd`/$0")
+PROJECT_DIR=`dirname "$SCRIPT_DIR"`
 CONF_FILE="$PROJECT_DIR/config/application.yml"
 TARGET="$PROJECT_DIR/lib/kafka-console-ui.jar"
 

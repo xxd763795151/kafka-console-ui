@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content" v-action:topic:load>
     <a-spin :spinning="loading">
       <div class="topic">
         <div id="components-form-topic-advanced-search">

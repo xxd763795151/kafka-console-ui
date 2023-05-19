@@ -35,7 +35,7 @@ public class TopicController {
 
     @Permission("topic:load")
     @GetMapping("/list")
-    public Object getTopicList(@RequestParam(required = false) String topic, @RequestParam String type) {
+    public Object getTopicList(@RequestParam(required = false, name = "topic") String topic, @RequestParam("type") String type) {
         return topicService.getTopicList(topic, TopicType.valueOf(type.toUpperCase()));
     }
 
@@ -47,7 +47,7 @@ public class TopicController {
 
     @Permission("topic:partition-detail")
     @GetMapping("/partition")
-    public Object getTopicPartitionInfo(@RequestParam String topic) {
+    public Object getTopicPartitionInfo(@RequestParam("topic") String topic) {
         return topicService.getTopicPartitionInfo(topic.trim());
     }
 
@@ -76,7 +76,7 @@ public class TopicController {
     }
 
     @GetMapping("/replica/assignment")
-    public Object getCurrentReplicaAssignment(@RequestParam String topic) {
+    public Object getCurrentReplicaAssignment(@RequestParam("topic") String topic) {
         return topicService.getCurrentReplicaAssignment(topic);
     }
 
@@ -94,7 +94,7 @@ public class TopicController {
 
     @Permission("topic:send-count")
     @GetMapping("/send/stats")
-    public Object sendStats(@RequestParam String topic) {
+    public Object sendStats(@RequestParam("topic") String topic) {
         return topicService.sendStats(topic);
     }
 }

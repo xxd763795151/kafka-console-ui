@@ -42,7 +42,7 @@ public class OperationController {
     }
 
     @DeleteMapping("/sync/alignment")
-    public Object deleteAlignment(@RequestParam Long id) {
+    public Object deleteAlignment(@RequestParam("id") Long id) {
         return operationService.deleteAlignmentById(id);
     }
 
