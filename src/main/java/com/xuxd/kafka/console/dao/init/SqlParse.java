@@ -82,7 +82,7 @@ public class SqlParse {
 //        List<String> lines = Files.readLines(file, Charset.forName("UTF-8"));
         List<String> lines = new ArrayList<>();
         try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(FILE)) {
-            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream)) {
+            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8")) {
                 try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
                     String line;
                     while ((line = reader.readLine()) != null) {

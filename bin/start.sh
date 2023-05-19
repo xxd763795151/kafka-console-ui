@@ -17,7 +17,7 @@ ERROR_OUT="$PROJECT_DIR/error.out"
 # 不要修改进程标记，作为进程属性关闭使用，如果要修改，请把stop.sh里的该属性的值保持一致
 PROCESS_FLAG="kafka-console-ui-process-flag:${PROJECT_DIR}"
 
-JAVA_OPTS="$JAVA_OPTS $JAVA_MEM_OPTS"
+JAVA_OPTS="$JAVA_OPTS $JAVA_MEM_OPTS -Dfile.encoding=utf-8"
 
 nohup java -jar $JAVA_OPTS $TARGET --spring.config.location="$CONF_FILE" --logging.home="$PROJECT_DIR" --data.dir=$DATA_DIR $PROCESS_FLAG 1>/dev/null 2>$ERROR_OUT &
 
