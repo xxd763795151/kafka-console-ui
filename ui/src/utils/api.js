@@ -288,6 +288,10 @@ export const KafkaMessageApi = {
     url: "/message/send",
     method: "post",
   },
+  sendWithHeader: {
+    url: "/message/sendWithHeader",
+    method: "post",
+  },
   resend: {
     url: "/message/resend",
     method: "post",

@@ -228,6 +228,14 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
         return ResponseData.create().success();
     }
 
+    @Override public ResponseData sendWithHeader(SendMessage message) {
+        String[] headerKeys= message.getHeaders().stream().map(SendMessage.Header::getHeaderKey).toArray(String[]::new);
+        String[] headerValues= message.getHeaders().stream().map(SendMessage.Header::getHeaderValue).toArray(String[]::new);
+        log.info("send with header:keys{},values{}",headerKeys, headerValues);
+        messageConsole.send(message.getTopic(), message.getPartition(), message.getKey(), message.getBody(), message.getNum(), headerKeys, headerValues);
+        return ResponseData.create().success();
+    }
+
     @Override public ResponseData resend(SendMessage message) {
         TopicPartition partition = new TopicPartition(message.getTopic(), message.getPartition());
         Map<TopicPartition, Object> offsetTable = new HashMap<>(1, 1.0f);

@@ -56,6 +56,13 @@ public class MessageController {
         return messageService.send(message);
     }
 
+    @PostMapping("/sendWithHeader")
+    @ControllerLog("在线发送消息")
+    @Permission("message:send")
+    public Object sendWithHeader(@RequestBody SendMessage message) {
+        return messageService.sendWithHeader(message);
+    }
+
     @ControllerLog("重新发送消息")
     @Permission("message:resend")
     @PostMapping("/resend")
