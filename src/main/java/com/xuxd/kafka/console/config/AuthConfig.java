@@ -18,4 +18,8 @@ public class AuthConfig {
     private String secret = "kafka-console-ui-default-secret";
 
     private long expireHours;
+
+    private boolean hideClusterProperty;
+
+    private String hideClusterPropertyPerm = "op:cluster-switch:edit";
 }

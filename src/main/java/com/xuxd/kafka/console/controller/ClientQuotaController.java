@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dto.AlterClientQuotaDTO;
@@ -28,6 +29,7 @@ public class ClientQuotaController {
         return clientQuotaService.getClientQuotaConfigs(request.getTypes(), request.getNames());
     }
 
+    @ControllerLog("增加限流配额")
     @Permission({"quota:user:add", "quota:client:add", "quota:user-client:add", "quota:edit"})
     @PostMapping
     public Object alterClientQuotaConfigs(@RequestBody AlterClientQuotaDTO request) {
@@ -41,6 +43,7 @@ public class ClientQuotaController {
         return clientQuotaService.alterClientQuotaConfigs(request);
     }
 
+    @ControllerLog("删除限流配额")
     @Permission("quota:del")
     @DeleteMapping
     public Object deleteClientQuotaConfigs(@RequestBody AlterClientQuotaDTO request) {

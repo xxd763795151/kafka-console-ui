@@ -1,6 +1,9 @@
 package com.xuxd.kafka.console.aspect;
 
 import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
+import com.xuxd.kafka.console.beans.Credentials;
+import com.xuxd.kafka.console.config.LogConfig;
+import com.xuxd.kafka.console.filter.CredentialsContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -28,6 +32,12 @@ public class ControllerLogAspect {
 
     private ReentrantLock lock = new ReentrantLock();
 
+    private final LogConfig logConfig;
+
+    public ControllerLogAspect(LogConfig logConfig) {
+        this.logConfig = logConfig;
+    }
+
     @Pointcut("@annotation(com.xuxd.kafka.console.aspect.annotation.ControllerLog)")
     private void pointcut() {
 
@@ -35,6 +45,9 @@ public class ControllerLogAspect {
 
     @Around("pointcut()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (!logConfig.isPrintControllerLog()) {
+            return joinPoint.proceed();
+        }
         StringBuilder params = new StringBuilder("[");
         try {
             String methodName = getMethodFullName(joinPoint.getTarget().getClass().getName(), joinPoint.getSignature().getName());
@@ -56,6 +69,10 @@ public class ControllerLogAspect {
             String resStr = "[" + (res != null ? res.toString() : "") + "]";
 
             StringBuilder sb = new StringBuilder();
+            Credentials credentials = CredentialsContext.get();
+            if (credentials != null) {
+                sb.append("[").append(credentials.getUsername()).append("] ");
+            }
             String shortMethodName = descMap.getOrDefault(methodName, ".-");
             shortMethodName = shortMethodName.substring(shortMethodName.lastIndexOf(".") + 1);
             sb.append("[").append(shortMethodName)
@@ -85,6 +102,9 @@ public class ControllerLogAspect {
                 Class<?>[] clzArr = new Class[args.length];
                 for (int i = 0; i < args.length; i++) {
                     clzArr[i] = args[i].getClass();
+                    if (List.class.isAssignableFrom(clzArr[i])) {
+                        clzArr[i] = List.class;
+                    }
                 }
                 method = aClass.getDeclaredMethod(methodName, clzArr);
 

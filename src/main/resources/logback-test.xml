@@ -45,7 +45,12 @@
         <appender-ref ref="AsyncFileAppender"/>
     </logger>
 
-    <logger name="org.apache.kafka.clients.consumer" level="warn" additivity="false">
+    <logger name="org.apache.kafka.common" level="warn" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="AsyncFileAppender"/>
+    </logger>
+
+    <logger name="org.apache.kafka.clients.Metadata" level="warn" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="AsyncFileAppender"/>
     </logger>

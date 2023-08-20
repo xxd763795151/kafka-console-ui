@@ -15,6 +15,11 @@ public class Credentials {
 
     private long expiration;
 
+    /**
+     * 是否隐藏集群属性
+     */
+    private boolean hideClusterProperty;
+
     public boolean isInvalid() {
         return this == INVALID;
     }

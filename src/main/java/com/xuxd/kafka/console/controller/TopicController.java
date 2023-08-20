@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.ReplicaAssignment;
 import com.xuxd.kafka.console.beans.dto.AddPartitionDTO;
@@ -39,6 +40,7 @@ public class TopicController {
         return topicService.getTopicList(topic, TopicType.valueOf(type.toUpperCase()));
     }
 
+    @ControllerLog("删除topic")
     @Permission({"topic:batch-del", "topic:del"})
     @DeleteMapping
     public Object deleteTopic(@RequestBody List<String> topics) {
@@ -51,12 +53,14 @@ public class TopicController {
         return topicService.getTopicPartitionInfo(topic.trim());
     }
 
+    @ControllerLog("创建topic")
     @Permission("topic:add")
     @PostMapping("/new")
     public Object createNewTopic(@RequestBody NewTopicDTO topicDTO) {
         return topicService.createTopic(topicDTO.toNewTopic());
     }
 
+    @ControllerLog("增加topic分区")
     @Permission("topic:partition-add")
     @PostMapping("/partition/new")
     public Object addPartition(@RequestBody AddPartitionDTO partitionDTO) {
@@ -80,12 +84,14 @@ public class TopicController {
         return topicService.getCurrentReplicaAssignment(topic);
     }
 
+    @ControllerLog("更新副本")
     @Permission({"topic:replication-modify", "op:replication-reassign"})
     @PostMapping("/replica/assignment")
     public Object updateReplicaAssignment(@RequestBody ReplicaAssignment assignment) {
         return topicService.updateReplicaAssignment(assignment);
     }
 
+    @ControllerLog("配置限流")
     @Permission("topic:replication-sync-throttle")
     @PostMapping("/replica/throttle")
     public Object configThrottle(@RequestBody TopicThrottleDTO dto) {

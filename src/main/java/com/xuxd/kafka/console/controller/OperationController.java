@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.TopicPartition;
 import com.xuxd.kafka.console.beans.dto.BrokerThrottleDTO;
@@ -24,12 +25,14 @@ public class OperationController {
     @Autowired
     private OperationService operationService;
 
+    @ControllerLog("同步消费位点")
     @PostMapping("/sync/consumer/offset")
     public Object syncConsumerOffset(@RequestBody SyncDataDTO dto) {
         dto.getProperties().put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, dto.getAddress());
         return operationService.syncConsumerOffset(dto.getGroupId(), dto.getTopic(), dto.getProperties());
     }
 
+    @ControllerLog("重新位点对齐")
     @PostMapping("/sync/min/offset/alignment")
     public Object minOffsetAlignment(@RequestBody SyncDataDTO dto) {
         dto.getProperties().put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, dto.getAddress());
@@ -41,23 +44,27 @@ public class OperationController {
         return operationService.getAlignmentList();
     }
 
+    @ControllerLog("deleteAlignment")
     @DeleteMapping("/sync/alignment")
     public Object deleteAlignment(@RequestParam("id") Long id) {
         return operationService.deleteAlignmentById(id);
     }
 
+    @ControllerLog("优先副本leader")
     @Permission({"topic:partition-detail:preferred", "op:replication-preferred"})
     @PostMapping("/replication/preferred")
     public Object electPreferredLeader(@RequestBody ReplicationDTO dto) {
         return operationService.electPreferredLeader(dto.getTopic(), dto.getPartition());
     }
 
+    @ControllerLog("配置同步限流")
     @Permission("op:config-throttle")
     @PostMapping("/broker/throttle")
     public Object configThrottle(@RequestBody BrokerThrottleDTO dto) {
         return operationService.configThrottle(dto.getBrokerList(), dto.getUnit().toKb(dto.getThrottle()));
     }
 
+    @ControllerLog("移除限流配置")
     @Permission("op:remove-throttle")
     @DeleteMapping("/broker/throttle")
     public Object removeThrottle(@RequestBody BrokerThrottleDTO dto) {
@@ -70,6 +77,7 @@ public class OperationController {
         return operationService.currentReassignments();
     }
 
+    @ControllerLog("取消副本重分配")
     @Permission("op:replication-update-detail:cancel")
     @DeleteMapping("/replication/reassignments")
     public Object cancelReassignment(@RequestBody TopicPartition partition) {

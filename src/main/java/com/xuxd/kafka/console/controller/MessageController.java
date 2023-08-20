@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.ResponseData;
@@ -48,18 +49,21 @@ public class MessageController {
         return messageService.deserializerList();
     }
 
+    @ControllerLog("在线发送消息")
     @Permission("message:send")
     @PostMapping("/send")
     public Object send(@RequestBody SendMessage message) {
         return messageService.send(message);
     }
 
+    @ControllerLog("重新发送消息")
     @Permission("message:resend")
     @PostMapping("/resend")
     public Object resend(@RequestBody SendMessage message) {
         return messageService.resend(message);
     }
 
+    @ControllerLog("在线删除消息")
     @Permission("message:del")
     @DeleteMapping
     public Object delete(@RequestBody List<QueryMessage> messages) {

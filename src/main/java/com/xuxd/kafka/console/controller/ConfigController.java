@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dto.AlterConfigDTO;
@@ -48,12 +49,14 @@ public class ConfigController {
         return configService.getTopicConfig(topic);
     }
 
+    @ControllerLog("编辑topic配置")
     @Permission("topic:property-config:edit")
     @PostMapping("/topic")
     public Object setTopicConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterTopicConfig(dto.getEntity(), dto.to(), AlterType.SET);
     }
 
+    @ControllerLog("删除topic配置")
     @Permission("topic:property-config:del")
     @DeleteMapping("/topic")
     public Object deleteTopicConfig(@RequestBody AlterConfigDTO dto) {
@@ -66,12 +69,14 @@ public class ConfigController {
         return configService.getBrokerConfig(brokerId);
     }
 
+    @ControllerLog("设置broker配置")
     @Permission("cluster:edit")
     @PostMapping("/broker")
     public Object setBrokerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerConfig(dto.getEntity(), dto.to(), AlterType.SET);
     }
 
+    @ControllerLog("编辑broker配置")
     @Permission("cluster:edit")
     @DeleteMapping("/broker")
     public Object deleteBrokerConfig(@RequestBody AlterConfigDTO dto) {
@@ -84,12 +89,14 @@ public class ConfigController {
         return configService.getBrokerLoggerConfig(brokerId);
     }
 
+    @ControllerLog("编辑broker日志配置")
     @Permission("cluster:edit")
     @PostMapping("/broker/logger")
     public Object setBrokerLoggerConfig(@RequestBody AlterConfigDTO dto) {
         return configService.alterBrokerLoggerConfig(dto.getEntity(), dto.to(), AlterType.SET);
     }
 
+    @ControllerLog("删除broker日志配置")
     @Permission("cluster:edit")
     @DeleteMapping("/broker/logger")
     public Object deleteBrokerLoggerConfig(@RequestBody AlterConfigDTO dto) {

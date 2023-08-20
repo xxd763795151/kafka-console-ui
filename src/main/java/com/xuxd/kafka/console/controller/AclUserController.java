@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.AclEntry;
 import com.xuxd.kafka.console.beans.AclUser;
@@ -33,12 +34,14 @@ public class AclUserController {
         return aclService.getUserList();
     }
 
+    @ControllerLog("增加SaslUser")
     @Permission({"acl:sasl-scram:add-update", "acl:sasl-scram:add-auth"})
     @PostMapping
     public Object addOrUpdateUser(@RequestBody AclUser user) {
         return aclService.addOrUpdateUser(user.getUsername(), user.getPassword());
     }
 
+    @ControllerLog("删除SaslUser")
     @Permission({"acl:sasl-scram:del", "acl:sasl-scram:pure"})
     @DeleteMapping
     public Object deleteUser(@RequestBody AclUser user) {
@@ -46,6 +49,7 @@ public class AclUserController {
     }
 
 
+    @ControllerLog("删除SaslUser和Acl")
     @Permission({"acl:sasl-scram:del", "acl:sasl-scram:pure"})
     @DeleteMapping("/auth")
     public Object deleteUserAndAuth(@RequestBody AclUser user) {

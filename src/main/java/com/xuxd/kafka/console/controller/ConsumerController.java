@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.controller;
 
+import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dto.AddSubscriptionDTO;
@@ -43,6 +44,7 @@ public class ConsumerController {
         return consumerService.getConsumerGroupList(groupIdList, stateSet);
     }
 
+    @ControllerLog("删除消费组")
     @Permission("group:del")
     @DeleteMapping("/group")
     public Object deleteConsumerGroup(@RequestParam("groupId") String groupId) {
@@ -61,12 +63,14 @@ public class ConsumerController {
         return consumerService.getConsumerDetail(groupId);
     }
 
+    @ControllerLog("新增消费组")
     @Permission("group:add")
     @PostMapping("/subscription")
     public Object addSubscription(@RequestBody AddSubscriptionDTO subscriptionDTO) {
         return consumerService.addSubscription(subscriptionDTO.getGroupId(), subscriptionDTO.getTopic());
     }
 
+    @ControllerLog("重置消费位点")
     @Permission({"group:consumer-detail:min",
             "group:consumer-detail:last",
             "group:consumer-detail:timestamp",

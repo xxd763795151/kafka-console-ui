@@ -101,17 +101,27 @@ public class PermissionAspect {
             throw new UnAuthorizedException(credentials.getUsername() + ":" + allowPermSet);
         }
 
+        boolean unauthorized = true;
+        boolean notFoundHideProperty = true;
         String roleIds = userDO.getRoleIds();
         List<Long> roleIdList = Arrays.stream(roleIds.split(",")).map(String::trim).filter(StringUtils::isNotEmpty).map(Long::valueOf).collect(Collectors.toList());
         for (Long roleId : roleIdList) {
             Set<String> permSet = rolePermCache.getRolePermCache().getOrDefault(roleId, Collections.emptySet());
             for (String p : allowPermSet) {
                 if (permSet.contains(p)) {
-                    return;
+                    unauthorized = false;
                 }
             }
+            if (permSet.contains(authConfig.getHideClusterPropertyPerm())) {
+                notFoundHideProperty = false;
+            }
         }
-        throw new UnAuthorizedException(credentials.getUsername() + ":" + allowPermSet);
+        if (unauthorized) {
+            throw new UnAuthorizedException(credentials.getUsername() + ":" + allowPermSet);
+        }
+        if (authConfig.isHideClusterProperty() && notFoundHideProperty) {
+            credentials.setHideClusterProperty(true);
+        }
     }
 
     private Map<String, Set<String>> checkPermMap(String methodName, String[] value) {
