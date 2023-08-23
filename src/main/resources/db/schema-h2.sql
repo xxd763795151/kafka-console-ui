@@ -66,3 +66,14 @@ CREATE TABLE IF NOT EXISTS t_sys_user
     PRIMARY KEY (id),
     UNIQUE (username)
 );
+
+-- 集群数据权限与角色绑定
+CREATE TABLE IF NOT EXISTS t_cluster_role_relation
+(
+    ID              IDENTITY   NOT NULL COMMENT '主键ID',
+    ROLE_ID         bigint(20) NOT NULL COMMENT '角色ID',
+    CLUSTER_INFO_ID bigint(20) NOT NULL COMMENT '集群信息的ID',
+    UPDATE_TIME     TIMESTAMP  NOT NULL DEFAULT NOW() COMMENT '更新时间',
+    PRIMARY KEY (id),
+    UNIQUE (ROLE_ID, CLUSTER_INFO_ID)
+);

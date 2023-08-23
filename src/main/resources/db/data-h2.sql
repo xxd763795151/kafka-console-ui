@@ -82,6 +82,9 @@ insert into t_sys_permission(id, name,type,parent_id,permission) values(147,'保
 insert into t_sys_permission(id, name,type,parent_id,permission) values(148,'删除',1,146,'user-manage:role:del');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(149,'权限列表',1,140,'user-manage:permission');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(150,'个人设置',1,140,'user-manage:setting');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(151,'集群权限',1,140,'user-manage:cluster-role');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(152,'新增',1,151,'user-manage:cluster-role:add');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(153,'删除',1,151,'user-manage:cluster-role:delete');
 
 insert into t_sys_permission(id, name,type,parent_id,permission) values(160,'运维',0,null,'op');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(161,'集群切换',1,160,'op:cluster-switch');
@@ -98,7 +101,7 @@ insert into t_sys_permission(id, name,type,parent_id,permission) values(171,'取
 -- t_sys_permission end--
 
 -- t_sys_role start--
-insert into t_sys_role(id, role_name, description, permission_ids) VALUES (1,'超级管理员','超级管理员','12,13,14,22,23,24,25,26,27,28,29,30,34,35,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,66,67,81,82,83,84,85,86,87,88,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,142,143,144,145,146,147,148,149,150,161,162,163,164,165,166,167,168,169,171,170');
+insert into t_sys_role(id, role_name, description, permission_ids) VALUES (1,'超级管理员','超级管理员','12,13,14,22,23,24,25,26,27,28,29,30,34,35,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,66,67,81,82,83,84,85,86,87,88,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,142,143,144,145,146,147,148,149,150,151,152,153,161,162,163,164,165,166,167,168,169,171,170');
 insert into t_sys_role(id, role_name, description, permission_ids) VALUES (2,'普通管理员','普通管理员，不能更改用户信息','12,13,14,22,23,24,25,26,27,28,29,30,34,35,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,66,67,81,82,83,84,85,86,87,88,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,146,149,150,161,162,163,164,165,166,167,168,169,171,170');
 -- insert into t_sys_role(id, role_name, description, permission_ids) VALUES (2,'访客','访客','12,13,22,26,29,32,44,45,50,62,63,81,83,85,141,146,149,150,161,163');
 -- t_sys_role end--
