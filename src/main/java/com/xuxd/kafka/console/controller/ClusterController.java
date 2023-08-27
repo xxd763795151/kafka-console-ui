@@ -5,13 +5,7 @@ import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.dto.ClusterInfoDTO;
 import com.xuxd.kafka.console.service.ClusterService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * kafka-console-ui.
@@ -35,6 +29,12 @@ public class ClusterController {
     @GetMapping("/info")
     public Object getClusterInfoList() {
         return clusterService.getClusterInfoList();
+    }
+
+    @Permission({"user-manage:cluster-role:add"})
+    @GetMapping("/info/select")
+    public Object getClusterInfoListForSelect() {
+        return clusterService.getClusterInfoListForSelect();
     }
 
     @ControllerLog("增加集群信息")

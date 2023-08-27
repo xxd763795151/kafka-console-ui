@@ -12,6 +12,8 @@ import com.xuxd.kafka.console.beans.dos.ClusterInfoDO;
 public interface ClusterService {
     ResponseData getClusterInfo();
 
+    ResponseData getClusterInfoListForSelect();
+
     ResponseData getClusterInfoList();
 
     ResponseData addClusterInfo(ClusterInfoDO infoDO);

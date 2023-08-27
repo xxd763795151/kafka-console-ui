@@ -6,9 +6,12 @@ import com.xuxd.kafka.console.beans.ClusterInfo;
 import com.xuxd.kafka.console.beans.Credentials;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.ClusterInfoDO;
+import com.xuxd.kafka.console.beans.dos.ClusterRoleRelationDO;
 import com.xuxd.kafka.console.beans.vo.BrokerApiVersionVO;
 import com.xuxd.kafka.console.beans.vo.ClusterInfoVO;
+import com.xuxd.kafka.console.config.AuthConfig;
 import com.xuxd.kafka.console.dao.ClusterInfoMapper;
+import com.xuxd.kafka.console.dao.ClusterRoleRelationMapper;
 import com.xuxd.kafka.console.filter.CredentialsContext;
 import com.xuxd.kafka.console.service.ClusterService;
 import kafka.console.ClusterConsole;
@@ -37,10 +40,18 @@ public class ClusterServiceImpl implements ClusterService {
 
     private final ClusterInfoMapper clusterInfoMapper;
 
-    public ClusterServiceImpl(ObjectProvider<ClusterConsole> clusterConsole,
-                              ObjectProvider<ClusterInfoMapper> clusterInfoMapper) {
+    private final AuthConfig authConfig;
+
+    private final ClusterRoleRelationMapper clusterRoleRelationMapper;
+
+    public ClusterServiceImpl(final ObjectProvider<ClusterConsole> clusterConsole,
+                              final ObjectProvider<ClusterInfoMapper> clusterInfoMapper,
+                              final AuthConfig authConfig,
+                              final ClusterRoleRelationMapper clusterRoleRelationMapper) {
         this.clusterConsole = clusterConsole.getIfAvailable();
         this.clusterInfoMapper = clusterInfoMapper.getIfAvailable();
+        this.authConfig = authConfig;
+        this.clusterRoleRelationMapper = clusterRoleRelationMapper;
     }
 
     @Override
@@ -56,17 +67,41 @@ public class ClusterServiceImpl implements ClusterService {
     }
 
     @Override
+    public ResponseData getClusterInfoListForSelect() {
+        return ResponseData.create().
+                data(clusterInfoMapper.selectList(null).stream().
+                        map(e -> {
+                            ClusterInfoVO vo = ClusterInfoVO.from(e);
+                            vo.setProperties(Collections.emptyList());
+                            vo.setAddress("");
+                            return vo;
+                        }).collect(Collectors.toList())).success();
+    }
+
+    @Override
     public ResponseData getClusterInfoList() {
         // 如果开启权限管理，当前用户没有集群切换->集群信息的编辑权限，隐藏集群的属性信息，避免ACL属性暴露出来
         Credentials credentials = CredentialsContext.get();
-        return ResponseData.create().data(clusterInfoMapper.selectList(null)
-                .stream().map(e -> {
-                    ClusterInfoVO vo = ClusterInfoVO.from(e);
-                    if (credentials != null && credentials.isHideClusterProperty()) {
-                        vo.setProperties(Collections.emptyList());
-                    }
-                    return vo;
-                }).collect(Collectors.toList())).success();
+        boolean enableClusterAuthority = credentials != null && authConfig.isEnableClusterAuthority();
+        final Set<Long> clusterInfoIdSet = new HashSet<>();
+        if (enableClusterAuthority) {
+            List<Long> roleIdList = credentials.getRoleIdList();
+            QueryWrapper<ClusterRoleRelationDO> queryWrapper = new QueryWrapper<>();
+            queryWrapper.in("role_id", roleIdList);
+            clusterInfoIdSet.addAll(clusterRoleRelationMapper.selectList(queryWrapper).
+                    stream().map(ClusterRoleRelationDO::getClusterInfoId).
+                    collect(Collectors.toSet()));
+        }
+        return ResponseData.create().
+                data(clusterInfoMapper.selectList(null).stream().
+                        filter(e -> !enableClusterAuthority || clusterInfoIdSet.contains(e.getId())).
+                        map(e -> {
+                            ClusterInfoVO vo = ClusterInfoVO.from(e);
+                            if (credentials != null && credentials.isHideClusterProperty()) {
+                                vo.setProperties(Collections.emptyList());
+                            }
+                            return vo;
+                        }).collect(Collectors.toList())).success();
     }
 
     @Override
@@ -77,12 +112,39 @@ public class ClusterServiceImpl implements ClusterService {
             return ResponseData.create().failed("cluster name exist.");
         }
         clusterInfoMapper.insert(infoDO);
+        Credentials credentials = CredentialsContext.get();
+        boolean enableClusterAuthority = credentials != null && authConfig.isEnableClusterAuthority();
+        if (enableClusterAuthority) {
+            for (Long roleId : credentials.getRoleIdList()) {
+                // 开启集群的数据权限控制，新增集群的时候必须要录入一条信息
+                QueryWrapper<ClusterRoleRelationDO> relationQueryWrapper = new QueryWrapper<>();
+                relationQueryWrapper.eq("role_id", roleId).
+                        eq("cluster_info_id", infoDO.getId());
+                Integer count = clusterRoleRelationMapper.selectCount(relationQueryWrapper);
+                if (count <= 0) {
+                    ClusterRoleRelationDO relationDO = new ClusterRoleRelationDO();
+                    relationDO.setRoleId(roleId);
+                    relationDO.setClusterInfoId(infoDO.getId());
+                    clusterRoleRelationMapper.insert(relationDO);
+                }
+            }
+        }
         return ResponseData.create().success();
     }
 
     @Override
     public ResponseData deleteClusterInfo(Long id) {
         clusterInfoMapper.deleteById(id);
+        Credentials credentials = CredentialsContext.get();
+        boolean enableClusterAuthority = credentials != null && authConfig.isEnableClusterAuthority();
+        if (enableClusterAuthority) {
+            for (Long roleId : credentials.getRoleIdList()) {
+                // 开启集群的数据权限控制，删除集群的时候必须要删除对应的数据权限
+                QueryWrapper<ClusterRoleRelationDO> relationQueryWrapper = new QueryWrapper<>();
+                relationQueryWrapper.eq("role_id", roleId).eq("cluster_info_id", id);
+                clusterRoleRelationMapper.delete(relationQueryWrapper);
+            }
+        }
         return ResponseData.create().success();
     }
 

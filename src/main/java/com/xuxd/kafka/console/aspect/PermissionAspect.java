@@ -104,7 +104,9 @@ public class PermissionAspect {
         boolean unauthorized = true;
         boolean notFoundHideProperty = true;
         String roleIds = userDO.getRoleIds();
-        List<Long> roleIdList = Arrays.stream(roleIds.split(",")).map(String::trim).filter(StringUtils::isNotEmpty).map(Long::valueOf).collect(Collectors.toList());
+        List<Long> roleIdList = Arrays.stream(roleIds.split(",")).
+                map(String::trim).filter(StringUtils::isNotEmpty).
+                map(Long::valueOf).collect(Collectors.toList());
         for (Long roleId : roleIdList) {
             Set<String> permSet = rolePermCache.getRolePermCache().getOrDefault(roleId, Collections.emptySet());
             for (String p : allowPermSet) {
@@ -122,6 +124,7 @@ public class PermissionAspect {
         if (authConfig.isHideClusterProperty() && notFoundHideProperty) {
             credentials.setHideClusterProperty(true);
         }
+        credentials.setRoleIdList(roleIdList);
     }
 
     private Map<String, Set<String>> checkPermMap(String methodName, String[] value) {

@@ -7,6 +7,7 @@ import com.xuxd.kafka.console.beans.dos.ClusterRoleRelationDO;
 import com.xuxd.kafka.console.beans.dos.SysRoleDO;
 import com.xuxd.kafka.console.beans.dto.ClusterRoleRelationDTO;
 import com.xuxd.kafka.console.beans.vo.ClusterRoleRelationVO;
+import com.xuxd.kafka.console.config.AuthConfig;
 import com.xuxd.kafka.console.dao.ClusterInfoMapper;
 import com.xuxd.kafka.console.dao.ClusterRoleRelationMapper;
 import com.xuxd.kafka.console.dao.SysRoleMapper;
@@ -14,6 +15,7 @@ import com.xuxd.kafka.console.service.ClusterRoleRelationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,16 +35,23 @@ public class ClusterRoleRelationServiceImpl implements ClusterRoleRelationServic
 
     private final ClusterInfoMapper clusterInfoMapper;
 
+    private final AuthConfig authConfig;
+
     public ClusterRoleRelationServiceImpl(final ClusterRoleRelationMapper mapper,
                                           final SysRoleMapper roleMapper,
-                                          final ClusterInfoMapper clusterInfoMapper) {
+                                          final ClusterInfoMapper clusterInfoMapper,
+                                          final AuthConfig authConfig) {
         this.mapper = mapper;
         this.roleMapper = roleMapper;
         this.clusterInfoMapper = clusterInfoMapper;
+        this.authConfig = authConfig;
     }
 
     @Override
     public ResponseData select() {
+        if (!authConfig.isEnableClusterAuthority()) {
+            return ResponseData.create().data(Collections.emptyList()).success();
+        }
         List<ClusterRoleRelationDO> dos = mapper.selectList(null);
 
         Map<Long, SysRoleDO> roleMap = roleMapper.selectList(null).stream().
@@ -65,6 +74,9 @@ public class ClusterRoleRelationServiceImpl implements ClusterRoleRelationServic
 
     @Override
     public ResponseData add(ClusterRoleRelationDTO dto) {
+        if (!authConfig.isEnableClusterAuthority()) {
+            return ResponseData.create().failed("未启用集群的数据权限管理");
+        }
         ClusterRoleRelationDO relationDO = dto.toDO();
         if (relationDO.getClusterInfoId() == -1L) {
             // all insert
@@ -82,6 +94,9 @@ public class ClusterRoleRelationServiceImpl implements ClusterRoleRelationServic
 
     @Override
     public ResponseData delete(Long id) {
+        if (!authConfig.isEnableClusterAuthority()) {
+            return ResponseData.create().failed("未启用集群的数据权限管理");
+        }
         mapper.deleteById(id);
         return ResponseData.create().success();
     }

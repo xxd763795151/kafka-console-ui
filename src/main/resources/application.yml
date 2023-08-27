@@ -50,12 +50,13 @@ cron:
 
 # 权限认证设置，设置为true，需要先登录才能访问
 auth:
-  enable: true
+  enable: false
   # 登录用户token的过期时间，单位：小时
   expire-hours: 24
   # 隐藏集群的属性信息，如果当前用户没有集群切换里的编辑权限，就不能看集群的属性信息，有开启ACL的集群需要开启这个
   hide-cluster-property: true
-
+  # 是否启用集群的数据权限，如果启用，可以配置哪些角色看到哪些集群. 不启用，即使配置了也不生效，每个角色的用户都可以看到所有集群信息.
+  enable-cluster-authority: false
 log:
   # 是否打印操作日志（增加、删除、编辑）
   print-controller-log: true

@@ -199,6 +199,10 @@ export const KafkaClusterApi = {
     url: "/cluster/info",
     method: "get",
   },
+  getClusterInfoListForSelect: {
+    url: "/cluster/info/select",
+    method: "get",
+  },
   addClusterInfo: {
     url: "/cluster/info",
     method: "post",

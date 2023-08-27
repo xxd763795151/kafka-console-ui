@@ -146,8 +146,8 @@ export default {
     },
     getClusterInfoList() {
       request({
-        url: KafkaClusterApi.getClusterInfoList.url,
-        method: KafkaClusterApi.getClusterInfoList.method,
+        url: KafkaClusterApi.getClusterInfoListForSelect.url,
+        method: KafkaClusterApi.getClusterInfoListForSelect.method,
       }).then((res) => {
         if (res.code == 0) {
           this.clusterInfoList = res.data;
