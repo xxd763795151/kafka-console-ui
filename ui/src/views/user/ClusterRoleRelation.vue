@@ -9,11 +9,11 @@
         >
           <a-row :gutter="24">
             <a-col :span="16">
-              <a-form-item label="用户名">
+              <a-form-item label="角色">
                 <a-input
-                  v-decorator="['username']"
-                  placeholder="请输入用户名!"
-                  @change="onUsernameChange"
+                  v-decorator="['roleName']"
+                  placeholder="请输入角色名!"
+                  @change="onRoleNameChange"
                 />
               </a-form-item>
             </a-col>
@@ -24,8 +24,8 @@
                   html-type="submit"
                   @click="handleSearch()"
                 >
-                  刷新</a-button
-                >
+                  刷新
+                </a-button>
               </a-form-item>
             </a-col>
           </a-row>
@@ -36,8 +36,8 @@
           type="primary"
           @click="openCreateUserDialog()"
           v-action:user-manage:user:add
-          >新增用户</a-button
-        >
+          >新增集群归属权限
+        </a-button>
       </div>
       <a-table
         :columns="columns"
@@ -45,16 +45,12 @@
         bordered
         row-key="id"
       >
-        <div
-          slot="operation"
-          slot-scope="record"
-          v-show="record.username != 'super-admin'"
-        >
+        <div slot="operation" slot-scope="record">
           <a-popconfirm
-            :title="'删除用户: ' + record.username + '？'"
+            title="确认删除?"
             ok-text="确认"
             cancel-text="取消"
-            @confirm="deleteUser(record)"
+            @confirm="deleteRelation(record)"
           >
             <a-button
               size="small"
@@ -64,44 +60,14 @@
               >删除
             </a-button>
           </a-popconfirm>
-          <a-popconfirm
-            :title="'重置用户: ' + record.username + '密码？'"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="resetPassword(record)"
-          >
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              v-action:user-manage:user:reset-pass
-              >重置密码
-            </a-button>
-          </a-popconfirm>
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="openUpdateUserRoleDialog(record)"
-            v-action:user-manage:user:change-role
-            >分配角色
-          </a-button>
         </div>
       </a-table>
-      <CreateUser
-        @closeCreateUserDialog="closeCreateUserDialog"
-        :visible="showCreateUserDialog"
-      ></CreateUser>
-      <MessageBox
-        :visible="showMessageBox"
-        :message="messageBoxContent"
-        @closeMessageBox="closeMessageBox"
-      ></MessageBox>
-      <UpdateUserRole
-        :visible="showUpdateUserRole"
-        :user="selectUser"
-        @closeUpdateUserRoleDialog="closeUpdateUserRoleDialog"
-      ></UpdateUserRole>
+      <CreateClusterRoleRelation
+        @closeCreateClusterRoleRelationDialog="
+          closeCreateClusterRoleRelationDialog
+        "
+        :visible="showCreateClusterRoleRelationDialog"
+      ></CreateClusterRoleRelation>
     </a-spin>
   </div>
 </template>
@@ -110,14 +76,12 @@
 import request from "@/utils/request";
 
 import notification from "ant-design-vue/lib/notification";
-import { UserManageApi } from "@/utils/api";
-import CreateUser from "@/views/user/CreateUser.vue";
-import MessageBox from "@/components/MessageBox.vue";
-import UpdateUserRole from "@/views/user/UpdateUserRole.vue";
+import { ClusterRoleRelationApi } from "@/utils/api";
+import CreateClusterRoleRelation from "@/views/user/CreateClusterRoleRelation.vue";
 
 export default {
-  name: "User",
-  components: { CreateUser, MessageBox, UpdateUserRole },
+  name: "ClusterRoleRelation",
+  components: { CreateClusterRoleRelation },
   props: {
     topicList: {
       type: Array,
@@ -129,22 +93,18 @@ export default {
       form: this.$form.createForm(this, { name: "user" }),
       data: [],
       filteredData: [],
-      filterUsername: "",
-      showCreateUserDialog: false,
-      showMessageBox: false,
-      showUpdateUserRole: false,
-      messageBoxContent: "",
-      selectUser: {},
+      filterRoleName: "",
+      showCreateClusterRoleRelationDialog: false,
       columns: [
         {
-          title: "用户名",
-          dataIndex: "username",
-          key: "username",
+          title: "角色",
+          dataIndex: "roleName",
+          key: "roleName",
         },
         {
-          title: "角色",
-          dataIndex: "roleNames",
-          key: "roleNames",
+          title: "集群",
+          dataIndex: "clusterName",
+          key: "clusterName",
         },
         {
           title: "操作",
@@ -160,8 +120,8 @@ export default {
         if (!err) {
           this.loading = true;
           request({
-            url: UserManageApi.getUsers.url,
-            method: UserManageApi.getUsers.method,
+            url: ClusterRoleRelationApi.select.url,
+            method: ClusterRoleRelationApi.select.method,
           }).then((res) => {
             this.loading = false;
             if (res.code == 0) {
@@ -182,67 +142,31 @@ export default {
     },
     filter() {
       this.filteredData = this.data.filter(
-        (e) => e && e.username && e.username.indexOf(this.filterUsername) != -1
+        (e) => e.roleName.indexOf(this.filterRoleName) != -1
       );
     },
-    onUsernameChange(input) {
-      this.filterUsername = input.target.value;
+    onRoleNameChange(input) {
+      this.filterRoleName = input.target.value;
       this.filter();
     },
     openCreateUserDialog() {
-      this.showCreateUserDialog = true;
+      this.showCreateClusterRoleRelationDialog = true;
     },
-    closeCreateUserDialog(p) {
-      this.showCreateUserDialog = false;
-      if (p.refresh) {
-        this.refresh();
-        this.messageBoxContent = "用户初始密码：" + p.data;
-        this.showMessageBox = true;
-      }
-    },
-    openUpdateUserRoleDialog(user) {
-      this.selectUser = user;
-      this.showUpdateUserRole = true;
-    },
-    closeUpdateUserRoleDialog(p) {
-      this.showUpdateUserRole = false;
+    closeCreateClusterRoleRelationDialog(p) {
+      this.showCreateClusterRoleRelationDialog = false;
       if (p.refresh) {
         this.refresh();
       }
     },
-    closeMessageBox() {
-      this.showMessageBox = false;
-    },
-    deleteUser(user) {
+    deleteRelation(user) {
       this.loading = true;
       request({
-        url: UserManageApi.deleteUser.url + "?id=" + user.id,
-        method: UserManageApi.deleteUser.method,
+        url: ClusterRoleRelationApi.delete.url + "?id=" + user.id,
+        method: ClusterRoleRelationApi.delete.method,
       }).then((res) => {
         this.loading = false;
         if (res.code == 0) {
           this.refresh();
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    },
-    resetPassword(record) {
-      this.loading = true;
-      const params = Object.assign({}, record);
-      params.resetPassword = true;
-      request({
-        url: UserManageApi.addOrUpdateUser.url,
-        method: UserManageApi.addOrUpdateUser.method,
-        data: params,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code == 0) {
-          this.messageBoxContent = "密码重置成功，新密码：" + res.data;
-          this.showMessageBox = true;
         } else {
           notification.error({
             message: "error",

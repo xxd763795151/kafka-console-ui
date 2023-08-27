@@ -50,7 +50,7 @@ cron:
 
 # 权限认证设置，设置为true，需要先登录才能访问
 auth:
-  enable: false
+  enable: true
   # 登录用户token的过期时间，单位：小时
   expire-hours: 24
   # 隐藏集群的属性信息，如果当前用户没有集群切换里的编辑权限，就不能看集群的属性信息，有开启ACL的集群需要开启这个

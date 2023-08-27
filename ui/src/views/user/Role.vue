@@ -46,6 +46,7 @@
             </div>
             <div class="role-info" v-if="selectedRole.roleName">
               <a-form :form="form">
+                <h2>角色信息配置</h2>
                 <a-form-item label="角色名称">
                   <a-input
                     v-decorator="[
@@ -73,7 +74,8 @@
                   />
                 </a-form-item>
 
-                <a-form-item label="权限配置">
+                <a-form-item>
+                  <h2>功能权限配置</h2>
                   <div
                     v-for="(menuPermission, index) in selectedPermissions"
                     :key="index"

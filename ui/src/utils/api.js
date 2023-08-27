@@ -358,3 +358,18 @@ export const AuthApi = {
     method: "post",
   },
 };
+
+export const ClusterRoleRelationApi = {
+  select: {
+    url: "/cluster-role/relation",
+    method: "get",
+  },
+  add: {
+    url: "/cluster-role/relation",
+    method: "post",
+  },
+  delete: {
+    url: "/cluster-role/relation",
+    method: "delete",
+  },
+};

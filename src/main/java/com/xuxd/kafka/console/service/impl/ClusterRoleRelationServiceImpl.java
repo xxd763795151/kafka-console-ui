@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.dos.ClusterInfoDO;
 import com.xuxd.kafka.console.beans.dos.ClusterRoleRelationDO;
@@ -10,6 +11,7 @@ import com.xuxd.kafka.console.dao.ClusterInfoMapper;
 import com.xuxd.kafka.console.dao.ClusterRoleRelationMapper;
 import com.xuxd.kafka.console.dao.SysRoleMapper;
 import com.xuxd.kafka.console.service.ClusterRoleRelationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
  * @author: xuxd
  * @since: 2023/8/23 21:50
  **/
+@Slf4j
 @Service
 public class ClusterRoleRelationServiceImpl implements ClusterRoleRelationService {
 
@@ -62,7 +65,18 @@ public class ClusterRoleRelationServiceImpl implements ClusterRoleRelationServic
 
     @Override
     public ResponseData add(ClusterRoleRelationDTO dto) {
-        mapper.insert(dto.toDO());
+        ClusterRoleRelationDO relationDO = dto.toDO();
+        if (relationDO.getClusterInfoId() == -1L) {
+            // all insert
+            for (ClusterInfoDO clusterInfoDO : clusterInfoMapper.selectList(null)) {
+                ClusterRoleRelationDO aDo = new ClusterRoleRelationDO();
+                aDo.setRoleId(relationDO.getRoleId());
+                aDo.setClusterInfoId(clusterInfoDO.getId());
+                insertIfNotExist(aDo);
+            }
+        } else {
+            insertIfNotExist(relationDO);
+        }
         return ResponseData.create().success();
     }
 
@@ -70,5 +84,17 @@ public class ClusterRoleRelationServiceImpl implements ClusterRoleRelationServic
     public ResponseData delete(Long id) {
         mapper.deleteById(id);
         return ResponseData.create().success();
+    }
+
+    private void insertIfNotExist(ClusterRoleRelationDO relationDO) {
+        QueryWrapper<ClusterRoleRelationDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("role_id", relationDO.getRoleId()).
+                eq("cluster_info_id", relationDO.getClusterInfoId());
+        Integer count = mapper.selectCount(queryWrapper);
+        if (count > 0) {
+            log.info("已存在，不再增加：{}", relationDO);
+            return;
+        }
+        mapper.insert(relationDO);
     }
 }

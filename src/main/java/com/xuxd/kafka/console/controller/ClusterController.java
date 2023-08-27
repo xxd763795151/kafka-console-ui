@@ -31,7 +31,7 @@ public class ClusterController {
         return clusterService.getClusterInfo();
     }
 
-    @Permission("op:cluster-switch")
+    @Permission({"op:cluster-switch", "user-manage:cluster-role:add"})
     @GetMapping("/info")
     public Object getClusterInfoList() {
         return clusterService.getClusterInfoList();

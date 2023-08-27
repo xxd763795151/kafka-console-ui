@@ -18,13 +18,20 @@
         </a-tab-pane>
         <a-tab-pane
           key="3"
+          tab="集群权限"
+          v-if="isAuthorized('user-manage:cluster-role')"
+        >
+          <ClusterRoleRelation></ClusterRoleRelation>
+        </a-tab-pane>
+        <a-tab-pane
+          key="4"
           tab="权限列表"
           v-if="isAuthorized('user-manage:permission')"
         >
           <Permission></Permission>
         </a-tab-pane>
         <a-tab-pane
-          key="4"
+          key="5"
           tab="个人设置"
           v-if="isAuthorized('user-manage:setting')"
         >
@@ -40,10 +47,11 @@ import Permission from "@/views/user/Permission.vue";
 import Role from "@/views/user/Role.vue";
 import User from "@/views/user/User.vue";
 import UserSetting from "@/views/user/UserSetting.vue";
+import ClusterRoleRelation from "@/views/user/ClusterRoleRelation.vue";
 import { isAuthorized } from "@/utils/auth";
 export default {
   name: "UserManage",
-  components: { Permission, Role, User, UserSetting },
+  components: { Permission, Role, User, UserSetting, ClusterRoleRelation },
   data() {
     return {
       loading: false,
