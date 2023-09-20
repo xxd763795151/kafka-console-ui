@@ -8,10 +8,12 @@ import org.apache.kafka.clients.admin.{DeleteRecordsOptions, RecordsToDelete}
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.header.Header
+import org.apache.kafka.common.header.internals.RecordHeader
 
 import java.time.Duration
 import java.util
-import java.util.{Properties}
+import java.util.Properties
 import scala.collection.immutable
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, MapHasAsScala, SeqHasAsJava}
 
@@ -218,10 +220,28 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
 
     def send(topic: String, partition: Int, key: String, value: String, num: Int): Unit = {
         withProducerAndCatchError(producer => {
-            val nullKey = if (key != null && key.trim().length() == 0) null else key
+            val nullKey = if (key != null && key.trim().isEmpty) null else key
             for (a <- 1 to num) {
                 val record = if (partition != -1) new ProducerRecord[String, String](topic, partition, nullKey, value)
                 else new ProducerRecord[String, String](topic, nullKey, value)
+                producer.send(record)
+            }
+        }, e => log.error("send error.", e))
+
+    }
+
+    def send(topic: String, partition: Int, key: String, value: String, num: Int, headerKeys: Array[String], headerValues: Array[String]): Unit = {
+        withProducerAndCatchError(producer => {
+            val nullKey = if (key != null && key.trim().isEmpty) null else key
+            for (a <- 1 to num) {
+                val record = if (partition != -1) new ProducerRecord[String, String](topic, partition, nullKey, value)
+                else new ProducerRecord[String, String](topic, nullKey, value)
+                if (!headerKeys.isEmpty && headerKeys.length == headerValues.length) {
+                    val headers: Array[Header] = headerKeys.zip(headerValues).map { case (key, value) =>
+                        new RecordHeader(key, value.getBytes())
+                    }
+                    headers.foreach(record.headers().add)
+                }
                 producer.send(record)
             }
         }, e => log.error("send error.", e))

@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.beans;
 
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -22,4 +23,13 @@ public class SendMessage {
     private int num;
 
     private long offset;
+
+    private List<Header> headers;
+
+    @Data
+    public static class Header{
+        private String headerKey;
+
+        private String headerValue;
+    }
 }
