@@ -24,6 +24,8 @@ public interface MessageService {
 
     ResponseData send(SendMessage message);
 
+    ResponseData sendWithHeader(SendMessage message);
+
     ResponseData resend(SendMessage message);
 
     ResponseData delete(List<QueryMessage> messages);
