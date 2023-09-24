@@ -94,7 +94,7 @@ class ConsumerConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaCon
                         t.lag = t.logEndOffset - t.consumerOffset
                     }
                 }
-                t.lag = t.logEndOffset - t.consumerOffset
+//                t.lag = t.logEndOffset - t.consumerOffset
                 (topicPartition, t)
             }).toMap
 

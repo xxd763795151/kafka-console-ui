@@ -15,15 +15,20 @@
               },
             ]"
             placeholder="请选择一个topic"
-           >
+          >
             <a-select-option v-for="v in topicList" :key="v" :value="v">
               {{ v }}
             </a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item label="分区">
-          <a-select class="type-select" show-search option-filter-prop="children" v-model="selectPartition"
-            placeholder="请选择一个分区">
+          <a-select
+            class="type-select"
+            show-search
+            option-filter-prop="children"
+            v-model="selectPartition"
+            placeholder="请选择一个分区"
+          >
             <a-select-option v-for="v in partitions" :key="v" :value="v">
               <span v-if="v == -1">默认</span> <span v-else>{{ v }}</span>
             </a-select-option>
@@ -31,20 +36,32 @@
         </a-form-item>
         <a-form-item label="消息头">
           <table>
-            <thead>
-              <tr>
-                <th>header key</th>
-                <th>header value</th>
-              </tr>
-            </thead>
             <tbody>
               <tr v-for="(row, index) in rows" :key="index">
-                <td> <a-input v-model="row.headerKey" /></td>
-                <td> <a-input v-model="row.headerValue" /></td>
-                <td><a-button type="primary" @click="deleteRow(index)">删除</a-button></td>
+                <td class="w-30">
+                  <a-input v-model="row.headerKey" placeholder="key" />
+                </td>
+                <td class="w-60">
+                  <a-input v-model="row.headerValue" placeholder="value" />
+                </td>
+                <td>
+                  <a-button
+                    type="danger"
+                    @click="deleteRow(index)"
+                    v-show="rows.length > 1"
+                    >删除</a-button
+                  >
+                </td>
+                <td>
+                  <a-button
+                    type="primary"
+                    @click="addRow"
+                    v-show="index == rows.length - 1"
+                    >添加</a-button
+                  >
+                </td>
               </tr>
             </tbody>
-            <a-button type="primary" @click="addRow">添加</a-button>
           </table>
         </a-form-item>
         <a-form-item label="消息Key">
@@ -52,35 +69,37 @@
         </a-form-item>
         <a-form-item label="消息体" has-feedback>
           <a-textarea
-           v-decorator="[
-            'body',
-            {
-              rules: [
-                {
-                  required: true,
-                  message: '输入消息体!',
-                },
-              ],
-            },
-          ]"
-           placeholder="输入消息体!" />
+            v-decorator="[
+              'body',
+              {
+                rules: [
+                  {
+                    required: true,
+                    message: '输入消息体!',
+                  },
+                ],
+              },
+            ]"
+            placeholder="输入消息体!"
+          />
         </a-form-item>
         <a-form-item label="发送的消息数">
-          <a-input-number v-decorator="[
-            'num',
-            {
-              initialValue: 1,
-              rules: [
-                {
-                  required: true,
-                  message: '输入消息数!',
-                },
-              ],
-            },
-          ]"
-           :min="1"
-           :max="32"
-         />
+          <a-input-number
+            v-decorator="[
+              'num',
+              {
+                initialValue: 1,
+                rules: [
+                  {
+                    required: true,
+                    message: '输入消息数!',
+                  },
+                ],
+              },
+            ]"
+            :min="1"
+            :max="32"
+          />
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
           <a-button type="primary" html-type="submit"> 提交 </a-button>
@@ -97,18 +116,15 @@ import notification from "ant-design-vue/lib/notification";
 export default {
   name: "SendMessage",
   components: {},
-  props: {
-    topicList: {
-      type: Array,
-    },
-  },
+  props: {},
   data() {
     return {
       form: this.$form.createForm(this, { name: "message_send" }),
       loading: false,
       partitions: [],
       selectPartition: undefined,
-      rows: [{ headerKey: '', headerValue: '' }],
+      rows: [{ headerKey: "", headerValue: "" }],
+      topicList: [],
     };
   },
   methods: {
@@ -150,15 +166,15 @@ export default {
       this.getPartitionInfo(topic);
     },
     addRow() {
-      if(this.rows.length<32){
-        this.rows.push({ HeaderKey: '', HeaderValue: '' });
+      if (this.rows.length < 32) {
+        this.rows.push({ HeaderKey: "", HeaderValue: "" });
       }
     },
     deleteRow(index) {
       this.rows.splice(index, 1);
     },
     handleSubmit(e) {
-    e.preventDefault();
+      e.preventDefault();
       this.form.validateFields((err, values) => {
         if (!err) {
           const param = Object.assign({}, values, {
@@ -167,8 +183,8 @@ export default {
           });
           this.loading = true;
           request({
-            url: KafkaMessageApi.sendWithHeader.url,
-            method: KafkaMessageApi.sendWithHeader.method,
+            url: KafkaMessageApi.send.url,
+            method: KafkaMessageApi.send.method,
             data: param,
           }).then((res) => {
             this.loading = false;
@@ -190,5 +206,11 @@ export default {
   },
 };
 </script>
-
-<style scoped></style>
+<style scoped>
+.w-30 {
+  width: 300px;
+}
+.w-60 {
+  width: 500px;
+}
+</style>

@@ -49,17 +49,10 @@ public class MessageController {
         return messageService.deserializerList();
     }
 
-    @ControllerLog("在线发送消息")
-    @Permission("message:send")
     @PostMapping("/send")
-    public Object send(@RequestBody SendMessage message) {
-        return messageService.send(message);
-    }
-
-    @PostMapping("/sendWithHeader")
     @ControllerLog("在线发送消息")
     @Permission("message:send")
-    public Object sendWithHeader(@RequestBody SendMessage message) {
+    public Object send(@RequestBody SendMessage message) {
         return messageService.sendWithHeader(message);
     }
 
