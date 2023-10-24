@@ -125,4 +125,11 @@ const columns = [
 ];
 </script>
 
-<style scoped></style>
+<style scoped>
+ul ol {
+  padding-inline-start: 0px;
+}
+.ant-table-row-cell-break-word ul {
+  padding-inline-start: 0px;
+}
+</style>
