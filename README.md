@@ -98,7 +98,8 @@ auth:
 
 ## DockerCompose部署
 感谢@wdkang123 同学分享的部署方式，如果有需要请查看[DockerCompose部署方式](./document/deploy/docker部署.md)
-
+## 感谢支持
+[![jetbrains](./document/img/jb_beam.svg "jetbrains")](https://jb.gg/OpenSourceSupport)
 ## 联系方式
 + 微信群
 
