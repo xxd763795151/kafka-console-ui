@@ -64,4 +64,6 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="AsyncFileAppender"/>
     </logger>
+
+    <logger name="org.apache.kafka" level="warn"/>
 </configuration>

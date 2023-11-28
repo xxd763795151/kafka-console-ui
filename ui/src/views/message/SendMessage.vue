@@ -1,7 +1,12 @@
 <template>
   <div class="content">
     <a-spin :spinning="loading">
-      <a-form :form="form" @submit="handleSubmit">
+      <a-form
+        :form="form"
+        :label-col="{ span: 5 }"
+        :wrapper-col="{ span: 12 }"
+        @submit="handleSubmit"
+      >
         <a-form-item label="Topic">
           <a-select
             class="topic-select"
@@ -69,6 +74,7 @@
         </a-form-item>
         <a-form-item label="消息体" has-feedback>
           <a-textarea
+            :autosize="{ minRows: 5 }"
             v-decorator="[
               'body',
               {
@@ -100,6 +106,22 @@
             :min="1"
             :max="32"
           />
+        </a-form-item>
+        <a-form-item label="发送类型">
+          <a-radio-group
+            v-decorator="[
+              'sync',
+              {
+                initialValue: 'false',
+                rules: [{ required: true, message: '请选择一个发送类型!' }],
+              },
+            ]"
+          >
+            <a-radio value="false"> 异步发送 </a-radio>
+            <a-radio value="true">
+              同步发送（发送失败，会返回错误信息）
+            </a-radio>
+          </a-radio-group>
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
           <a-button type="primary" html-type="submit"> 提交 </a-button>

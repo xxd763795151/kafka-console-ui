@@ -26,6 +26,11 @@ public class SendMessage {
 
     private List<Header> headers;
 
+    /**
+     * true: sync send.
+     */
+    private boolean sync;
+
     @Data
     public static class Header{
         private String headerKey;

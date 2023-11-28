@@ -6,7 +6,7 @@ import com.xuxd.kafka.console.config.{ContextConfigHolder, KafkaConfig}
 import org.apache.commons.lang3.StringUtils
 import org.apache.kafka.clients.admin.{DeleteRecordsOptions, RecordsToDelete}
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
-import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.{ProducerRecord, RecordMetadata}
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.header.Header
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -14,7 +14,9 @@ import org.apache.kafka.common.header.internals.RecordHeader
 import java.time.Duration
 import java.util
 import java.util.Properties
+import java.util.concurrent.Future
 import scala.collection.immutable
+import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, MapHasAsScala, SeqHasAsJava}
 
 /**
@@ -230,9 +232,17 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
 
     }
 
-    def send(topic: String, partition: Int, key: String, value: String, num: Int, headerKeys: Array[String], headerValues: Array[String]): Unit = {
+    def send(topic: String,
+             partition: Int,
+             key: String,
+             value: String,
+             num: Int,
+             headerKeys: Array[String],
+             headerValues: Array[String],
+             sync: Boolean): (Boolean, String) = {
         withProducerAndCatchError(producer => {
             val nullKey = if (key != null && key.trim().isEmpty) null else key
+            val results = ArrayBuffer.empty[Future[RecordMetadata]]
             for (a <- 1 to num) {
                 val record = if (partition != -1) new ProducerRecord[String, String](topic, partition, nullKey, value)
                 else new ProducerRecord[String, String](topic, nullKey, value)
@@ -242,11 +252,18 @@ class MessageConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConf
                     }
                     headers.foreach(record.headers().add)
                 }
-                producer.send(record)
+                results += producer.send(record)
             }
-        }, e => log.error("send error.", e))
+            if (sync) {
+                results.foreach(_.get())
+            }
+            (true, "")
+        }, e => {
+            log.error("send error.", e)
+            (false, e.getMessage)
+        })
 
-    }
+    }.asInstanceOf[(Boolean, String)]
 
     def sendSync(record: ProducerRecord[Array[Byte], Array[Byte]]): (Boolean, String) = {
         withByteProducerAndCatchError(producer => {

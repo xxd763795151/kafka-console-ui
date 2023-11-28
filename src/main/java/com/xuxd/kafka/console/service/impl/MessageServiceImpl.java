@@ -231,9 +231,16 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
     @Override public ResponseData sendWithHeader(SendMessage message) {
         String[] headerKeys= message.getHeaders().stream().map(SendMessage.Header::getHeaderKey).toArray(String[]::new);
         String[] headerValues= message.getHeaders().stream().map(SendMessage.Header::getHeaderValue).toArray(String[]::new);
-        log.info("send with header:keys{},values{}",headerKeys, headerValues);
-        messageConsole.send(message.getTopic(), message.getPartition(), message.getKey(), message.getBody(), message.getNum(), headerKeys, headerValues);
-        return ResponseData.create().success();
+//        log.info("send with header:keys{},values{}",headerKeys, headerValues);
+        Tuple2<Object, String> tuple2 = messageConsole.send(message.getTopic(),
+                message.getPartition(),
+                message.getKey(),
+                message.getBody(),
+                message.getNum(),
+                headerKeys,
+                headerValues,
+                message.isSync());
+        return (boolean)tuple2._1 ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2);
     }
 
     @Override public ResponseData resend(SendMessage message) {
