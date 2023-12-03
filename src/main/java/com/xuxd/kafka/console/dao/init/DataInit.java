@@ -71,6 +71,9 @@ public class DataInit implements SmartInitializingSingleton {
                 initData(connection, SqlParse.ROLE_TABLE);
             }
 
+            if (authConfig.isReloadPermission()) {
+                permissionMapper.delete(null);
+            }
             Integer permCount = permissionMapper.selectCount(null);
             if (permCount == null || permCount == 0) {
                 initData(connection, SqlParse.PERM_TABLE);

@@ -75,6 +75,7 @@ public class MessageController {
         return messageService.delete(messages);
     }
 
+    @Permission("message:send-statistics")
     @PostMapping("/send/statistics")
     public Object sendStatistics(@RequestBody QuerySendStatisticsDTO dto) {
         if (StringUtils.isEmpty(dto.getTopic())) {

@@ -46,4 +46,9 @@ public class AuthConfig {
      * @since 1.0.9
      */
     private boolean enableClusterAuthority;
+
+    /**
+     * 重新加载权限信息，版本升级替换jar包的时候，新版本里增加了新的权限菜单，这个设置为true.
+     */
+    private boolean reloadPermission;
 }

@@ -57,6 +57,8 @@ auth:
   hide-cluster-property: true
   # 是否启用集群的数据权限，如果启用，可以配置哪些角色看到哪些集群. 不启用，即使配置了也不生效，每个角色的用户都可以看到所有集群信息.
   enable-cluster-authority: false
+  # 重新加载权限信息，版本升级替换jar包的时候，新版本里增加了新的权限菜单，这个设置为true.然后在角色列表里分配新增加的菜单权限.
+  reload-permission: true
 log:
   # 是否打印操作日志（增加、删除、编辑）
   print-controller-log: true

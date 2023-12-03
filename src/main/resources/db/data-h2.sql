@@ -42,6 +42,7 @@ insert into t_sys_permission(id, name,type,parent_id,permission) values(64,'在�
 insert into t_sys_permission(id, name,type,parent_id,permission) values(65,'在线删除',1,61,'message:del');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(66,'消息详情',1,61,'message:detail');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(67,'重新发送',1,61,'message:resend');
+insert into t_sys_permission(id, name,type,parent_id,permission) values(68,'发送统计',1,61,'message:send-statistics');
 
 insert into t_sys_permission(id, name,type,parent_id,permission) values(80,'限流',0,null,'quota');
 insert into t_sys_permission(id, name,type,parent_id,permission) values(81,'用户',1,80,'quota:user');
@@ -101,8 +102,8 @@ insert into t_sys_permission(id, name,type,parent_id,permission) values(171,'取
 -- t_sys_permission end--
 
 -- t_sys_role start--
-insert into t_sys_role(id, role_name, description, permission_ids) VALUES (1,'超级管理员','超级管理员','12,13,14,22,23,24,25,26,27,28,29,30,34,35,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,66,67,81,82,83,84,85,86,87,88,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,142,143,144,145,146,147,148,149,150,151,152,153,161,162,163,164,165,166,167,168,169,171,170');
-insert into t_sys_role(id, role_name, description, permission_ids) VALUES (2,'普通管理员','普通管理员，不能更改用户信息','12,13,14,22,23,24,25,26,27,28,29,30,34,35,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,66,67,81,82,83,84,85,86,87,88,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,146,149,150,161,162,163,164,165,166,167,168,169,171,170');
+insert into t_sys_role(id, role_name, description, permission_ids) VALUES (1,'超级管理员','超级管理员','12,13,14,22,23,24,25,26,27,28,29,30,34,35,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,66,67,68,81,82,83,84,85,86,87,88,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,142,143,144,145,146,147,148,149,150,151,152,153,161,162,163,164,165,166,167,168,169,171,170');
+insert into t_sys_role(id, role_name, description, permission_ids) VALUES (2,'普通管理员','普通管理员，不能更改用户信息','12,13,14,22,23,24,25,26,27,28,29,30,34,35,31,32,33,42,43,44,45,46,47,48,49,50,62,63,64,65,66,67,68,81,82,83,84,85,86,87,88,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,141,146,149,150,161,162,163,164,165,166,167,168,169,171,170');
 -- insert into t_sys_role(id, role_name, description, permission_ids) VALUES (2,'访客','访客','12,13,22,26,29,32,44,45,50,62,63,81,83,85,141,146,149,150,161,163');
 -- t_sys_role end--
 
