@@ -296,6 +296,10 @@ export const KafkaMessageApi = {
     url: "/message",
     method: "delete",
   },
+  sendStatistics: {
+    url: "/message/send/statistics",
+    method: "post",
+  },
 };
 
 export const KafkaClientQuotaApi = {

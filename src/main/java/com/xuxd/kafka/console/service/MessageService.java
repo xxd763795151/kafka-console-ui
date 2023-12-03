@@ -1,6 +1,7 @@
 package com.xuxd.kafka.console.service;
 
 import com.xuxd.kafka.console.beans.QueryMessage;
+import com.xuxd.kafka.console.beans.dto.QuerySendStatisticsDTO;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.SendMessage;
 
@@ -29,4 +30,6 @@ public interface MessageService {
     ResponseData resend(SendMessage message);
 
     ResponseData delete(List<QueryMessage> messages);
+
+    ResponseData sendStatisticsByTime(QuerySendStatisticsDTO request);
 }

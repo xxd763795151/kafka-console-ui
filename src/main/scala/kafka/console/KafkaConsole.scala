@@ -189,10 +189,10 @@ object KafkaConsole {
             case (topicPartition, listOffsetsResultInfo) => topicPartition -> new OffsetAndMetadata(listOffsetsResultInfo.offset)
         }.toMap
 
-        unsuccessfulOffsetsForTimes.foreach { entry =>
-            log.warn(s"\nWarn: Partition " + entry._1.partition() + " from topic " + entry._1.topic() +
-                " is empty. Falling back to latest known offset.")
-        }
+//        unsuccessfulOffsetsForTimes.foreach { entry =>
+//            log.warn(s"\nWarn: Partition " + entry._1.partition() + " from topic " + entry._1.topic() +
+//                " is empty. Falling back to latest known offset.")
+//        }
 
         successfulLogTimestampOffsets ++ getLogEndOffsets(admin, unsuccessfulOffsetsForTimes.keySet.toSeq, timeoutMs)
     }

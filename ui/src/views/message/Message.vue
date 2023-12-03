@@ -23,6 +23,10 @@
         <a-tab-pane key="4" tab="在线删除" v-if="isAuthorized('message:del')">
           <DeleteMessage :topic-list="topicList"></DeleteMessage>
         </a-tab-pane>
+
+        <a-tab-pane key="5" tab="发送统计" v-if="isAuthorized('message:del')">
+          <SendStatistics :topic-list="topicList"></SendStatistics>
+        </a-tab-pane>
       </a-tabs>
     </a-spin>
   </div>
@@ -31,6 +35,7 @@
 <script>
 import SearchByTime from "@/views/message/SearchByTime";
 import SearchByOffset from "@/views/message/SearchByOffset";
+import SendStatistics from "@/views/message/SendStatistics.vue";
 import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
@@ -39,7 +44,13 @@ import DeleteMessage from "./DeleteMessage";
 import { isAuthorized, isUnauthorized } from "@/utils/auth";
 export default {
   name: "Message",
-  components: { DeleteMessage, SearchByTime, SearchByOffset, SendMessage },
+  components: {
+    DeleteMessage,
+    SearchByTime,
+    SearchByOffset,
+    SendMessage,
+    SendStatistics,
+  },
   data() {
     return {
       loading: false,

@@ -6,8 +6,10 @@ import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.SendMessage;
 import com.xuxd.kafka.console.beans.dto.QueryMessageDTO;
+import com.xuxd.kafka.console.beans.dto.QuerySendStatisticsDTO;
 import com.xuxd.kafka.console.service.MessageService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -71,5 +73,13 @@ public class MessageController {
             return ResponseData.create().failed("params is null");
         }
         return messageService.delete(messages);
+    }
+
+    @PostMapping("/send/statistics")
+    public Object sendStatistics(@RequestBody QuerySendStatisticsDTO dto) {
+        if (StringUtils.isEmpty(dto.getTopic())) {
+            return ResponseData.create().failed("Topic is null");
+        }
+        return messageService.sendStatisticsByTime(dto);
     }
 }
