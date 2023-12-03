@@ -14,7 +14,7 @@ import java.util.Map;
 @Data
 public class QuerySendStatisticsVO {
 
-    private static final String FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    private static final String FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat(FORMAT);
 
