@@ -25,11 +25,11 @@ v1.0.6版本之前，如果kafka集群启用了ACL，但是控制台没看到Acl
 ![功能特性](./document/img/功能特性.png)
 
 ## 安装包下载
-点击下载(v1.0.8版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.8/kafka-console-ui.zip)  
+点击下载(v1.0.9版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.9/kafka-console-ui-1.0.9.zip)  
 
 如果安装包下载的比较慢，可以查看下面的源码打包说明，把代码下载下来，本地快速打包.  
 
-github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.8/kafka-console-ui.zip)
+github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.9/kafka-console-ui-1.0.9.zip)
 
 ## 快速使用
 ### Windows
@@ -99,6 +99,8 @@ auth:
 ## DockerCompose部署
 感谢@wdkang123 同学分享的部署方式，如果有需要请查看[DockerCompose部署方式](./document/deploy/docker部署.md)
 ## 感谢支持
+感谢jetbrains的开源支持，如果有朋友愿意一起维护，很欢迎提pr.
+
 [![jetbrains](./document/img/jb_beam.svg "jetbrains")](https://jb.gg/OpenSourceSupport)
 ## 联系方式
 + 微信群
