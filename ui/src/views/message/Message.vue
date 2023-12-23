@@ -24,7 +24,11 @@
           <DeleteMessage :topic-list="topicList"></DeleteMessage>
         </a-tab-pane>
 
-        <a-tab-pane key="5" tab="发送统计" v-if="isAuthorized('message:send-statistics')">
+        <a-tab-pane
+          key="5"
+          tab="发送统计"
+          v-if="isAuthorized('message:send-statistics')"
+        >
           <SendStatistics :topic-list="topicList"></SendStatistics>
         </a-tab-pane>
       </a-tabs>

@@ -9,6 +9,7 @@
     <h3 class="login-title">登录kafka-console-ui</h3>
     <a-form-item label="账号">
       <a-input
+        @keyup.enter="handleSubmit"
         style="width: 200px"
         allowClear
         v-decorator="[
@@ -20,6 +21,7 @@
     </a-form-item>
     <a-form-item label="密码">
       <a-input-password
+        @keyup.enter="handleSubmit"
         style="width: 200px"
         v-decorator="[
           'password',
@@ -28,7 +30,11 @@
       />
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 16, offset: 5 }">
-      <a-button type="primary" @click="handleSubmit" :loading="loading"
+      <a-button
+        type="primary"
+        @click="handleSubmit"
+        :loading="loading"
+        @keyup.enter="handleSubmit"
         >登录</a-button
       >
     </a-form-item>
