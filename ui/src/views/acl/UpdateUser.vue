@@ -17,7 +17,7 @@
           <a-input
             placeholder="username"
             :allowClear="true"
-            :maxLength="30"
+            :maxLength="100"
             v-decorator="[
               'username',
               {
@@ -30,7 +30,7 @@
           <a-input
             placeholder="password"
             :allowClear="true"
-            :maxLength="30"
+            :maxLength="100"
             v-decorator="[
               'password',
               {
