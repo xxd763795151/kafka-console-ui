@@ -70,7 +70,7 @@ public class MessageServiceImpl implements MessageService, ApplicationContextAwa
 
     @Override
     public ResponseData searchByTime(QueryMessage queryMessage) {
-        int maxNums = 5000;
+        int maxNums = queryMessage.getFilterNumber() <= 0 ? 5000 : queryMessage.getFilterNumber();
 
         Object searchContent = null;
         String headerKey = null;

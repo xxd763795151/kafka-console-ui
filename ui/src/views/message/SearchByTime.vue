@@ -61,6 +61,33 @@
           </a-row>
           <hr class="hr" />
           <a-row :gutter="24">
+            <a-col :span="24">
+              <a-form-item label="最大检索数">
+                <a-input-number
+                  v-decorator="[
+                    'filterNumber',
+                    {
+                      initialValue: 5000,
+                      rules: [
+                        {
+                          required: true,
+                          message: '输入消息数!',
+                        },
+                      ],
+                    },
+                  ]"
+                  :min="1"
+                  :max="100000"
+                />
+                <span
+                  >条
+                  注意：这里允许最多检索10万条，但是不建议将该值设置过大，这意味着一次查询要在内存里缓存这么多的数据，可能导致内存溢出；并且更大的消息量会导致更长的检索时间</span
+                >
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <hr class="hr" />
+          <a-row :gutter="24">
             <a-col :span="5">
               <a-form-item label="消息过滤">
                 <a-select

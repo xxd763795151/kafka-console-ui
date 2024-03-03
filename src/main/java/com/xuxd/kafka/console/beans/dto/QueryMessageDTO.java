@@ -37,6 +37,8 @@ public class QueryMessageDTO {
 
     private String headerValue;
 
+    private int filterNumber;
+
     public QueryMessage toQueryMessage() {
         QueryMessage queryMessage = new QueryMessage();
         queryMessage.setTopic(topic);
@@ -69,6 +71,7 @@ public class QueryMessageDTO {
         if (StringUtils.isNotBlank(headerValue)) {
             queryMessage.setHeaderValue(headerValue.trim());
         }
+        queryMessage.setFilterNumber(filterNumber);
 
         return queryMessage;
     }

@@ -33,4 +33,6 @@ public class QueryMessage {
     private String headerKey;
 
     private String headerValue;
+
+    private int filterNumber;
 }
