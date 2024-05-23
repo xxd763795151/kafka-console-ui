@@ -21,7 +21,7 @@
         <ui.path>${project.basedir}/ui</ui.path>
         <frontend-maven-plugin.version>1.11.0</frontend-maven-plugin.version>
         <compiler.version>1.8</compiler.version>
-        <kafka.version>3.2.0</kafka.version>
+        <kafka.version>3.5.0</kafka.version>
         <maven.assembly.plugin.version>3.0.0</maven.assembly.plugin.version>
         <mybatis-plus-boot-starter.version>3.4.2</mybatis-plus-boot-starter.version>
         <scala.version>2.13.6</scala.version>
@@ -89,6 +89,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.apache.kafka</groupId>-->
+<!--            <artifactId>kafka-tools</artifactId>-->
+<!--            <version>${kafka.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>com.typesafe.scala-logging</groupId>

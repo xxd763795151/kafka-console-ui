@@ -21,7 +21,7 @@ import org.apache.kafka.common.utils.{KafkaThread, LogContext, Time}
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.IOException
-import java.util.Properties
+import java.util.{Collections, Properties}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{ConcurrentLinkedQueue, TimeUnit}
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, PropertiesHasAsScala, SetHasAsScala}
@@ -162,7 +162,7 @@ object BrokerApiVersion{
 
         def listAllBrokerVersionInfo(): Map[Node, Try[NodeApiVersions]] =
             findAllBrokers().map { broker =>
-                broker -> Try[NodeApiVersions](new NodeApiVersions(getApiVersions(broker)))
+                broker -> Try[NodeApiVersions](new NodeApiVersions(getApiVersions(broker), Collections.emptyList(), false))
             }.toMap
 
         def close(): Unit = {
