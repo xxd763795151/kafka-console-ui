@@ -91,6 +91,7 @@ export default {
       loading: false,
       form: this.$form.createForm(this, { name: "coordinated" }),
       brokerSize: 0,
+      brokerIdList: [],
       replicaNums: 0,
       defaultReplicaNums: 0,
     };
@@ -136,6 +137,8 @@ export default {
         method: KafkaClusterApi.getClusterInfo.method,
       }).then((res) => {
         this.brokerSize = res.data.nodes.length;
+        this.brokerIdList = res.data.nodes.map((o) => o.id);
+        this.brokerIdList.sort((a, b) => a - b);
       });
     },
     handleCancel() {
@@ -149,9 +152,16 @@ export default {
       if (this.data.partitions.length > 0) {
         this.data.partitions.forEach((p) => {
           if (value > p.replicas.length) {
+            let min = this.brokerIdList[0];
+            let max = this.brokerIdList[this.brokerSize - 1] + 1;
             let num = p.replicas[p.replicas.length - 1];
             for (let i = p.replicas.length; i < value; i++) {
-              p.replicas.push(++num % this.brokerSize);
+              ++num;
+              if (num < max) {
+                p.replicas.push(num);
+              } else {
+                p.replicas.push((num % max) + min);
+              }
             }
           }
           if (value < p.replicas.length) {
