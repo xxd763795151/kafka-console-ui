@@ -25,11 +25,11 @@ v1.0.6版本之前，如果kafka集群启用了ACL，但是控制台没看到Acl
 ![功能特性](./document/img/功能特性.png)
 
 ## 安装包下载
-点击下载(v1.0.9版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.9/kafka-console-ui-1.0.9.zip)  
+点击下载(v1.0.10版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.10/kafka-console-ui-1.0.10.zip)  
 
 如果安装包下载的比较慢，可以查看下面的源码打包说明，把代码下载下来，本地快速打包.  
 
-github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.9/kafka-console-ui-1.0.9.zip)
+github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.10/kafka-console-ui-1.0.10.zip)
 
 ## 快速使用
 ### Windows
@@ -109,6 +109,14 @@ auth:
 
 [//]: # (<img src="https://github.com/xxd763795151/kafka-console-ui/blob/main/document/contact/weixin_contact.jpg" width="40%"/>)
 
-+ 若联系方式失效, 请联系加一下微信, 说明意图
-    - xxd763795151
-    - wxid_7jy2ezljvebt12
+抱歉，后面就不再提供新的联系方式加群了。  
+
+在很早之前，有个兄弟提了个建议，可以拉个群，大家可以一起交流，所以成立了一个群，当时我以为没有多少朋友愿意加入。  
+
+可是后来确实有不少朋友进群了，这让我很惶恐，其实这个平台我自己并不觉得有太多技术深度，却有一些朋友愿意来捧场，这个让我觉得很惭愧，所以现在考虑了下，如果真有使用问题，可以留个issue。  
+
+另外，我自己也确实挺忙，对于这个项目的需求处理不够及时，实在是时间和精力上有限，所以有朋友希望新增的一些能力，拖了这么久我也没有下文，实在是抱歉。
+
+对于一些不太耗时的功能，我还是可以积极处理的。
+
+另外有些功能，是想要放到后面再加的，所以迟迟没有动手。
