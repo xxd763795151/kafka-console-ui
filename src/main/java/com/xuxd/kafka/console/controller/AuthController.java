@@ -33,4 +33,9 @@ public class AuthController {
     public ResponseData login(@RequestBody LoginUserDTO userDTO) {
         return authService.login(userDTO);
     }
+
+    @GetMapping("/own/data/auth")
+    public boolean ownDataAuthority() {
+        return authService.ownDataAuthority();
+    }
 }

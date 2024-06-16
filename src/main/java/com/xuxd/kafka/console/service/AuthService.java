@@ -10,4 +10,6 @@ import com.xuxd.kafka.console.beans.dto.LoginUserDTO;
 public interface AuthService {
 
     ResponseData login(LoginUserDTO userDTO);
+
+    boolean ownDataAuthority();
 }

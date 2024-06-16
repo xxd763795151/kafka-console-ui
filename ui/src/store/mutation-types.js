@@ -1,5 +1,6 @@
 export const CLUSTER = {
   SWITCH: "switchCluster",
+  DELETE: "deleteClusterInfo",
 };
 
 export const AUTH = {

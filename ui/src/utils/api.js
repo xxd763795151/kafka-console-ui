@@ -365,6 +365,10 @@ export const AuthApi = {
     url: "/auth/login",
     method: "post",
   },
+  ownDataAuthority: {
+    url: "/auth/own/data/auth",
+    method: "get",
+  },
 };
 
 export const ClusterRoleRelationApi = {

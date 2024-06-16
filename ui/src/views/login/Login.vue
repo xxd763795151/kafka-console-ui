@@ -46,7 +46,7 @@ import request from "@/utils/request";
 import { AuthApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
 import { mapMutations } from "vuex";
-import { AUTH } from "@/store/mutation-types";
+import { AUTH, CLUSTER } from "@/store/mutation-types";
 
 export default {
   name: "Login",
@@ -88,7 +88,18 @@ export default {
       setToken: AUTH.SET_TOKEN,
       setUsername: AUTH.SET_USERNAME,
       setPermissions: AUTH.SET_PERMISSIONS,
+      deleteClusterInfo: CLUSTER.DELETE,
     }),
+  },
+  created() {
+    request({
+      url: AuthApi.ownDataAuthority.url,
+      method: AuthApi.ownDataAuthority.method,
+    }).then((res) => {
+      if (!res) {
+        this.deleteClusterInfo();
+      }
+    });
   },
 };
 </script>

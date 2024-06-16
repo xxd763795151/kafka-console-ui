@@ -6,6 +6,7 @@ import {
   setPermissions,
   setToken,
   setUsername,
+  deleteClusterInfo,
 } from "@/utils/local-cache";
 
 Vue.use(Vuex);
@@ -37,6 +38,9 @@ export default new Vuex.Store({
       }
       state.clusterInfo.enableSasl = enableSasl;
       setClusterInfo(clusterInfo);
+    },
+    [CLUSTER.DELETE]() {
+      deleteClusterInfo();
     },
     [AUTH.ENABLE](state, enable) {
       state.auth.enable = enable;

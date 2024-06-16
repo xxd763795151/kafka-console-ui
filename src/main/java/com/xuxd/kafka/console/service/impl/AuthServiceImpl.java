@@ -93,4 +93,16 @@ public class AuthServiceImpl implements AuthService {
         return ResponseData.create().data(loginResult).success();
     }
 
+    @Override
+    public boolean ownDataAuthority() {
+        if (!authConfig.isEnable()) {
+            return true;
+        }
+        if (!authConfig.isEnableClusterAuthority()) {
+            return true;
+        }
+
+        return false;
+    }
+
 }

@@ -4,6 +4,10 @@ export function setClusterInfo(clusterInfo) {
   localStorage.setItem(Cache.clusterInfo, JSON.stringify(clusterInfo));
 }
 
+export function deleteClusterInfo() {
+  localStorage.removeItem(Cache.clusterInfo);
+}
+
 export function getClusterInfo() {
   const str = localStorage.getItem(Cache.clusterInfo);
   return str ? JSON.parse(str) : undefined;
