@@ -5,7 +5,7 @@
     :width="1200"
     :mask="false"
     :destroyOnClose="true"
-    :maskClosable="false"
+    :maskClosable="true"
     @cancel="handleCancel"
     okText="确认"
     cancelText="取消"

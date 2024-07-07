@@ -6,7 +6,7 @@
     :mask="false"
     :destroyOnClose="true"
     :footer="null"
-    :maskClosable="false"
+    :maskClosable="true"
     @cancel="handleCancel"
   >
     <div>
