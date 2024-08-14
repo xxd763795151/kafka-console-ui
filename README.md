@@ -102,6 +102,8 @@ auth:
 感谢jetbrains的开源支持，如果有朋友愿意一起维护，很欢迎提pr.
 
 [![jetbrains](./document/img/jb_beam.svg "jetbrains")](https://jb.gg/OpenSourceSupport)
+
+jetbrains官方地址: https://www.jetbrains.com/
 ## 联系方式
 + 微信群
 
