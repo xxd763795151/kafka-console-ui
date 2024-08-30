@@ -21,4 +21,6 @@ public class BrokerApiVersionVO {
     private int unSupportNums;
 
     private List<String> versionInfo;
+
+    private String brokerVersion;
 }

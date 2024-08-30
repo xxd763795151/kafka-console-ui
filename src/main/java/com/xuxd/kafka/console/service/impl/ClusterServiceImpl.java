@@ -14,6 +14,7 @@ import com.xuxd.kafka.console.dao.ClusterInfoMapper;
 import com.xuxd.kafka.console.dao.ClusterRoleRelationMapper;
 import com.xuxd.kafka.console.filter.CredentialsContext;
 import com.xuxd.kafka.console.service.ClusterService;
+import kafka.console.BrokerVersion;
 import kafka.console.ClusterConsole;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -188,6 +189,9 @@ public class ClusterServiceImpl implements ClusterService {
             versionInfo = versionInfo.substring(1, versionInfo.length() - 2);
             vo.setVersionInfo(Arrays.asList(StringUtils.split(versionInfo, ",")));
             list.add(vo);
+            // 推测broker版本
+            String vs = BrokerVersion.guessBrokerVersion(versions);
+            vo.setBrokerVersion(vs);
         }));
         Collections.sort(list, Comparator.comparingInt(BrokerApiVersionVO::getBrokerId));
         return ResponseData.create().data(list).success();
