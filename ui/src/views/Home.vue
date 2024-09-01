@@ -6,6 +6,10 @@
     <p></p>
     <hr />
     <h3>kafka API 版本兼容性</h3>
+    <div class="green">
+      broker版本说明:
+      该值并不保证broker实际版本一定是该值(大概是这个版本范围)，broker使用不同的模式(如kraft)可能显示不同的值
+    </div>
     <a-spin :spinning="apiVersionInfoLoading">
       <a-table
         :columns="columns"
@@ -105,6 +109,11 @@ const columns = [
     key: "host",
   },
   {
+    title: "broker版本",
+    dataIndex: "brokerVersion",
+    key: "brokerVersion",
+  },
+  {
     title: "支持的api数量",
     dataIndex: "supportNums",
     key: "supportNums",
@@ -124,5 +133,8 @@ const columns = [
 <style scoped>
 .card-style {
   width: 100%;
+}
+.green {
+  color: green;
 }
 </style>
