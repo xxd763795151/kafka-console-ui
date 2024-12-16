@@ -11,7 +11,18 @@
   >
     <div>
       <a-spin :spinning="loading">
-        <h4>今天发送消息数：{{ today.total }}</h4>
+        <h4>
+          今天发送消息数：{{ today.total
+          }}<a-button
+            type="primary"
+            icon="reload"
+            size="small"
+            style="float: right"
+            @click="sendStatus"
+          >
+            刷新
+          </a-button>
+        </h4>
         <a-table
           :columns="columns"
           :data-source="today.detail"
