@@ -17,3 +17,8 @@ new Vue({
   store,
   render: (h) => h(App),
 }).$mount("#app");
+
+Vue.prototype.$message.config({
+  duration: 1,
+  maxCount: 1,
+});
