@@ -58,6 +58,22 @@
                 </a-form-item>
               </a-col>
             </a-row>
+            <hr class="hr" />
+            <a-row :gutter="24">
+              <a-col :span="24">
+                <a-form-item label="过滤消费组">
+                  <a-input
+                    placeholder="groupId 模糊过滤"
+                    class="input-w"
+                    v-decorator="['filterGroupId']"
+                    @change="onFilterGroupIdUpdate"
+                  />
+                  <span>
+                    仅过滤当前已查出来的消费组，如果要查询服务端最新消费组，请点击查询按钮</span
+                  >
+                </a-form-item>
+              </a-col>
+            </a-row>
           </a-form>
         </div>
         <div class="operation-row-button">
@@ -70,7 +86,7 @@
         </div>
         <a-table
           :columns="columns"
-          :data-source="data"
+          :data-source="filteredData"
           bordered
           row-key="groupId"
         >
@@ -169,6 +185,7 @@ export default {
     return {
       queryParam: {},
       data: [],
+      filteredData: [],
       columns,
       selectRow: {},
       form: this.$form.createForm(this, {
@@ -186,6 +203,7 @@ export default {
       showConsumerDetailDialog: false,
       showAddSubscriptionDialog: false,
       showOffsetPartitionDialog: false,
+      filterGroupId: "",
     };
   },
   methods: {
@@ -209,6 +227,7 @@ export default {
         this.loading = false;
         if (res.code == 0) {
           this.data = res.data.list;
+          this.filter();
         } else {
           notification.error({
             message: "error",
@@ -267,6 +286,19 @@ export default {
     },
     closeOffsetPartitionDialog() {
       this.showOffsetPartitionDialog = false;
+    },
+    onFilterGroupIdUpdate(input) {
+      this.filterGroupId = input.target.value;
+      this.filter();
+    },
+    filter() {
+      if (this.filterGroupId) {
+        this.filteredData = this.data.filter(
+          (e) => e.groupId.indexOf(this.filterGroupId) != -1
+        );
+      } else {
+        this.filteredData = this.data;
+      }
     },
   },
   created() {
@@ -371,5 +403,10 @@ const columns = [
 
 .type-select {
   width: 200px !important;
+}
+.hr {
+  height: 1px;
+  border: none;
+  border-top: 1px dashed #0066cc;
 }
 </style>
