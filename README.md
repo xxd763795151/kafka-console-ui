@@ -25,11 +25,11 @@ v1.0.6版本之前，如果kafka集群启用了ACL，但是控制台没看到Acl
 ![功能特性](./document/img/功能特性.png)
 
 ## 安装包下载
-点击下载(v1.0.11版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.11/kafka-console-ui-1.0.11.zip)  
+点击下载(v1.0.12版本)：[kafka-console-ui.zip](https://github.com/xxd763795151/kafka-console-ui/releases/download/v1.0.12/kafka-console-ui-1.0.12.zip)  
 
 如果安装包下载的比较慢，可以查看下面的源码打包说明，把代码下载下来，本地快速打包.  
 
-github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.11/kafka-console-ui-1.0.11.zip)
+github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-console-ui.zip](https://gitee.com/xiaodong_xu/kafka-console-ui/releases/download/v1.0.12/kafka-console-ui-1.0.12.zip)
 
 ## 快速使用
 ### Windows
@@ -68,7 +68,7 @@ sh bin/shutdown.sh
 在新增集群的时候，除了集群地址还可以输入集群的其它属性配置，比如请求超时，ACL配置等。如果开启了ACL，切换到该集群的时候，导航栏上便会出现ACL菜单，支持进行相关操作（目前是基于SASL_SCRAM认证授权管理支持的最完善，其它的我也没验证过，虽然是我开发的，但是我也没具体全部验证这一块功能，授权部分应该是通用的）
 
 ## kafka版本
-* 当前使用的kafka 3.2.0
+* 当前使用的kafka 3.5.0
 ## 监控
 仅提供运维管理功能，监控、告警需要配合其它组件，如有需要，建议请查看：https://blog.csdn.net/x763795151/article/details/119705372
 
