@@ -14,6 +14,15 @@
         <div v-for="(v, k) in data" :key="k">
           <strong>消费组: </strong><span class="color-font">{{ k }}</span
           ><strong> | 积压: </strong><span class="color-font">{{ v.lag }}</span>
+          <a-button
+            type="primary"
+            icon="reload"
+            size="small"
+            style="float: right"
+            @click="getConsumerDetail"
+          >
+            刷新
+          </a-button>
           <hr />
           <a-table
             :columns="columns"
