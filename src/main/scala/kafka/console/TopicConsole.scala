@@ -15,7 +15,7 @@ import scala.collection.{Map, Seq}
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, MapHasAsJava, MapHasAsScala, SeqHasAsJava, SetHasAsJava}
 
 /**
- * kafka-console-ui.
+ * kafka topic console.
  *
  * @author xuxd
  * @date 2021-09-08 19:52:27
@@ -52,6 +52,12 @@ class TopicConsole(config: KafkaConfig) extends KafkaConsole(config: KafkaConfig
             }).asInstanceOf[Set[String]]
     }
 
+    /**
+     * get topic list by topic name list.
+     *
+     * @param topics topic name list.
+     * @return topic list.
+     */
     def getTopicList(topics: Set[String]): List[TopicDescription] = {
         if (topics == null || topics.isEmpty) {
             Collections.emptyList()
