@@ -2,6 +2,7 @@ package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
+import com.xuxd.kafka.console.beans.ForwardMessage;
 import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.SendMessage;
@@ -82,5 +83,12 @@ public class MessageController {
             return ResponseData.create().failed("Topic is null");
         }
         return messageService.sendStatisticsByTime(dto);
+    }
+
+    @Permission("message:forward")
+    @ControllerLog("消息转发")
+    @PostMapping("/forward")
+    public Object forward(@RequestBody ForwardMessage message) {
+        return messageService.forward(message);
     }
 }

@@ -1,5 +1,6 @@
 package com.xuxd.kafka.console.service;
 
+import com.xuxd.kafka.console.beans.ForwardMessage;
 import com.xuxd.kafka.console.beans.QueryMessage;
 import com.xuxd.kafka.console.beans.dto.QuerySendStatisticsDTO;
 import com.xuxd.kafka.console.beans.ResponseData;
@@ -32,4 +33,6 @@ public interface MessageService {
     ResponseData delete(List<QueryMessage> messages);
 
     ResponseData sendStatisticsByTime(QuerySendStatisticsDTO request);
+
+    ResponseData forward(ForwardMessage message);
 }
