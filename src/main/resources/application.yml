@@ -15,7 +15,7 @@ kafka:
     # 缓存连接，不缓存的情况下，每次请求建立连接. 即使每次请求建立连接，其实也很快，某些情况下开启ACL，查询可能很慢，可以设置连接缓存为true，
     # 或者想提高查询速度，也可以设置下面连接缓存为true
     # 缓存 admin client的连接
-    cache-admin-connection: false
+    cache-admin-connection: true
     # 缓存 producer的连接
     cache-producer-connection: false
     # 缓存 consumer的连接

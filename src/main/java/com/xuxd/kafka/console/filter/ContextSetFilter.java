@@ -49,6 +49,10 @@ public class ContextSetFilter implements Filter {
             String uri = request.getRequestURI();
             if (!excludes.contains(uri)) {
                 String headerId = request.getHeader(Header.ID);
+                String specificId = request.getHeader(Header.SPECIFIC_ID);
+                if (StringUtils.isNotBlank(specificId)) {
+                    headerId = specificId;
+                }
                 if (StringUtils.isBlank(headerId)) {
 //                    ResponseData failed = ResponseData.create().failed("Cluster info is null.");
                     ResponseData failed = ResponseData.create().failed("没有集群信息，请先切换集群");
@@ -84,5 +88,6 @@ public class ContextSetFilter implements Filter {
     interface Header {
         String ID = "X-Cluster-Info-Id";
         String NAME = "X-Cluster-Info-Name";
+        String SPECIFIC_ID = "X-Specific-Cluster-Info-Id";
     }
 }

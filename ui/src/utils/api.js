@@ -300,6 +300,10 @@ export const KafkaMessageApi = {
     url: "/message/send/statistics",
     method: "post",
   },
+  forward: {
+    url: "/message/forward",
+    method: "post",
+  },
 };
 
 export const KafkaClientQuotaApi = {

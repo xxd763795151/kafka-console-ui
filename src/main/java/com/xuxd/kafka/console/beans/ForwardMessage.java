@@ -22,4 +22,9 @@ public class ForwardMessage {
      * 目标集群id.
      */
     private long targetClusterId;
+
+    /**
+     * 目标topic.
+     */
+    private String targetTopic;
 }

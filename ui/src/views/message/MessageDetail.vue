@@ -120,8 +120,22 @@
               重新发送
             </a-button>
           </a-popconfirm>
+          <a-button
+            type="dashed"
+            class="mar-left"
+            icon="plus"
+            v-action:message:forward
+            @click="openForwardDialog()"
+          >
+            转发消息
+          </a-button>
         </div>
       </a-spin>
+      <ForwardMessage
+        :visible="showForwardDialog"
+        :record="data"
+        @closeForwardDialog="closeForwardDialog"
+      ></ForwardMessage>
     </div>
   </a-modal>
 </template>
@@ -131,9 +145,11 @@ import request from "@/utils/request";
 import { KafkaMessageApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
 import moment from "moment";
+import ForwardMessage from "@/views/message/ForwardMessage.vue";
 
 export default {
   name: "MessageDetail",
+  components: { ForwardMessage },
   props: {
     record: {},
     visible: {
@@ -151,6 +167,7 @@ export default {
       valueDeserializer: "String",
       consumerDetail: [],
       columns,
+      showForwardDialog: false,
     };
   },
   watch: {
@@ -232,6 +249,12 @@ export default {
         }
       });
     },
+    openForwardDialog() {
+      this.showForwardDialog = true;
+    },
+    closeForwardDialog() {
+      this.showForwardDialog = false;
+    },
   },
 };
 const columns = [
@@ -263,5 +286,8 @@ const columns = [
 .ant-spin-container #message-detail textarea {
   max-width: 80% !important;
   vertical-align: top !important;
+}
+.mar-left {
+  margin-left: 1%;
 }
 </style>
