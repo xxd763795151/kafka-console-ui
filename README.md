@@ -34,7 +34,7 @@ github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-con
 ## 快速使用
 ### Windows
 1. 解压缩zip安装包  
-2. 进入bin目录（必须在bin目录下），双击执行`start.bat`启动
+2. 进入bin目录, 双击执行`start.bat`启动; 如果使用PowerShell, 也可以选择运行`start.ps1`启动
 3. 停止：直接关闭启动的命令行窗口即可
 
 ### Linux或Mac OS
