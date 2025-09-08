@@ -14,8 +14,8 @@
     <div>
       <a-spin :spinning="loading">
         <div class="replica-box">
-          <label>设置副本数：</label
-          ><a-input-number
+          <label>设置副本数：</label>
+          <a-input-number
             id="inputNumber"
             v-model="replicaNums"
             :min="1"
@@ -24,8 +24,8 @@
           />
         </div>
         <div class="replica-box">
-          <label>是否要限流：</label
-          ><a-input-number
+          <label>是否要限流：</label>
+          <a-input-number
             id="inputNumber"
             v-model="data.interBrokerThrottle"
             :min="-1"
@@ -152,16 +152,17 @@ export default {
       if (this.data.partitions.length > 0) {
         this.data.partitions.forEach((p) => {
           if (value > p.replicas.length) {
-            let min = this.brokerIdList[0];
-            let max = this.brokerIdList[this.brokerSize - 1] + 1;
-            let num = p.replicas[p.replicas.length - 1];
-            for (let i = p.replicas.length; i < value; i++) {
-              ++num;
-              if (num < max) {
-                p.replicas.push(num);
-              } else {
-                p.replicas.push((num % max) + min);
-              }
+            // the index of last replication in replicas
+            const index =
+              this.brokerIdList.indexOf(p.replicas[p.replicas.length - 1]) + 1;
+            const number = Math.min(
+              this.brokerIdList.length - p.replicas.length,
+              value - p.replicas.length
+            );
+            for (let i = 0; i < number; i++) {
+              p.replicas.push(
+                this.brokerIdList[(index + i) % this.brokerIdList.length]
+              );
             }
           }
           if (value < p.replicas.length) {
