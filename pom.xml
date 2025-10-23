@@ -26,6 +26,10 @@
         <mybatis-plus-boot-starter.version>3.4.2</mybatis-plus-boot-starter.version>
         <scala.version>2.13.6</scala.version>
         <spring-framework.version>5.3.26</spring-framework.version>
+        <!-- SpringBoot子包tomcat-embed-core版本漏洞 fixed-->
+        <tomcat.version>9.0.99</tomcat.version>
+        <guava.version>32.0.1-jre</guava.version>
+        <h2.version>2.1.210</h2.version>
     </properties>
     <dependencies>
         <dependency>
@@ -117,7 +121,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>23.0</version>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>
