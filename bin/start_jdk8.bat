@@ -1,7 +1,7 @@
 @echo off
 
 rem MAIN_CLASS=org.springframework.boot.loader.JarLauncher
-rem java version more than jdk 1.8
+rem java version == jdk 1.8
 
 setlocal enabledelayedexpansion
 
@@ -19,11 +19,6 @@ if defined JAVA_HOME (
 )
 
 set "JAVA_OPTS=-Xmx512m -Xms512m -Xmn256m -Xss256k -Dfile.encoding=utf-8"
-
-set "JAVA_OPTS=%JAVA_OPTS% --add-opens java.base/java.io=ALL-UNNAMED"
-set "JAVA_OPTS=%JAVA_OPTS% --add-opens java.base/java.lang=ALL-UNNAMED"
-set "JAVA_OPTS=%JAVA_OPTS% --add-opens java.base/java.util=ALL-UNNAMED"
-set "JAVA_OPTS=%JAVA_OPTS% --add-opens java.base/java.net=ALL-UNNAMED"
 
 set "CONFIG_FILE=%BASE_DIR%\config\application.yml"
 set "TARGET=%BASE_DIR%\lib\kafka-console-ui.jar"

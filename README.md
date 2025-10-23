@@ -11,6 +11,8 @@
 最新代码运行即可看到acl菜单，将权限管理和认证的用户管理（SASL_SCRAM)进行了分离。分离之后，支持只开启SASL_SCRAM认证的时候（未开启鉴权），用户变更操作。或者使用其它认证机制下的权限管理操作（可视化的权限管理），但是可视化的认证用户管理目前只支持Scram。
 
 v1.0.6版本之前，如果kafka集群启用了ACL，但是控制台没看到Acl菜单，可以查看：[Acl配置启用说明](./document/acl/Acl.md)
+
+不支持从v1.0.x平滑升级v1.1.x
 ## 功能支持
 * 多集群支持
 * 集群信息
@@ -34,7 +36,7 @@ github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-con
 ## 快速使用
 ### Windows
 1. 解压缩zip安装包  
-2. 进入bin目录, 双击执行`start.bat`启动; 如果使用PowerShell, 也可以选择运行`start.ps1`启动
+2. 进入bin目录, jdk版本>1.8双击执行`start.bat`启动, jdk版本=1.8双击执行`start_jdk8.bat`启动; 如果使用PowerShell, 也可以选择运行`start.ps1`启动
 3. 停止：直接关闭启动的命令行窗口即可
 
 ### Linux或Mac OS

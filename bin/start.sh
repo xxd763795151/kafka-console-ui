@@ -3,6 +3,14 @@
 # 设置jvm堆大小及栈大小
 JAVA_MEM_OPTS="-Xmx512m -Xms512m -Xmn256m -Xss256k"
 
+# 设置Java路径，如果未指定则使用系统默认的Java
+if [ -z "$JAVA_HOME" ]; then
+    JAVA_CMD="java"
+else
+    JAVA_CMD="$JAVA_HOME/bin/java"
+    echo "Use java home: $JAVA_HOME"
+fi
+
 # 获取脚本真实路径（兼容Linux和macOS）
 if [ -L "$0" ]; then
     # 处理符号链接
@@ -45,8 +53,28 @@ PROCESS_FLAG="kafka-console-ui-process-flag:${PROJECT_DIR}"
 
 JAVA_OPTS="$JAVA_OPTS $JAVA_MEM_OPTS -Dfile.encoding=utf-8"
 
+# 检测JDK版本
+JAVA_VERSION=$("$JAVA_CMD" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION" | awk -F '.' '{print $1}')
+
+# 如果是数字1，则取第二位作为主版本号（如1.8中的8）
+if [ "$JAVA_MAJOR_VERSION" = "1" ]; then
+    JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION" | awk -F '.' '{print $2}')
+fi
+
+# 只在JDK 9及以上版本添加--add-opens参数
+if [ "$JAVA_MAJOR_VERSION" -ge "9" ]; then
+    echo "Jdk version $JAVA_VERSION, add --add-opens..."
+    JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.io=ALL-UNNAMED"
+    JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.util=ALL-UNNAMED"
+    JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.lang=ALL-UNNAMED"
+    JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.net=ALL-UNNAMED"
+else
+    echo "Jdk version $JAVA_VERSION, ignore --add-opens..."
+fi
+
 # 启动应用
-nohup java -jar $JAVA_OPTS "$TARGET" \
+nohup "$JAVA_CMD" $JAVA_OPTS -jar "$TARGET" \
     --spring.config.location="$CONF_FILE" \
     --logging.home="$LOG_HOME" \
     --data.dir="$DATA_DIR" \
