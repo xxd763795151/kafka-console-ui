@@ -1,9 +1,12 @@
 package com.xuxd.kafka.console.service;
 
+import com.xuxd.kafka.console.beans.ConsoleData;
 import com.xuxd.kafka.console.beans.ResponseData;
+import org.apache.kafka.common.TopicPartition;
+import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 import java.util.Properties;
-import org.apache.kafka.common.TopicPartition;
 
 /**
  * kafka-console-ui.
@@ -32,4 +35,8 @@ public interface OperationService {
     ResponseData cancelReassignment(TopicPartition partition);
 
     ResponseData proposedAssignments(String topic, List<Integer> brokerList);
+
+    ResponseEntity<byte[]> export() throws Exception;
+
+    ResponseData importData(ConsoleData data) throws Exception;
 }

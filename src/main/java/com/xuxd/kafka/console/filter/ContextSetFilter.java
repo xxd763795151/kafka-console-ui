@@ -36,6 +36,8 @@ public class ContextSetFilter implements Filter {
         excludes.add("/cluster/info/peek");
         excludes.add("/cluster/info");
         excludes.add("/config/console");
+        excludes.add("/op/console/export");
+        excludes.add("/op/console/import");
     }
 
     @Autowired

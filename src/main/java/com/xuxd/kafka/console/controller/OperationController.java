@@ -2,6 +2,7 @@ package com.xuxd.kafka.console.controller;
 
 import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
+import com.xuxd.kafka.console.beans.ConsoleData;
 import com.xuxd.kafka.console.beans.TopicPartition;
 import com.xuxd.kafka.console.beans.dto.BrokerThrottleDTO;
 import com.xuxd.kafka.console.beans.dto.ProposedAssignmentDTO;
@@ -87,5 +88,17 @@ public class OperationController {
     @PostMapping("/replication/reassignments/proposed")
     public Object proposedAssignments(@RequestBody ProposedAssignmentDTO dto) {
         return operationService.proposedAssignments(dto.getTopic(), dto.getBrokers());
+    }
+
+    @ControllerLog("控制台数据导出")
+    @GetMapping("/console/export")
+    public Object export() throws Exception {
+        return operationService.export();
+    }
+
+    @ControllerLog("控制台数据导入")
+    @PostMapping("/console/import")
+    public Object importData(@RequestBody ConsoleData data) throws Exception {
+        return operationService.importData(data);
     }
 }

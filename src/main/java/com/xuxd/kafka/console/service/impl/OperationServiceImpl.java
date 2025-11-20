@@ -1,33 +1,33 @@
 package com.xuxd.kafka.console.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.xuxd.kafka.console.beans.ConsoleData;
 import com.xuxd.kafka.console.beans.ResponseData;
-import com.xuxd.kafka.console.beans.dos.MinOffsetAlignmentDO;
+import com.xuxd.kafka.console.beans.dos.*;
 import com.xuxd.kafka.console.beans.vo.CurrentReassignmentVO;
 import com.xuxd.kafka.console.beans.vo.OffsetAlignmentVO;
-import com.xuxd.kafka.console.dao.MinOffsetAlignmentMapper;
+import com.xuxd.kafka.console.dao.*;
 import com.xuxd.kafka.console.service.OperationService;
 import com.xuxd.kafka.console.utils.GsonUtil;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
 import kafka.console.OperationConsole;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.PartitionReassignment;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * kafka-console-ui.
@@ -35,21 +35,44 @@ import scala.Tuple2;
  * @author xuxd
  * @date 2021-10-24 23:12:54
  **/
+@Slf4j
 @Service
 public class OperationServiceImpl implements OperationService {
 
     private Gson gson = GsonUtil.INSTANCE.get();
 
-    @Autowired
-    private OperationConsole operationConsole;
+    private final OperationConsole operationConsole;
 
     private MinOffsetAlignmentMapper minOffsetAlignmentMapper;
 
-    public OperationServiceImpl(ObjectProvider<MinOffsetAlignmentMapper> minOffsetAlignmentMapper) {
+    private final ClusterInfoMapper clusterInfoMapper;
+
+    private final ClusterRoleRelationMapper clusterRoleRelationMapper;
+
+    private final SysRoleMapper sysRoleMapper;
+
+    private final SysUserMapper sysUserMapper;
+
+    private final KafkaUserMapper kafkaUserMapper;
+
+    public OperationServiceImpl(ObjectProvider<MinOffsetAlignmentMapper> minOffsetAlignmentMapper,
+                                OperationConsole operationConsole,
+                                ClusterInfoMapper clusterInfoMapper,
+                                ClusterRoleRelationMapper clusterRoleRelationMapper,
+                                SysRoleMapper sysRoleMapper,
+                                SysUserMapper sysUserMapper,
+                                KafkaUserMapper kafkaUserMapper) {
         this.minOffsetAlignmentMapper = minOffsetAlignmentMapper.getIfAvailable();
+        this.operationConsole = operationConsole;
+        this.clusterInfoMapper = clusterInfoMapper;
+        this.clusterRoleRelationMapper = clusterRoleRelationMapper;
+        this.sysRoleMapper = sysRoleMapper;
+        this.sysUserMapper = sysUserMapper;
+        this.kafkaUserMapper = kafkaUserMapper;
     }
 
-    @Override public ResponseData syncConsumerOffset(String groupId, String topic, Properties thatProps) {
+    @Override
+    public ResponseData syncConsumerOffset(String groupId, String topic, Properties thatProps) {
         QueryWrapper<MinOffsetAlignmentDO> wrapper = new QueryWrapper<>();
         wrapper.eq("group_id", groupId);
         wrapper.eq("topic", topic);
@@ -74,7 +97,8 @@ public class OperationServiceImpl implements OperationService {
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
-    @Override public ResponseData minOffsetAlignment(String groupId, String topic, Properties thatProps) {
+    @Override
+    public ResponseData minOffsetAlignment(String groupId, String topic, Properties thatProps) {
 
         Tuple2<Map<TopicPartition, Object>, Map<TopicPartition, Object>> tuple2 = operationConsole.checkAndFetchOffset(groupId, topic, thatProps);
         Map<TopicPartition, Object> thisMaxOffset = tuple2._1();
@@ -105,7 +129,8 @@ public class OperationServiceImpl implements OperationService {
         return ResponseData.create().success();
     }
 
-    @Override public ResponseData getAlignmentList() {
+    @Override
+    public ResponseData getAlignmentList() {
         QueryWrapper wrapper = new QueryWrapper();
         wrapper.orderByDesc("update_time");
         List<MinOffsetAlignmentDO> alignmentDOS = minOffsetAlignmentMapper.selectList(wrapper);
@@ -113,12 +138,14 @@ public class OperationServiceImpl implements OperationService {
         return ResponseData.create().data(alignmentDOS.stream().map(OffsetAlignmentVO::from)).success();
     }
 
-    @Override public ResponseData deleteAlignmentById(Long id) {
+    @Override
+    public ResponseData deleteAlignmentById(Long id) {
         minOffsetAlignmentMapper.deleteById(id);
         return ResponseData.create().success();
     }
 
-    @Override public ResponseData electPreferredLeader(String topic, int partition) {
+    @Override
+    public ResponseData electPreferredLeader(String topic, int partition) {
         Set<TopicPartition> partitions = new HashSet<>();
         if (partition != -1) {
             partitions.add(new TopicPartition(topic, partition));
@@ -131,30 +158,34 @@ public class OperationServiceImpl implements OperationService {
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
-    @Override public ResponseData configThrottle(List<Integer> brokerList, long size) {
+    @Override
+    public ResponseData configThrottle(List<Integer> brokerList, long size) {
         Tuple2<Object, String> tuple2 = operationConsole.modifyInterBrokerThrottle(new HashSet<>(brokerList), size);
 
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
-    @Override public ResponseData removeThrottle(List<Integer> brokerList) {
+    @Override
+    public ResponseData removeThrottle(List<Integer> brokerList) {
         Tuple2<Object, String> tuple2 = operationConsole.clearBrokerLevelThrottles(new HashSet<>(brokerList));
 
         return (boolean) tuple2._1() ? ResponseData.create().success() : ResponseData.create().failed(tuple2._2());
     }
 
-    @Override public ResponseData currentReassignments() {
+    @Override
+    public ResponseData currentReassignments() {
         Map<TopicPartition, PartitionReassignment> reassignmentMap = operationConsole.currentReassignments();
         List<CurrentReassignmentVO> vos = reassignmentMap.entrySet().stream().map(entry -> {
             TopicPartition partition = entry.getKey();
             PartitionReassignment reassignment = entry.getValue();
             return new CurrentReassignmentVO(partition.topic(),
-                partition.partition(), reassignment.replicas(), reassignment.addingReplicas(), reassignment.removingReplicas());
+                    partition.partition(), reassignment.replicas(), reassignment.addingReplicas(), reassignment.removingReplicas());
         }).collect(Collectors.toList());
         return ResponseData.create().data(vos).success();
     }
 
-    @Override public ResponseData cancelReassignment(TopicPartition partition) {
+    @Override
+    public ResponseData cancelReassignment(TopicPartition partition) {
         Map<TopicPartition, Throwable> res = operationConsole.cancelPartitionReassignments(Collections.singleton(partition));
         if (!res.isEmpty()) {
             StringBuilder sb = new StringBuilder("Failed: ");
@@ -166,7 +197,8 @@ public class OperationServiceImpl implements OperationService {
         return ResponseData.create().success();
     }
 
-    @Override public ResponseData proposedAssignments(String topic, List<Integer> brokerList) {
+    @Override
+    public ResponseData proposedAssignments(String topic, List<Integer> brokerList) {
         Map<String, Object> params = new HashMap<>();
         params.put("version", 1);
         Map<String, String> topicMap = new HashMap<>(1, 1.0f);
@@ -177,9 +209,43 @@ public class OperationServiceImpl implements OperationService {
         List<CurrentReassignmentVO> res = new ArrayList<>(assignments.size());
         assignments.forEach((tp, replicas) -> {
             CurrentReassignmentVO vo = new CurrentReassignmentVO(tp.topic(), tp.partition(),
-                replicas.stream().map(x -> (Integer) x).collect(Collectors.toList()), null, null);
+                    replicas.stream().map(x -> (Integer) x).collect(Collectors.toList()), null, null);
             res.add(vo);
         });
         return ResponseData.create().data(res).success();
+    }
+
+    @Override
+    public ResponseEntity<byte[]> export() throws Exception {
+
+        List<ClusterInfoDO> clusterInfoList = clusterInfoMapper.selectList(null);
+        List<ClusterRoleRelationDO> clusterRoleRelationList = clusterRoleRelationMapper.selectList(null);
+        List<SysRoleDO> sysRoleList = sysRoleMapper.selectList(null);
+        List<SysUserDO> sysUserList = sysUserMapper.selectList(null);
+        List<KafkaUserDO> kafkaUserList = kafkaUserMapper.selectList(null);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        ConsoleData consoleData = new ConsoleData();
+        consoleData.setClusterInfoList(clusterInfoList);
+        consoleData.setClusterRoleRelationList(clusterRoleRelationList);
+        consoleData.setSysRoleList(sysRoleList);
+        consoleData.setSysUserList(sysUserList);
+        consoleData.setKafkaUserList(kafkaUserList);
+
+        String jsonContent = objectMapper.writeValueAsString(consoleData);
+        byte[] jsonBytes = jsonContent.getBytes();
+
+        String filename = "kafka-console-ui-export.json";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(jsonBytes);
+    }
+
+    @Override
+    public ResponseData importData(ConsoleData data) throws Exception {
+        log.info("import data: {}", data);
+        return ResponseData.create().success();
     }
 }
