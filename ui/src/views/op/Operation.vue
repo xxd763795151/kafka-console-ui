@@ -1,5 +1,6 @@
 <template>
   <div class="content">
+    <a-spin :spinning="loading">
     <div class="content-module">
       <a-card title="集群管理" style="width: 100%; text-align: left">
         <p v-action:op:cluster-switch>
@@ -93,6 +94,20 @@
         </p>
       </a-card>
     </div>
+    <div class="content-module">
+      <a-card title="控制台数据" style="width: 100%; text-align: left">
+        <p>
+          <a-button type="primary" @click="handleImport"> 导入 </a-button>
+          <label>说明：</label>
+          <span>将其它控制台数据导入当前控制台内</span>
+        </p>
+        <p>
+          <a-button type="primary" @click="handleExport"> 导出 </a-button>
+          <label>说明：</label>
+          <span>将当前控制台的数据作为文本导出</span>
+        </p>
+      </a-card>
+    </div>
     <SyncConsumerOffset
       :visible="syncData.showSyncConsumerOffsetDialog"
       @closeSyncConsumerOffsetDialog="closeSyncConsumerOffsetDialog"
@@ -139,6 +154,14 @@
       @closeReplicaReassignDialog="closeReplicaReassignDialog"
     >
     </ReplicaReassign>
+    <input
+      type="file"
+      ref="fileInput"
+      accept=".json"
+      style="display: none"
+      @change="handleFileChange"
+    />
+    </a-spin>
   </div>
 </template>
 
@@ -153,6 +176,10 @@ import RemoveThrottle from "@/views/op/RemoveThrottle";
 import CurrentReassignments from "@/views/op/CurrentReassignments";
 import ClusterInfo from "@/views/op/ClusterInfo";
 import ReplicaReassign from "@/views/op/ReplicaReassign";
+import { message } from "ant-design-vue";
+import request from "@/utils/request";
+import { KafkaOpApi } from "@/utils/api";
+import notification from "ant-design-vue/lib/notification";
 export default {
   name: "Operation",
   components: {
@@ -187,6 +214,7 @@ export default {
       clusterManager: {
         showClusterInfoDialog: false,
       },
+      loading: false,
     };
   },
   methods: {
@@ -249,6 +277,101 @@ export default {
     },
     closeReplicaReassignDialog() {
       this.replicationManager.showReplicaReassignDialog = false;
+    },
+    handleExport() {
+      try {
+        this.loading = true;
+
+        // 调用导出接口
+        request({
+          url: KafkaOpApi.consoleExport.url,
+          method: KafkaOpApi.consoleExport.method,
+          responseType: "blob",
+        }).then((response) => {
+          this.loading = false;
+          // 创建下载链接
+          const blob = new Blob([response.data], { type: "application/json" });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+
+          // 从响应头获取文件名，如果没有则使用默认文件名
+          const headers = response.headers || {};
+          const contentDisposition = headers["content-disposition"];
+          let fileName = "console_data.json";
+          if (contentDisposition) {
+            const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);
+            if (fileNameMatch && fileNameMatch.length === 2) {
+              fileName = fileNameMatch[1];
+            }
+          }
+
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+
+          // 清理
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          message.success({ content: "数据导出成功", key: "export" });
+        });
+      } catch (error) {
+        message.error({ content: "数据导出失败", key: "export" });
+      }
+    },
+
+    // 导入数据 - 触发文件选择
+    handleImport() {
+      this.$refs.fileInput.click();
+    },
+
+    // 处理文件选择
+    handleFileChange(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // 验证文件类型
+      if (!file.name.toLowerCase().endsWith(".json")) {
+        message.error("请选择JSON文件");
+        return;
+      }
+
+      try {
+        this.loading = true;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("overwriteExisting", true);
+        formData.append("importType", "ALL");
+
+        request({
+          url: KafkaOpApi.consoleImport.url,
+          method: KafkaOpApi.consoleImport.method,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          data: formData,
+        }).then((response) => {
+          this.loading = false;
+          if (response.code == 0) {
+            this.$message.success(response.msg);
+          } else {
+            notification.error({
+              message: "error",
+              description: `导入失败：${response.msg}`,
+            });
+          }
+        });
+      } catch (error) {
+        message.error({
+          content: "文件导入失败，请检查文件格式",
+          key: "import",
+        });
+      } finally {
+        // 清空文件输入，允许重复选择同一文件
+        event.target.value = "";
+      }
     },
   },
 };

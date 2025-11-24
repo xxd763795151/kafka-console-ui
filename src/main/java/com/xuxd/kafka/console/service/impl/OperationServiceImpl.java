@@ -16,6 +16,7 @@ import com.xuxd.kafka.console.service.OperationService;
 import com.xuxd.kafka.console.utils.GsonUtil;
 import kafka.console.OperationConsole;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.PartitionReassignment;
 import org.apache.kafka.common.TopicPartition;
@@ -245,7 +246,85 @@ public class OperationServiceImpl implements OperationService {
 
     @Override
     public ResponseData importData(ConsoleData data) throws Exception {
-        log.info("import data: {}", data);
+        if (CollectionUtils.isNotEmpty(data.getClusterInfoList())) {
+            Set<Long> idSet = clusterInfoMapper.selectList(new QueryWrapper<ClusterInfoDO>().select("id"))
+                    .stream().map(ClusterInfoDO::getId).collect(Collectors.toSet());
+            for (ClusterInfoDO infoDO : data.getClusterInfoList()) {
+                if (idSet.contains(infoDO.getId())) {
+                    return ResponseData.create().failed("[clusterInfoList]cluster info id already exists: " + infoDO.getId());
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(data.getClusterRoleRelationList())) {
+            Set<Long> idSet = clusterRoleRelationMapper.selectList(new QueryWrapper<ClusterRoleRelationDO>().select("id"))
+                    .stream().map(ClusterRoleRelationDO::getId).collect(Collectors.toSet());
+            for (ClusterRoleRelationDO relationDO : data.getClusterRoleRelationList()) {
+                if (idSet.contains(relationDO.getId())) {
+                    return ResponseData.create()
+                            .failed("[clusterRoleRelationList]cluster role relation id already exists: " + relationDO.getId());
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(data.getSysRoleList())) {
+            Set<Long> idSet = sysRoleMapper.selectList(new QueryWrapper<SysRoleDO>().select("id"))
+                    .stream().map(SysRoleDO::getId).collect(Collectors.toSet());
+            for (SysRoleDO roleDO : data.getSysRoleList()) {
+                if (idSet.contains(roleDO.getId())) {
+                    return ResponseData.create()
+                            .failed("[sysRoleList]sys role id already exists: " + roleDO.getId());
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(data.getSysUserList())) {
+            Set<Long> idSet = sysUserMapper.selectList(new QueryWrapper<SysUserDO>().select("id"))
+                    .stream().map(SysUserDO::getId).collect(Collectors.toSet());
+            for (SysUserDO userDO : data.getSysUserList()) {
+                if (idSet.contains(userDO.getId())) {
+                    return ResponseData.create()
+                            .failed("[sysUserList]sys user id already exists: " + userDO.getId());
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(data.getKafkaUserList())) {
+            Set<Long> idSet = kafkaUserMapper.selectList(new QueryWrapper<KafkaUserDO>().select("id"))
+                    .stream().map(KafkaUserDO::getId).collect(Collectors.toSet());
+            for (KafkaUserDO userDO : data.getKafkaUserList()) {
+                if (idSet.contains(userDO.getId())) {
+                    return ResponseData.create()
+                            .failed("[kafkaUserList]kafka user id already exists: " + userDO.getId());
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(data.getClusterInfoList())) {
+            for (ClusterInfoDO infoDO : data.getClusterInfoList()) {
+                clusterInfoMapper.insert(infoDO);
+                log.info("Insert cluster info: {}", infoDO);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(data.getClusterRoleRelationList())) {
+            for (ClusterRoleRelationDO relationDO : data.getClusterRoleRelationList()) {
+                clusterRoleRelationMapper.insert(relationDO);
+                log.info("Insert cluster role relation: {}", relationDO);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(data.getSysRoleList())) {
+            for (SysRoleDO roleDO : data.getSysRoleList()) {
+                sysRoleMapper.insert(roleDO);
+                log.info("Insert sys role: {}", roleDO);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(data.getSysUserList())) {
+            for (SysUserDO userDO : data.getSysUserList()) {
+                sysUserMapper.insert(userDO);
+                log.info("Insert sys user: {}", userDO);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(data.getKafkaUserList())) {
+            for (KafkaUserDO userDO : data.getKafkaUserList()) {
+                kafkaUserMapper.insert(userDO);
+                log.info("Insert kafka user: {}", userDO);
+            }
+        }
         return ResponseData.create().success();
     }
 }

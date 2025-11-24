@@ -54,6 +54,9 @@ request.interceptors.request.use((config) => {
 
 // response interceptor
 request.interceptors.response.use((response) => {
+  if (response.config.responseType === "blob") {
+    return response;
+  }
   return response.data;
 }, errorHandler);
 

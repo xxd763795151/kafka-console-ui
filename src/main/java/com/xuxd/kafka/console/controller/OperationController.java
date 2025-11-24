@@ -1,8 +1,10 @@
 package com.xuxd.kafka.console.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xuxd.kafka.console.aspect.annotation.ControllerLog;
 import com.xuxd.kafka.console.aspect.annotation.Permission;
 import com.xuxd.kafka.console.beans.ConsoleData;
+import com.xuxd.kafka.console.beans.ResponseData;
 import com.xuxd.kafka.console.beans.TopicPartition;
 import com.xuxd.kafka.console.beans.dto.BrokerThrottleDTO;
 import com.xuxd.kafka.console.beans.dto.ProposedAssignmentDTO;
@@ -12,6 +14,7 @@ import com.xuxd.kafka.console.service.OperationService;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * kafka-console-ui.
@@ -98,7 +101,13 @@ public class OperationController {
 
     @ControllerLog("控制台数据导入")
     @PostMapping("/console/import")
-    public Object importData(@RequestBody ConsoleData data) throws Exception {
-        return operationService.importData(data);
+    public Object importData(@RequestPart(value = "file", required = false) MultipartFile file) throws Exception {
+        if (file != null && !file.isEmpty()) {
+            String fileContent = new String(file.getBytes());
+            ObjectMapper objectMapper = new ObjectMapper();
+            ConsoleData data = objectMapper.readValue(fileContent, ConsoleData.class);
+            return operationService.importData(data);
+        }
+        return ResponseData.create().failed("Import data is empty");
     }
 }

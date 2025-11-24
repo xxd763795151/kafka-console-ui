@@ -266,6 +266,14 @@ export const KafkaOpApi = {
     url: "/op/replication/reassignments/proposed",
     method: "post",
   },
+  consoleExport: {
+    url: "/op/console/export",
+    method: "get",
+  },
+  consoleImport: {
+    url: "/op/console/import",
+    method: "post",
+  },
 };
 export const KafkaMessageApi = {
   searchByTime: {
