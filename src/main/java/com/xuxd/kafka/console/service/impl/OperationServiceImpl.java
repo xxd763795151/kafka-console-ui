@@ -250,8 +250,9 @@ public class OperationServiceImpl implements OperationService {
             Set<Long> idSet = clusterInfoMapper.selectList(new QueryWrapper<ClusterInfoDO>().select("id"))
                     .stream().map(ClusterInfoDO::getId).collect(Collectors.toSet());
             for (ClusterInfoDO infoDO : data.getClusterInfoList()) {
-                if (idSet.contains(infoDO.getId())) {
-                    return ResponseData.create().failed("[clusterInfoList]cluster info id already exists: " + infoDO.getId());
+                if (!idSet.contains(infoDO.getId())) {
+                    clusterInfoMapper.insert(infoDO);
+                    log.info("Insert cluster info: {}", infoDO);
                 }
             }
         }
@@ -259,9 +260,9 @@ public class OperationServiceImpl implements OperationService {
             Set<Long> idSet = clusterRoleRelationMapper.selectList(new QueryWrapper<ClusterRoleRelationDO>().select("id"))
                     .stream().map(ClusterRoleRelationDO::getId).collect(Collectors.toSet());
             for (ClusterRoleRelationDO relationDO : data.getClusterRoleRelationList()) {
-                if (idSet.contains(relationDO.getId())) {
-                    return ResponseData.create()
-                            .failed("[clusterRoleRelationList]cluster role relation id already exists: " + relationDO.getId());
+                if (!idSet.contains(relationDO.getId())) {
+                    clusterRoleRelationMapper.insert(relationDO);
+                    log.info("Insert cluster role relation: {}", relationDO);
                 }
             }
         }
@@ -269,9 +270,9 @@ public class OperationServiceImpl implements OperationService {
             Set<Long> idSet = sysRoleMapper.selectList(new QueryWrapper<SysRoleDO>().select("id"))
                     .stream().map(SysRoleDO::getId).collect(Collectors.toSet());
             for (SysRoleDO roleDO : data.getSysRoleList()) {
-                if (idSet.contains(roleDO.getId())) {
-                    return ResponseData.create()
-                            .failed("[sysRoleList]sys role id already exists: " + roleDO.getId());
+                if (!idSet.contains(roleDO.getId())) {
+                    sysRoleMapper.insert(roleDO);
+                    log.info("Insert sys role: {}", roleDO);
                 }
             }
         }
@@ -279,9 +280,9 @@ public class OperationServiceImpl implements OperationService {
             Set<Long> idSet = sysUserMapper.selectList(new QueryWrapper<SysUserDO>().select("id"))
                     .stream().map(SysUserDO::getId).collect(Collectors.toSet());
             for (SysUserDO userDO : data.getSysUserList()) {
-                if (idSet.contains(userDO.getId())) {
-                    return ResponseData.create()
-                            .failed("[sysUserList]sys user id already exists: " + userDO.getId());
+                if (!idSet.contains(userDO.getId())) {
+                    sysUserMapper.insert(userDO);
+                    log.info("Insert sys user: {}", userDO);
                 }
             }
         }
@@ -289,40 +290,10 @@ public class OperationServiceImpl implements OperationService {
             Set<Long> idSet = kafkaUserMapper.selectList(new QueryWrapper<KafkaUserDO>().select("id"))
                     .stream().map(KafkaUserDO::getId).collect(Collectors.toSet());
             for (KafkaUserDO userDO : data.getKafkaUserList()) {
-                if (idSet.contains(userDO.getId())) {
-                    return ResponseData.create()
-                            .failed("[kafkaUserList]kafka user id already exists: " + userDO.getId());
+                if (!idSet.contains(userDO.getId())) {
+                    kafkaUserMapper.insert(userDO);
+                    log.info("Insert kafka user: {}", userDO);
                 }
-            }
-        }
-        if (CollectionUtils.isNotEmpty(data.getClusterInfoList())) {
-            for (ClusterInfoDO infoDO : data.getClusterInfoList()) {
-                clusterInfoMapper.insert(infoDO);
-                log.info("Insert cluster info: {}", infoDO);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(data.getClusterRoleRelationList())) {
-            for (ClusterRoleRelationDO relationDO : data.getClusterRoleRelationList()) {
-                clusterRoleRelationMapper.insert(relationDO);
-                log.info("Insert cluster role relation: {}", relationDO);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(data.getSysRoleList())) {
-            for (SysRoleDO roleDO : data.getSysRoleList()) {
-                sysRoleMapper.insert(roleDO);
-                log.info("Insert sys role: {}", roleDO);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(data.getSysUserList())) {
-            for (SysUserDO userDO : data.getSysUserList()) {
-                sysUserMapper.insert(userDO);
-                log.info("Insert sys user: {}", userDO);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(data.getKafkaUserList())) {
-            for (KafkaUserDO userDO : data.getKafkaUserList()) {
-                kafkaUserMapper.insert(userDO);
-                log.info("Insert kafka user: {}", userDO);
             }
         }
         return ResponseData.create().success();
