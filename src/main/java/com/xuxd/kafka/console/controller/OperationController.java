@@ -94,14 +94,14 @@ public class OperationController {
     }
 
     @ControllerLog("控制台数据导出")
-    @Permission("op:console-export")
+//    @Permission("op:console-export")
     @GetMapping("/console/export")
     public Object export() throws Exception {
         return operationService.export();
     }
 
     @ControllerLog("控制台数据导入")
-    @Permission("op:console-import")
+//    @Permission("op:console-import")
     @PostMapping("/console/import")
     public Object importData(@RequestPart(value = "file", required = false) MultipartFile file) throws Exception {
         if (file != null && !file.isEmpty()) {

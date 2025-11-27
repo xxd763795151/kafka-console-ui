@@ -96,12 +96,14 @@
       </div>
       <div class="content-module">
         <a-card title="控制台数据" style="width: 100%; text-align: left">
-          <p v-action:op:console-import>
+          <!--          <p v-action:op:console-import>-->
+          <p>
             <a-button type="primary" @click="handleImport"> 导入 </a-button>
             <label>说明：</label>
             <span>将其它控制台数据导入当前控制台内</span>
           </p>
-          <p v-action:op:console-export>
+          <!--          <p v-action:op:console-export>-->
+          <p>
             <a-button type="primary" @click="handleExport"> 导出 </a-button>
             <label>说明：</label>
             <span>将当前控制台的数据作为文本导出</span>
