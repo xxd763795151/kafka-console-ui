@@ -1,7 +1,7 @@
 @echo off
 
 rem MAIN_CLASS=org.springframework.boot.loader.JarLauncher
-rem java version more than jdk 1.8
+rem require jdk 17+
 
 setlocal enabledelayedexpansion
 

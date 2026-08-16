@@ -61,12 +61,12 @@ public class DataInit implements SmartInitializingSingleton {
         }
         try {
             Connection connection = dataSource.getConnection();
-            Integer userCount = userMapper.selectCount(null);
+            Long userCount = userMapper.selectCount(null);
             if (userCount == null || userCount == 0) {
                 initData(connection, SqlParse.USER_TABLE);
             }
 
-            Integer roleCount = roleMapper.selectCount(null);
+            Long roleCount = roleMapper.selectCount(null);
             if (roleCount == null || roleCount == 0) {
                 initData(connection, SqlParse.ROLE_TABLE);
             }
@@ -74,7 +74,7 @@ public class DataInit implements SmartInitializingSingleton {
             if (authConfig.isReloadPermission()) {
                 permissionMapper.delete(null);
             }
-            Integer permCount = permissionMapper.selectCount(null);
+            Long permCount = permissionMapper.selectCount(null);
             if (permCount == null || permCount == 0) {
                 initData(connection, SqlParse.PERM_TABLE);
             }

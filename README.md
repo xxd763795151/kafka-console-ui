@@ -36,8 +36,9 @@ github下载慢也可以试试从gitee下载，点击下载[gitee来源kafka-con
 ## 快速使用
 ### Windows
 1. 解压缩zip安装包  
-2. 进入bin目录, jdk版本>1.8双击执行`start.bat`启动, jdk版本=1.8双击执行`start_jdk8.bat`启动; 如果使用PowerShell, 也可以选择运行`start.ps1`启动
-3. 停止：直接关闭启动的命令行窗口即可
+2. 确保已安装JDK 17或更高版本  
+3. 进入bin目录, 双击执行`start.bat`启动; 如果使用PowerShell, 也可以选择运行`start.ps1`启动
+4. 停止：直接关闭启动的命令行窗口即可
 
 ### Linux或Mac OS
 ```
@@ -69,8 +70,10 @@ sh bin/shutdown.sh
 
 在新增集群的时候，除了集群地址还可以输入集群的其它属性配置，比如请求超时，ACL配置等。如果开启了ACL，切换到该集群的时候，导航栏上便会出现ACL菜单，支持进行相关操作（目前是基于SASL_SCRAM认证授权管理支持的最完善，其它的我也没验证过，虽然是我开发的，但是我也没具体全部验证这一块功能，授权部分应该是通用的）
 
-## kafka版本
-* 当前使用的kafka 3.5.0
+## 技术栈版本要求
+* JDK版本：最低要求 JDK 17
+* Spring Boot版本：4.1.0
+* Kafka版本：当前使用的kafka 3.5.0
 ## 监控
 仅提供运维管理功能，监控、告警需要配合其它组件，如有需要，建议请查看：https://blog.csdn.net/x763795151/article/details/119705372
 

@@ -121,7 +121,7 @@ public class ClusterServiceImpl implements ClusterService {
                 QueryWrapper<ClusterRoleRelationDO> relationQueryWrapper = new QueryWrapper<>();
                 relationQueryWrapper.eq("role_id", roleId).
                         eq("cluster_info_id", infoDO.getId());
-                Integer count = clusterRoleRelationMapper.selectCount(relationQueryWrapper);
+                Long count = clusterRoleRelationMapper.selectCount(relationQueryWrapper);
                 if (count <= 0) {
                     ClusterRoleRelationDO relationDO = new ClusterRoleRelationDO();
                     relationDO.setRoleId(roleId);

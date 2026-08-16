@@ -3,9 +3,9 @@ package com.xuxd.kafka.console.utils;
 import com.google.gson.Gson;
 import com.xuxd.kafka.console.beans.Credentials;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.Base64Utils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /**
  * @author: xuxd
@@ -20,8 +20,8 @@ public class AuthUtil {
         String json = gson.toJson(info);
         String str = json + secret;
         String signature = MD5Util.md5(str);
-        return Base64Utils.encodeToString(json.getBytes(StandardCharsets.UTF_8)) + "." +
-                Base64Utils.encodeToString(signature.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8)) + "." +
+                Base64.getEncoder().encodeToString(signature.getBytes(StandardCharsets.UTF_8));
     }
 
     public static boolean isToken(String token) {
@@ -33,8 +33,8 @@ public class AuthUtil {
             return Credentials.INVALID;
         }
         String[] arr = token.split("\\.");
-        String infoStr = new String(Base64Utils.decodeFromString(arr[0]), StandardCharsets.UTF_8);
-        String signature = new String(Base64Utils.decodeFromString(arr[1]), StandardCharsets.UTF_8);
+        String infoStr = new String(Base64.getDecoder().decode(arr[0]), StandardCharsets.UTF_8);
+        String signature = new String(Base64.getDecoder().decode(arr[1]), StandardCharsets.UTF_8);
 
         String encrypt = MD5Util.md5(infoStr + secret);
         if (!encrypt.equals(signature)) {

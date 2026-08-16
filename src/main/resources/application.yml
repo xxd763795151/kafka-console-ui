@@ -31,9 +31,11 @@ spring:
     driver-class-name: org.h2.Driver
     username: kafka
     password: 1234567890
-    schema: classpath:db/schema-h2.sql
-#    data: classpath:db/data-h2.sqldata.dir
-    initialization-mode: always
+  sql:
+    init:
+      schema-locations: classpath:db/schema-h2.sql
+#      data-locations: classpath:db/data-h2.sql
+      mode: always
   h2:
     console:
       enabled: true
