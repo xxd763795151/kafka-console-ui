@@ -1,7 +1,7 @@
 <template>
   <a-modal
     :title="topic + '限流'"
-    :visible="show"
+    :open="show"
     :width="1000"
     :mask="false"
     :maskClosable="false"
@@ -14,40 +14,38 @@
     <div>
       <a-spin :spinning="loading">
         <a-form
-          :form="form"
+          :model="formState"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
         >
-          <a-form-item label="操作">
+          <a-form-item
+            label="操作"
+            name="operation"
+            :rules="[{ required: true, message: '请选择一个操作!' }]"
+          >
             <a-radio-group
               @change="onChange"
-              v-decorator="[
-                'operation',
-                {
-                  initialValue: 'ON',
-                  rules: [{ required: true, message: '请选择一个操作!' }],
-                },
-              ]"
+              v-model:value="formState.operation"
             >
               <a-radio value="ON"> 配置限流 </a-radio>
               <a-radio value="OFF"> 移除所有分区限流配置 </a-radio>
             </a-radio-group>
           </a-form-item>
 
-          <a-form-item label="选择分区" v-show="showPartition">
+          <a-form-item
+            label="选择分区"
+            v-show="showPartition"
+            name="partitions"
+            :rules="[{ required: true, message: '请选择一个分区!' }]"
+          >
             <a-select
               mode="multiple"
-              option-filter-prop="children"
-              v-decorator="[
-                'partitions',
-                {
-                  initialValue: [-1],
-                  rules: [{ required: true, message: '请选择一个分区!' }],
-                },
-              ]"
+              v-model:value="formState.partitions"
               placeholder="请选择一个分区"
+              :filter-option="true"
+              option-filter-prop="label"
             >
-              <a-select-option v-for="v in partitions" :key="v" :value="v">
+              <a-select-option v-for="v in partitions" :key="v" :value="v" :label="v == -1 ? '全部' : String(v)">
                 <span v-if="v == -1">全部</span> <span v-else>{{ v }}</span>
               </a-select-option>
             </a-select>
@@ -72,15 +70,16 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from "vue";
+import { message, notification } from "ant-design-vue";
 import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
-import notification from "ant-design-vue/lib/notification";
 
-export default {
+export default defineComponent({
   name: "ConfigTopicThrottle",
   props: {
-    visible: {
+    open: {
       type: Boolean,
       default: false,
     },
@@ -89,75 +88,92 @@ export default {
       default: "",
     },
   },
-  data() {
-    return {
-      show: this.visible,
-      loading: false,
-      form: this.$form.createForm(this, { name: "RemoveThrottleForm" }),
-      partitions: [],
-      showPartition: true,
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getPartitionInfo();
-        this.showPartition = true;
+  emits: ["closeThrottleDialog"],
+  setup(props, { emit }) {
+    const show = ref(props.open);
+    const loading = ref(false);
+    const partitions = ref<any[]>([]);
+    const showPartition = ref(true);
+
+    const formState = reactive({
+      operation: "ON",
+      partitions: [-1],
+    });
+
+    watch(
+      () => props.open,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          formState.operation = "ON";
+          formState.partitions = [-1];
+          getPartitionInfo();
+          showPartition.value = true;
+        }
       }
-    },
-  },
-  methods: {
-    handleCancel() {
-      this.$emit("closeThrottleDialog", { refresh: false });
-    },
-    getPartitionInfo() {
-      this.loading = true;
+    );
+
+    function handleCancel() {
+      emit("closeThrottleDialog", { refresh: false });
+    }
+
+    function getPartitionInfo() {
+      loading.value = true;
       request({
-        url: KafkaTopicApi.getPartitionInfo.url + "?topic=" + this.topic,
+        url: KafkaTopicApi.getPartitionInfo.url + "?topic=" + props.topic,
         method: KafkaTopicApi.getPartitionInfo.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        loading.value = false;
         if (res.code != 0) {
           notification.error({
             message: "error",
             description: res.msg,
           });
         } else {
-          this.partitions = res.data.map((e) => e.partition);
-          this.partitions.splice(0, 0, -1);
+          partitions.value = res.data.map((e: any) => e.partition);
+          partitions.value.splice(0, 0, -1);
         }
       });
-    },
-    ok() {
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          const data = Object.assign({}, values, { topic: this.topic });
-          this.loading = true;
-          request({
-            url: KafkaTopicApi.configThrottle.url,
-            method: KafkaTopicApi.configThrottle.method,
-            data: data,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.$message.success(res.msg);
-              this.$emit("closeThrottleDialog", { refresh: false });
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
+    }
+
+    function ok() {
+      const data = Object.assign({}, formState, { topic: props.topic });
+      loading.value = true;
+      request({
+        url: KafkaTopicApi.configThrottle.url,
+        method: KafkaTopicApi.configThrottle.method,
+        data: data,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          message.success(res.msg);
+          emit("closeThrottleDialog", { refresh: false });
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
           });
         }
       });
-    },
-    onChange(e) {
-      this.showPartition = !(e.target.value == "OFF");
-    },
+    }
+
+    function onChange(e: any) {
+      showPartition.value = !(e.target.value == "OFF");
+    }
+
+    return {
+      show,
+      loading,
+      partitions,
+      showPartition,
+      formState,
+      handleCancel,
+      getPartitionInfo,
+      ok,
+      onChange,
+    };
   },
-};
+});
 </script>
 
 <style scoped></style>

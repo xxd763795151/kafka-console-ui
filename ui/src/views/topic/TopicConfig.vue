@@ -1,7 +1,7 @@
 <template>
   <a-modal
     :title="topic + '配置'"
-    :visible="show"
+    :open="show"
     :width="1400"
     :mask="false"
     :destroyOnClose="true"
@@ -15,7 +15,7 @@
           <a-input-search
             placeholder="属性"
             style="width: 200px"
-            v-model="search"
+            v-model:value="search"
             @input="searchData"
             @search="searchData"
           />
@@ -28,35 +28,39 @@
           bordered
           :rowKey="(record) => record.name"
         >
-          <div slot="operation" slot-scope="record">
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              v-show="!record.readOnly"
-              @click="openEditConfigDialog(record)"
-              v-action:topic:property-config:edit
-              >编辑
-            </a-button>
-            <a-popconfirm
-              :title="'删除配置项: ' + record.name + '？'"
-              ok-text="确认"
-              cancel-text="取消"
-              v-show="isDynamic(record.source)"
-              @confirm="deleteTopicConfig(record)"
-            >
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.key === 'operation'">
               <a-button
                 size="small"
                 href="javascript:;"
                 class="operation-btn"
-                v-action:topic:property-config:del
-                >删除
+                v-show="!record.readOnly"
+                @click="openEditConfigDialog(record)"
+                v-action:topic:property-config:edit
+                >编辑
               </a-button>
-            </a-popconfirm>
-          </div>
+              <a-popconfirm
+                :title="'删除配置项: ' + record.name + '？'"
+                ok-text="确认"
+                cancel-text="取消"
+                v-show="isDynamic(record.source)"
+                @confirm="deleteTopicConfig(record)"
+              >
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  type="primary"
+                  danger
+                  v-action:topic:property-config:del
+                  >删除
+                </a-button>
+              </a-popconfirm>
+            </template>
+          </template>
         </a-table>
         <EditConfig
-          :visible="showEditConfigDialog"
+          :open="showEditConfigDialog"
           :record="selectData"
           :topic="topic"
           @closeEditConfigDialog="closeEditConfigDialog"
@@ -66,113 +70,12 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, watch } from "vue";
+import { message, notification } from "ant-design-vue";
 import request from "@/utils/request";
 import { KafkaConfigApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
-import EditConfig from "@/views/topic/EditConfig";
-
-export default {
-  name: "TopicConfig",
-  components: { EditConfig },
-  props: {
-    topic: {
-      type: String,
-      default: "",
-    },
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      columns: columns,
-      show: this.visible,
-      data: [],
-      loading: false,
-      search: "",
-      filterData: [],
-      showEditConfigDialog: false,
-      selectData: {},
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getTopicConfig();
-      }
-    },
-  },
-  methods: {
-    getTopicConfig() {
-      this.loading = true;
-      const api = KafkaConfigApi.getTopicConfig;
-      request({
-        url: api.url + "?topic=" + this.topic,
-        method: api.method,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.data = res.data;
-          this.searchData();
-        }
-      });
-    },
-    deleteTopicConfig(record) {
-      this.selectData = record;
-      this.loading = true;
-      const api = KafkaConfigApi.deleteTopicConfig;
-      request({
-        url: api.url,
-        method: api.method,
-        data: {
-          name: record.name,
-          value: record.value,
-          entity: this.topic,
-        },
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.getTopicConfig();
-        }
-      });
-    },
-    searchData() {
-      this.filterData = this.data.filter(
-        (e) => e.name.indexOf(this.search) >= 0
-      );
-    },
-    handleCancel() {
-      this.data = [];
-      this.$emit("closeTopicConfigDialog", {});
-    },
-    openEditConfigDialog(record) {
-      this.showEditConfigDialog = true;
-      this.selectData = record;
-    },
-    closeEditConfigDialog(params) {
-      this.showEditConfigDialog = false;
-      if (params.refresh) {
-        this.getTopicConfig();
-      }
-    },
-    isDynamic(source) {
-      return source.startsWith("DYNAMIC_");
-    },
-  },
-};
+import EditConfig from "@/views/topic/EditConfig.vue";
 
 const columns = [
   {
@@ -195,10 +98,135 @@ const columns = [
   {
     title: "操作",
     key: "operation",
-    scopedSlots: { customRender: "operation" },
     width: 150,
   },
 ];
+
+export default defineComponent({
+  name: "TopicConfig",
+  components: { EditConfig },
+  props: {
+    topic: {
+      type: String,
+      default: "",
+    },
+    open: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ["closeTopicConfigDialog"],
+  setup(props, { emit }) {
+    const show = ref(props.open);
+    const data = ref<any[]>([]);
+    const loading = ref(false);
+    const search = ref("");
+    const filterData = ref<any[]>([]);
+    const showEditConfigDialog = ref(false);
+    const selectData = ref<any>({});
+
+    watch(
+      () => props.open,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          getTopicConfig();
+        }
+      }
+    );
+
+    function getTopicConfig() {
+      loading.value = true;
+      const api = KafkaConfigApi.getTopicConfig;
+      request({
+        url: api.url + "?topic=" + props.topic,
+        method: api.method,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          data.value = res.data;
+          searchData();
+        }
+      });
+    }
+
+    function deleteTopicConfig(record: any) {
+      selectData.value = record;
+      loading.value = true;
+      const api = KafkaConfigApi.deleteTopicConfig;
+      request({
+        url: api.url,
+        method: api.method,
+        data: {
+          name: record.name,
+          value: record.value,
+          entity: props.topic,
+        },
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          message.success(res.msg);
+          getTopicConfig();
+        }
+      });
+    }
+
+    function searchData() {
+      filterData.value = data.value.filter(
+        (e) => e.name.indexOf(search.value) >= 0
+      );
+    }
+
+    function handleCancel() {
+      data.value = [];
+      emit("closeTopicConfigDialog", {});
+    }
+
+    function openEditConfigDialog(record: any) {
+      showEditConfigDialog.value = true;
+      selectData.value = record;
+    }
+
+    function closeEditConfigDialog(params: { refresh: boolean }) {
+      showEditConfigDialog.value = false;
+      if (params.refresh) {
+        getTopicConfig();
+      }
+    }
+
+    function isDynamic(source: string) {
+      return source.startsWith("DYNAMIC_");
+    }
+
+    return {
+      columns,
+      show,
+      data,
+      loading,
+      search,
+      filterData,
+      showEditConfigDialog,
+      selectData,
+      getTopicConfig,
+      deleteTopicConfig,
+      searchData,
+      handleCancel,
+      openEditConfigDialog,
+      closeEditConfigDialog,
+      isDynamic,
+    };
+  },
+});
 </script>
 
 <style scoped>

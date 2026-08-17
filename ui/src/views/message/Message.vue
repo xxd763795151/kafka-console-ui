@@ -36,17 +36,23 @@
   </div>
 </template>
 
-<script>
-import SearchByTime from "@/views/message/SearchByTime";
-import SearchByOffset from "@/views/message/SearchByOffset";
+<script lang="ts">
+import { defineComponent, reactive, toRefs, onMounted } from "vue";
+import SearchByTime from "@/views/message/SearchByTime.vue";
+import SearchByOffset from "@/views/message/SearchByOffset.vue";
 import SendStatistics from "@/views/message/SendStatistics.vue";
 import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
-import SendMessage from "@/views/message/SendMessage";
-import DeleteMessage from "./DeleteMessage";
+import SendMessage from "@/views/message/SendMessage.vue";
+import DeleteMessage from "./DeleteMessage.vue";
 import { isAuthorized, isUnauthorized } from "@/utils/auth";
-export default {
+
+interface TopicItem {
+  [key: string]: any;
+}
+
+export default defineComponent({
   name: "Message",
   components: {
     DeleteMessage,
@@ -55,22 +61,19 @@ export default {
     SendMessage,
     SendStatistics,
   },
-  data() {
-    return {
+  setup() {
+    const state = reactive({
       loading: false,
-      topicList: [],
-    };
-  },
-  methods: {
-    isAuthorized,
-    isUnauthorized,
-    getTopicNameList() {
+      topicList: [] as TopicItem[],
+    });
+
+    const getTopicNameList = () => {
       request({
         url: KafkaTopicApi.getTopicNameList.url,
         method: KafkaTopicApi.getTopicNameList.method,
-      }).then((res) => {
+      }).then((res: any) => {
         if (res.code == 0) {
-          this.topicList = res.data;
+          state.topicList = res.data;
         } else {
           notification.error({
             message: "error",
@@ -78,12 +81,20 @@ export default {
           });
         }
       });
-    },
+    };
+
+    onMounted(() => {
+      getTopicNameList();
+    });
+
+    return {
+      ...toRefs(state),
+      isAuthorized,
+      isUnauthorized,
+      getTopicNameList,
+    };
   },
-  created() {
-    this.getTopicNameList();
-  },
-};
+});
 </script>
 
 <style scoped></style>

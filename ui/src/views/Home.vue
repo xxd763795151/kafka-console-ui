@@ -17,33 +17,36 @@
         bordered
         row-key="brokerId"
       >
-        <div slot="operation" slot-scope="record">
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="openApiVersionInfoDialog(record)"
-            >详情
-          </a-button>
-        </div>
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'operation'">
+            <a-button
+              size="small"
+              href="javascript:;"
+              class="operation-btn"
+              @click="openApiVersionInfoDialog(record)"
+              >详情
+            </a-button>
+          </template>
+        </template>
       </a-table>
     </a-spin>
     <VersionInfo
       :version-info="apiVersionInfo"
-      :visible="showApiVersionInfoDialog"
+      :open="showApiVersionInfoDialog"
       @closeApiVersionInfoDialog="closeApiVersionInfoDialog"
     >
     </VersionInfo>
   </div>
 </template>
 
-<script>
-// @ is an alias to /src
+<script lang="ts">
+import { defineComponent } from 'vue';
 import request from "@/utils/request";
 import { KafkaConfigApi, KafkaClusterApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
-import VersionInfo from "@/views/home/VersionInfo";
-export default {
+import VersionInfo from "@/views/home/VersionInfo.vue";
+
+export default defineComponent({
   name: "Home",
   components: { VersionInfo },
   data() {
@@ -57,7 +60,7 @@ export default {
     };
   },
   methods: {
-    openApiVersionInfoDialog(record) {
+    openApiVersionInfoDialog(record: any) {
       this.apiVersionInfo = record.versionInfo;
       this.showApiVersionInfoDialog = true;
     },
@@ -70,7 +73,7 @@ export default {
     request({
       url: KafkaConfigApi.getConfig.url,
       method: KafkaConfigApi.getConfig.method,
-    }).then((res) => {
+    }).then((res: any) => {
       if (res.code == 0) {
         this.config = res.data;
       } else {
@@ -84,7 +87,7 @@ export default {
     request({
       url: KafkaClusterApi.getBrokerApiVersionInfo.url,
       method: KafkaClusterApi.getBrokerApiVersionInfo.method,
-    }).then((res) => {
+    }).then((res: any) => {
       this.apiVersionInfoLoading = false;
       if (res.code == 0) {
         this.brokerApiVersionInfo = res.data;
@@ -96,7 +99,7 @@ export default {
       }
     });
   },
-};
+});
 const columns = [
   {
     title: "id",
@@ -126,7 +129,6 @@ const columns = [
   {
     title: "操作",
     key: "operation",
-    scopedSlots: { customRender: "operation" },
   },
 ];
 </script>

@@ -1,45 +1,43 @@
 <template>
   <a-modal
     title="新增用户"
-    :visible="show"
+    :open="show"
     :width="800"
     :mask="false"
-    :destroyOnClose="true"
+    :destroy-on-close="true"
     :footer="null"
-    :maskClosable="false"
+    :mask-closable="false"
     @cancel="handleCancel"
   >
     <div>
       <a-spin :spinning="loading">
         <a-form
-          :form="form"
+          :model="formState"
+          :rules="rules"
+          ref="formRef"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
           @submit="handleSubmit"
         >
-          <a-form-item label="用户名">
+          <a-form-item label="用户名" name="username">
             <a-input
-              v-decorator="[
-                'username',
-                { rules: [{ required: true, message: '输入用户名' }] },
-              ]"
+              v-model:value="formState.username"
               placeholder="输入用户名"
             />
           </a-form-item>
-          <a-form-item label="角色">
+          <a-form-item label="角色" name="roleIds">
             <a-select
               show-search
-              option-filter-prop="children"
-              v-decorator="[
-                'roleIds',
-                { rules: [{ required: true, message: '请选择一个角色!' }] },
-              ]"
+              :filter-option="true"
+              option-filter-prop="label"
+              v-model:value="formState.roleIds"
               placeholder="请选择一个角色"
             >
               <a-select-option
                 v-for="role in roles"
                 :key="role.id"
                 :value="role.id"
+                :label="role.roleName"
               >
                 {{ role.roleName }}
               </a-select-option>
@@ -54,90 +52,110 @@
   </a-modal>
 </template>
 
-<script>
-import request from "@/utils/request";
-import notification from "ant-design-vue/es/notification";
-import { UserManageApi } from "@/utils/api";
+<script lang="ts">
+import { defineComponent, reactive, toRefs, onMounted, ref, watch } from 'vue';
+import { message } from 'ant-design-vue';
+import request from '@/utils/request';
+import notification from 'ant-design-vue/es/notification';
+import { UserManageApi } from '@/utils/api';
 
-export default {
-  name: "CreateUser",
+export default defineComponent({
+  name: 'CreateUser',
   props: {
-    visible: {
+    open: {
       type: Boolean,
       default: false,
     },
   },
-  data() {
-    return {
-      show: this.visible,
-      data: [],
+  emits: ['closeCreateUserDialog'],
+  setup(props, { emit }) {
+    const formRef = ref();
+
+    const state = reactive({
+      show: props.open,
+      data: [] as any[],
       loading: false,
-      form: this.$form.createForm(this, { name: "coordinated" }),
-      roles: [],
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getRoles();
-      }
-    },
-  },
-  methods: {
-    handleSubmit(e) {
-      e.preventDefault();
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          this.loading = true;
-          request({
-            url: UserManageApi.addOrUpdateUser.url,
-            method: UserManageApi.addOrUpdateUser.method,
-            data: values,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.$message.success(res.msg);
-              this.$emit("closeCreateUserDialog", {
-                refresh: true,
-                data: res.data,
-              });
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
-          });
+      roles: [] as any[],
+      formState: {
+        username: '',
+        roleIds: undefined as any,
+      },
+      rules: {
+        username: [{ required: true, message: '输入用户名' }],
+        roleIds: [{ required: true, message: '请选择一个角色!' }],
+      },
+    });
+
+    watch(
+      () => props.open,
+      (v) => {
+        state.show = v;
+        if (state.show) {
+          getRoles();
         }
-      });
-    },
-    getRoles() {
-      this.loading = true;
+      }
+    );
+
+    const handleSubmit = async (e: any) => {
+      e.preventDefault();
+      state.loading = true;
       request({
-        url: UserManageApi.getRole.url,
-        method: UserManageApi.getRole.method,
-      }).then((res) => {
-        this.loading = false;
+        url: UserManageApi.addOrUpdateUser.url,
+        method: UserManageApi.addOrUpdateUser.method,
+        data: state.formState,
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code == 0) {
-          this.roles = res.data;
+          message.success(res.msg);
+          emit('closeCreateUserDialog', {
+            refresh: true,
+            data: res.data,
+          });
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
-    handleCancel() {
-      this.data = [];
-      this.$emit("closeCreateUserDialog", { refresh: false });
-    },
+    };
+
+    const getRoles = () => {
+      state.loading = true;
+      request({
+        url: UserManageApi.getRole.url,
+        method: UserManageApi.getRole.method,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code == 0) {
+          state.roles = res.data;
+        } else {
+          notification.error({
+            message: 'error',
+            description: res.msg,
+          });
+        }
+      });
+    };
+
+    const handleCancel = () => {
+      state.data = [];
+      emit('closeCreateUserDialog', { refresh: false });
+    };
+
+    onMounted(() => {
+      getRoles();
+    });
+
+    return {
+      ...toRefs(state),
+      formRef,
+      handleSubmit,
+      getRoles,
+      handleCancel,
+    };
   },
-  created() {
-    this.getRoles();
-  },
-};
+});
 </script>
 
 <style scoped></style>

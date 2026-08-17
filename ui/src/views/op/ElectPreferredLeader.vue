@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="选择Preferred副本作为Leader"
-    :visible="show"
+    :open="show"
     :width="800"
     :mask="false"
     :destroyOnClose="true"
@@ -12,35 +12,39 @@
     <div>
       <a-spin :spinning="loading">
         <a-form
-          :form="form"
+          :model="formState"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
-          @submit="handleSubmit"
+          @finish="handleSubmit"
         >
-          <a-form-item label="Topic">
+          <a-form-item
+            label="Topic"
+            name="topic"
+            :rules="[{ required: true, message: '请选择一个topic!' }]"
+          >
             <a-select
+              v-model:value="formState.topic"
               @change="handleTopicChange"
               show-search
-              option-filter-prop="children"
-              v-decorator="[
-                'topic',
-                { rules: [{ required: true, message: '请选择一个topic!' }] },
-              ]"
+              :filter-option="true"
+              option-filter-prop="label"
               placeholder="请选择一个topic"
             >
-              <a-select-option v-for="v in topicList" :key="v" :value="v">
+              <a-select-option v-for="v in topicList" :key="v" :value="v" :label="String(v)">
                 {{ v }}
               </a-select-option>
             </a-select>
           </a-form-item>
-          <a-form-item label="分区">
+          <a-form-item
+            label="分区"
+            name="partition"
+            :rules="[{ required: true, message: '请选择一个分区!' }]"
+          >
             <a-select
+              v-model:value="formState.partition"
               show-search
-              option-filter-prop="children"
-              v-decorator="[
-                'partition',
-                { rules: [{ required: true, message: '请选择一个分区!' }] },
-              ]"
+              :filter-option="true"
+              option-filter-prop="label"
               placeholder="请选择一个分区"
             >
               <a-select-option v-for="v in partitions" :key="v" :value="v">
@@ -57,11 +61,14 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from "vue";
+import { message } from "ant-design-vue";
+import notification from "ant-design-vue/es/notification";
 import request from "@/utils/request";
 import { KafkaTopicApi, KafkaOpApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
-export default {
+
+export default defineComponent({
   name: "ElectPreferredLeader",
   props: {
     visible: {
@@ -69,56 +76,55 @@ export default {
       default: false,
     },
   },
-  data() {
-    return {
-      show: this.visible,
-      data: [],
-      loading: false,
-      form: this.$form.createForm(this, { name: "ElectPreferredLeaderForm" }),
-      topicList: [],
-      partitions: [],
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getTopicNameList();
-      }
-    },
-  },
-  methods: {
-    handleSubmit(e) {
-      e.preventDefault();
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          this.loading = true;
-          request({
-            url: KafkaOpApi.electPreferredLeader.url,
-            method: KafkaOpApi.electPreferredLeader.method,
-            data: values,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code != 0) {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            } else {
-              this.$message.success(res.msg);
-              this.$emit("closeElectPreferredLeaderDialog", { refresh: false });
-            }
-          });
+  setup(props, { emit }) {
+    const show = ref(props.visible);
+    const data = ref<any[]>([]);
+    const loading = ref(false);
+    const topicList = ref<any[]>([]);
+    const partitions = ref<any[]>([]);
+
+    const formState = reactive({
+      topic: undefined as any,
+      partition: undefined as any,
+    });
+
+    watch(
+      () => props.visible,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          getTopicNameList();
         }
-      });
-    },
-    getTopicNameList() {
+      }
+    );
+
+    const handleSubmit = (values: any) => {
+      loading.value = true;
+      request({
+        url: KafkaOpApi.electPreferredLeader.url,
+        method: KafkaOpApi.electPreferredLeader.method,
+        data: values,
+      }).then((res: any) => {
+          loading.value = false;
+          if (res.code != 0) {
+            notification.error({
+              message: "error",
+              description: res.msg,
+            });
+          } else {
+            message.success(res.msg);
+            emit("closeElectPreferredLeaderDialog", { refresh: false });
+          }
+        });
+    };
+
+    const getTopicNameList = () => {
       request({
         url: KafkaTopicApi.getTopicNameList.url,
         method: KafkaTopicApi.getTopicNameList.method,
-      }).then((res) => {
+      }).then((res: any) => {
         if (res.code == 0) {
-          this.topicList = res.data;
+          topicList.value = res.data;
         } else {
           notification.error({
             message: "error",
@@ -126,34 +132,51 @@ export default {
           });
         }
       });
-    },
-    getPartitionInfo(topic) {
-      this.loading = true;
+    };
+
+    const getPartitionInfo = (topic: string) => {
+      loading.value = true;
       request({
         url: KafkaTopicApi.getPartitionInfo.url + "?topic=" + topic,
         method: KafkaTopicApi.getPartitionInfo.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        loading.value = false;
         if (res.code != 0) {
           notification.error({
             message: "error",
             description: res.msg,
           });
         } else {
-          this.partitions = res.data.map((v) => v.partition);
-          this.partitions.splice(0, 0, -1);
+          partitions.value = res.data.map((v: any) => v.partition);
+          partitions.value.splice(0, 0, -1);
         }
       });
-    },
-    handleTopicChange(topic) {
-      this.getPartitionInfo(topic);
-    },
-    handleCancel() {
-      this.data = [];
-      this.$emit("closeElectPreferredLeaderDialog", { refresh: false });
-    },
+    };
+
+    const handleTopicChange = (topic: string) => {
+      getPartitionInfo(topic);
+    };
+
+    const handleCancel = () => {
+      data.value = [];
+      emit("closeElectPreferredLeaderDialog", { refresh: false });
+    };
+
+    return {
+      show,
+      data,
+      loading,
+      topicList,
+      partitions,
+      formState,
+      handleSubmit,
+      getTopicNameList,
+      getPartitionInfo,
+      handleTopicChange,
+      handleCancel,
+    };
   },
-};
+});
 </script>
 
 <style scoped></style>

@@ -1,7 +1,7 @@
 <template>
   <a-modal
     :title="'消费组: ' + group"
-    :visible="show"
+    v-model:open="show"
     :width="1200"
     :mask="false"
     :destroyOnClose="true"
@@ -11,8 +11,8 @@
   >
     <div>
       <a-spin :spinning="loading">
-        <div v-for="(v, k) in data" :key="k">
-          <strong>Topic: </strong><span class="color-font">{{ k }}</span
+        <div v-for="(v, k) in data" :key="k as string">
+          <strong>Topic: </strong><span class="color-font">{{ k as string }}</span
           ><strong> | 积压: </strong><span class="color-font">{{ v.lag }}</span>
           <strong> | 重置消费位点->: </strong>
           <a-popconfirm
@@ -21,11 +21,12 @@
             "
             ok-text="确认"
             cancel-text="取消"
-            @confirm="resetTopicOffsetToEndpoint(group, k, 1)"
+            @confirm="resetTopicOffsetToEndpoint(group, k as string, 1)"
           >
             <a-button
               size="small"
-              type="danger"
+              type="primary"
+              danger
               style="margin-right: 1%"
               v-action:group:consumer-detail:min
               >最小位点
@@ -37,11 +38,12 @@
             "
             ok-text="确认"
             cancel-text="取消"
-            @confirm="resetTopicOffsetToEndpoint(group, k, 2)"
+            @confirm="resetTopicOffsetToEndpoint(group, k as string, 2)"
           >
             <a-button
               size="small"
-              type="danger"
+              type="primary"
+              danger
               style="margin-right: 1%"
               v-action:group:consumer-detail:last
               >最新位点
@@ -50,19 +52,20 @@
 
           <a-button
             size="small"
-            type="danger"
+            type="primary"
+            danger
             style="margin-right: 1%"
-            @click="openResetOffsetByTimeDialog(k)"
+            @click="openResetOffsetByTimeDialog(k as string)"
             v-action:group:consumer-detail:timestamp
             >时间戳
           </a-button>
           <a-button
             type="primary"
-            icon="reload"
             size="small"
             style="float: right"
             @click="getConsumerDetail"
           >
+            <template #icon><ReloadOutlined /></template>
             刷新
           </a-button>
           <hr />
@@ -70,24 +73,26 @@
             :columns="columns"
             :data-source="v.data"
             bordered
-            :rowKey="(record) => record.topic + record.partition"
+            :rowKey="(record: any) => record.topic + record.partition"
           >
-            <span slot="clientId" slot-scope="text, record">
-              <span v-if="text"> {{ text }}@{{ record.host }} </span>
-            </span>
-            <div slot="operation" slot-scope="record">
-              <a-button
-                type="primary"
-                size="small"
-                href="javascript:;"
-                class="operation-btn"
-                @click="
-                  openResetPartitionOffsetDialog(record.topic, record.partition)
-                "
-                v-action:group:consumer-detail:any
-                >重置位点
-              </a-button>
-            </div>
+            <template #bodyCell="{ column, text, record }">
+              <template v-if="column.key === 'clientId'">
+                <span v-if="text"> {{ text }}@{{ record.host }} </span>
+              </template>
+              <template v-else-if="column.key === 'operation'">
+                <a-button
+                  type="primary"
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="
+                    openResetPartitionOffsetDialog(record.topic, record.partition)
+                  "
+                  v-action:group:consumer-detail:any
+                  >重置位点
+                </a-button>
+              </template>
+            </template>
           </a-table>
           <p>
             <strong style="color: red"
@@ -98,12 +103,12 @@
 
         <a-modal
           id="resetPartitionOffsetModal"
-          :visible="showResetPartitionOffsetDialog"
+          v-model:open="showResetPartitionOffsetDialog"
           :title="'重置' + select.topic + '[' + select.partition + ']消费位点'"
           :destroyOnClose="true"
           @cancel="closeResetPartitionOffsetDialog"
         >
-          <template slot="footer">
+          <template #footer>
             <a-button key="back" @click="closeResetPartitionOffsetDialog">
               取消
             </a-button>
@@ -113,20 +118,18 @@
           </template>
 
           <a-form
-            :form="resetPartitionOffsetForm"
+            :model="resetPartitionOffsetFormState"
             :label-col="{ span: 8 }"
             :wrapper-col="{ span: 12 }"
           >
-            <a-form-item label="重置消费位点到">
+            <a-form-item
+              label="重置消费位点到"
+              name="offset"
+              :rules="[{ required: true, message: '输入消费位点!' }]"
+            >
               <a-input-number
+                v-model:value="resetPartitionOffsetFormState.offset"
                 :min="0"
-                v-decorator="[
-                  'offset',
-                  {
-                    initialValue: 0,
-                    rules: [{ required: true, message: '输入消费位点!' }],
-                  },
-                ]"
               />
             </a-form-item>
           </a-form>
@@ -142,44 +145,52 @@
   </a-modal>
 </template>
 
-<script>
-import request from "@/utils/request";
-import { KafkaConsumerApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
-import ResetOffsetByTime from "@/views/group/ResetOffsetByTime";
+<script lang="ts">
+import { defineComponent, reactive } from 'vue';
+import { ReloadOutlined } from '@ant-design/icons-vue';
+import request from '@/utils/request';
+import { KafkaConsumerApi } from '@/utils/api';
+import { notification } from 'ant-design-vue';
+import ResetOffsetByTime from '@/views/group/ResetOffsetByTime.vue';
 
-export default {
-  name: "ConsumerDetail",
-  components: { ResetOffsetByTime },
+export default defineComponent({
+  name: 'ConsumerDetail',
+  components: { ReloadOutlined, ResetOffsetByTime },
   props: {
     group: {
       type: String,
-      default: "",
+      default: '',
     },
     visible: {
       type: Boolean,
       default: false,
     },
   },
+  emits: ['closeConsumerDetailDialog', 'update:visible'],
+  setup() {
+    const resetPartitionOffsetFormState = reactive({
+      offset: 0,
+    });
+    return {
+      resetPartitionOffsetFormState,
+    };
+  },
   data() {
     return {
-      columns: columns,
+      columns,
       show: this.visible,
-      data: [],
+      data: {} as Record<string, any>,
       loading: false,
       showResetPartitionOffsetDialog: false,
       select: {
-        topic: "",
+        topic: '',
         partition: 0,
       },
-      resetPartitionOffsetForm: this.$form.createForm(this, {
-        name: "resetPartitionOffsetForm",
-      }),
       showResetOffsetByTimeDialog: false,
     };
   },
   watch: {
-    visible(v) {
+    visible(v: boolean) {
       this.show = v;
       if (this.show) {
         this.getConsumerDetail();
@@ -190,13 +201,13 @@ export default {
     getConsumerDetail() {
       this.loading = true;
       request({
-        url: KafkaConsumerApi.getConsumerDetail.url + "?groupId=" + this.group,
+        url: KafkaConsumerApi.getConsumerDetail.url + '?groupId=' + this.group,
         method: KafkaConsumerApi.getConsumerDetail.method,
-      }).then((res) => {
+      }).then((res: any) => {
         this.loading = false;
         if (res.code != 0) {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         } else {
@@ -205,10 +216,11 @@ export default {
       });
     },
     handleCancel() {
-      this.data = [];
-      this.$emit("closeConsumerDetailDialog", {});
+      this.data = {};
+      this.$emit('update:visible', false);
+      this.$emit('closeConsumerDetailDialog', {});
     },
-    resetTopicOffsetToEndpoint(groupId, topic, type) {
+    resetTopicOffsetToEndpoint(groupId: string, topic: string, type: number) {
       this.requestResetOffset({
         groupId: groupId,
         topic: topic,
@@ -216,17 +228,17 @@ export default {
         type: type,
       });
     },
-    requestResetOffset(data, callbackOnSuccess) {
+    requestResetOffset(data: any, callbackOnSuccess?: () => void) {
       this.loading = true;
       request({
         url: KafkaConsumerApi.resetOffset.url,
         method: KafkaConsumerApi.resetOffset.method,
         data: data,
-      }).then((res) => {
+      }).then((res: any) => {
         this.loading = false;
         if (res.code != 0) {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         } else {
@@ -238,7 +250,7 @@ export default {
         }
       });
     },
-    openResetPartitionOffsetDialog(topic, partition) {
+    openResetPartitionOffsetDialog(topic: string, partition: number) {
       this.showResetPartitionOffsetDialog = true;
       this.select.topic = topic;
       this.select.partition = partition;
@@ -246,63 +258,58 @@ export default {
     closeResetPartitionOffsetDialog() {
       this.showResetPartitionOffsetDialog = false;
     },
-    resetPartitionOffset() {
-      this.resetPartitionOffsetForm.validateFields((err, values) => {
-        if (!err) {
-          const data = Object.assign({}, values);
-          Object.assign(data, this.select);
-          data.groupId = this.group;
-          data.level = 2;
-          data.type = 4;
-          this.requestResetOffset(data, this.closeResetPartitionOffsetDialog());
-        }
-      });
+    async resetPartitionOffset() {
+      const values = { ...this.resetPartitionOffsetFormState };
+      const data = Object.assign({}, values);
+      Object.assign(data, this.select);
+      (data as any).groupId = this.group;
+      (data as any).level = 2;
+      (data as any).type = 4;
+      this.requestResetOffset(data, this.closeResetPartitionOffsetDialog);
     },
-    openResetOffsetByTimeDialog(topic) {
+    openResetOffsetByTimeDialog(topic: string) {
       this.select.topic = topic;
       this.showResetOffsetByTimeDialog = true;
     },
-    closeResetOffsetByTimeDialog(params) {
+    closeResetOffsetByTimeDialog(params: any) {
       this.showResetOffsetByTimeDialog = false;
       if (params.refresh) {
         this.getConsumerDetail();
       }
     },
   },
-};
+});
 
 const columns = [
   {
-    title: "分区",
-    dataIndex: "partition",
-    key: "partition",
+    title: '分区',
+    dataIndex: 'partition',
+    key: 'partition',
   },
   {
-    title: "客户端",
-    dataIndex: "clientId",
-    key: "clientId",
-    scopedSlots: { customRender: "clientId" },
+    title: '客户端',
+    dataIndex: 'clientId',
+    key: 'clientId',
     width: 400,
   },
   {
-    title: "日志位点",
-    dataIndex: "logEndOffset",
-    key: "logEndOffset",
+    title: '日志位点',
+    dataIndex: 'logEndOffset',
+    key: 'logEndOffset',
   },
   {
-    title: "消费位点",
-    dataIndex: "consumerOffset",
-    key: "consumerOffset",
+    title: '消费位点',
+    dataIndex: 'consumerOffset',
+    key: 'consumerOffset',
   },
   {
-    title: "积压",
-    dataIndex: "lag",
-    key: "lag",
+    title: '积压',
+    dataIndex: 'lag',
+    key: 'lag',
   },
   {
-    title: "操作",
-    key: "operation",
-    scopedSlots: { customRender: "operation" },
+    title: '操作',
+    key: 'operation',
     width: 500,
   },
 ];

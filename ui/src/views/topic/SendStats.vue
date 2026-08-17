@@ -1,7 +1,7 @@
 <template>
   <a-modal
     :title="topic + '发送统计'"
-    :visible="show"
+    :open="show"
     :width="1000"
     :mask="false"
     :destroyOnClose="true"
@@ -15,11 +15,11 @@
           今天发送消息数：{{ today.total
           }}<a-button
             type="primary"
-            icon="reload"
             size="small"
             style="float: right"
             @click="sendStatus"
           >
+            <template #icon><ReloadOutlined /></template>
             刷新
           </a-button>
         </h4>
@@ -44,70 +44,12 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from "vue";
+import { notification } from "ant-design-vue";
+import { ReloadOutlined } from "@ant-design/icons-vue";
 import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
-
-export default {
-  name: "SendStats",
-  props: {
-    topic: {
-      type: String,
-      default: "",
-    },
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      columns: columns,
-      show: this.visible,
-      data: [],
-      loading: false,
-      yesterday: {},
-      today: {},
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.sendStatus();
-      }
-    },
-  },
-  methods: {
-    sendStatus() {
-      this.loading = true;
-      const api = KafkaTopicApi.sendStats;
-      request({
-        url: api.url + "?topic=" + this.topic,
-        method: api.method,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.data = res.data;
-          this.yesterday = this.data.yesterday;
-          this.today = this.data.today;
-        }
-      });
-    },
-    handleCancel() {
-      this.data = [];
-      this.yesterday = {};
-      this.today = {};
-      this.$emit("closeMessageStatsDialog", {});
-    },
-  },
-};
 
 const columns = [
   {
@@ -121,6 +63,80 @@ const columns = [
     key: "num",
   },
 ];
+
+export default defineComponent({
+  name: "SendStats",
+  components: {
+    ReloadOutlined,
+  },
+  props: {
+    topic: {
+      type: String,
+      default: "",
+    },
+    open: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ["closeMessageStatsDialog"],
+  setup(props, { emit }) {
+    const show = ref(props.open);
+    const data = ref<any>([]);
+    const loading = ref(false);
+    const yesterday = reactive<any>({});
+    const today = reactive<any>({});
+
+    watch(
+      () => props.open,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          sendStatus();
+        }
+      }
+    );
+
+    function sendStatus() {
+      loading.value = true;
+      const api = KafkaTopicApi.sendStats;
+      request({
+        url: api.url + "?topic=" + props.topic,
+        method: api.method,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          data.value = res.data;
+          Object.assign(yesterday, data.value.yesterday || {});
+          Object.assign(today, data.value.today || {});
+        }
+      });
+    }
+
+    function handleCancel() {
+      data.value = [];
+      Object.keys(yesterday).forEach((key) => delete (yesterday as any)[key]);
+      Object.keys(today).forEach((key) => delete (today as any)[key]);
+      emit("closeMessageStatsDialog", {});
+    }
+
+    return {
+      columns,
+      show,
+      data,
+      loading,
+      yesterday,
+      today,
+      sendStatus,
+      handleCancel,
+    };
+  },
+});
 </script>
 
 <style scoped></style>

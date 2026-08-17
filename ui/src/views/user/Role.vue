@@ -4,40 +4,38 @@
       <a-card :bordered="false" :style="{ height: '100%' }">
         <a-row :gutter="24">
           <a-col :md="4">
-            <a-list itemLayout="horizontal" :data-source="roles">
-              <a-list-item
-                slot="renderItem"
-                slot-scope="item, index"
-                :key="index"
-              >
-                <a-list-item-meta
-                  :style="{ marginBottom: '0', display: 'flex' }"
-                >
-                  <span slot="description" class="role-desc">{{
-                    item.description
-                  }}</span>
-                  <a slot="title" class="role-name" @click="selected(item)">{{
-                    item.roleName
-                  }}</a>
-                </a-list-item-meta>
-                <a-popconfirm
-                  title="确定删除角色？"
-                  ok-text="确认"
-                  cancel-text="取消"
-                  @confirm="deleteRole(item)"
-                >
-                  <a :style="{ display: 'flex' }" v-action:user-manage:role:del>
-                    <a-icon type="delete" />
-                  </a>
-                </a-popconfirm>
-              </a-list-item>
+            <a-list item-layout="horizontal" :data-source="roles">
+              <template #renderItem="{ item, index }">
+                <a-list-item :key="index">
+                  <a-list-item-meta
+                    :style="{ marginBottom: '0', display: 'flex' }"
+                  >
+                    <template #description>
+                      <span class="role-desc">{{ item.description }}</span>
+                    </template>
+                    <template #title>
+                      <a class="role-name" @click="selected(item)">{{ item.roleName }}</a>
+                    </template>
+                  </a-list-item-meta>
+                  <a-popconfirm
+                    title="确定删除角色？"
+                    ok-text="确认"
+                    cancel-text="取消"
+                    @confirm="deleteRole(item)"
+                  >
+                    <a :style="{ display: 'flex' }" v-action:user-manage:role:del>
+                      <DeleteOutlined />
+                    </a>
+                  </a-popconfirm>
+                </a-list-item>
+              </template>
             </a-list>
             <span
               :style="{ margin: '25px', fontSize: '15px', display: 'block' }"
             >
-              <a @click="addRole()" v-action:user-manage:role:save
-                ><a-icon type="plus" /> 新增角色</a
-              >
+              <a @click="addRole()" v-action:user-manage:role:save>
+                <PlusOutlined /> 新增角色
+              </a>
             </span>
           </a-col>
           <a-col :md="20">
@@ -45,31 +43,19 @@
               <a-empty />
             </div>
             <div class="role-info" v-if="selectedRole.roleName">
-              <a-form :form="form">
+              <a-form :model="formState" :rules="rules" ref="formRef">
                 <h2>角色信息配置</h2>
-                <a-form-item label="角色名称">
+                <a-form-item label="角色名称" name="roleName">
                   <a-input
-                    v-decorator="[
-                      'roleName',
-                      {
-                        rules: [{ required: true, message: '请填写角色名称!' }],
-                        initialValue: selectedRole.roleName,
-                      },
-                    ]"
+                    v-model:value="formState.roleName"
                     placeholder="请填写角色名称"
                   />
                 </a-form-item>
 
-                <a-form-item label="备注说明">
+                <a-form-item label="备注说明" name="description">
                   <a-textarea
-                    :row="3"
-                    v-decorator="[
-                      'description',
-                      {
-                        rules: [{ required: true, message: '请填写备注说明!' }],
-                        initialValue: selectedRole.description,
-                      },
-                    ]"
+                    :rows="3"
+                    v-model:value="formState.description"
                     placeholder="请填写备注说明"
                   />
                 </a-form-item>
@@ -81,14 +67,10 @@
                     :key="index"
                   >
                     <a-row>
-                      <a-col :span="18" :style="{ fontWeight: 'bold' }"
-                        >{{ menuPermission.name }}
+                      <a-col :span="18" :style="{ fontWeight: 'bold' }">
+                        {{ menuPermission.name }}
                       </a-col>
                       <a-col :span="6" :style="{ textAlign: 'right' }">
-                        <!--                        <a-checkbox :checked="menuPermission.checked">-->
-                        <!--                          可见</a-checkbox-->
-                        <!--                        >-->
-                        <!--                        <a-switch v-model="menuPermission.checked" />-->
                       </a-col>
                     </a-row>
                     <a-divider type="horizontal" :style="{ margin: '0px' }" />
@@ -105,16 +87,16 @@
                       <a-col :xl="18" :lg="24">
                         <a-checkbox-group
                           :options="checkboxPermission.children"
-                          v-model="checkboxPermission.selected"
+                          v-model:value="checkboxPermission.selected"
                         />
                       </a-col>
                       <a-col :span="3" :style="{ textAlign: 'right' }">
                         <a-checkbox
-                          v-model="checkboxPermission.selectAll"
+                          v-model:checked="checkboxPermission.selectAll"
                           @click="onCheckboxSelectAll(checkboxPermission)"
                         >
-                          全选</a-checkbox
-                        >
+                          全选
+                        </a-checkbox>
                       </a-col>
                     </a-row>
                   </div>
@@ -125,8 +107,9 @@
                     :loading="loading"
                     @click="onSave()"
                     v-action:user-manage:role:save
-                    >保存</a-button
                   >
+                    保存
+                  </a-button>
                 </a-form-item>
               </a-form>
             </div>
@@ -137,48 +120,50 @@
   </div>
 </template>
 
-<script>
-import request from "@/utils/request";
+<script lang="ts">
+import { defineComponent, reactive, toRefs, onMounted, ref } from 'vue';
+import { message } from 'ant-design-vue';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import request from '@/utils/request';
+import { UserManageApi } from '@/utils/api';
+import notification from 'ant-design-vue/lib/notification';
 
-import { UserManageApi } from "@/utils/api";
-import notification from "ant-design-vue/lib/notification";
+export default defineComponent({
+  name: 'Role',
+  components: { DeleteOutlined, PlusOutlined },
+  setup() {
+    const formRef = ref();
 
-export default {
-  name: "Role",
-  components: {},
-  data() {
-    return {
-      form: this.$form.createForm(this),
+    const state = reactive({
       loading: false,
-      roles: [],
-      permissions: [],
-      selectedRole: {},
-      selectedPermissions: [],
-    };
-  },
-  methods: {
-    selected(role) {
-      this.selectedRole = Object.assign({}, role);
-      this.form.getFieldDecorator("description", {
-        rules: [{ required: true, message: "请填写备注说明!" }],
-        initialValue: this.selectedRole.description,
-      });
-      this.form.getFieldDecorator("roleName", {
-        rules: [{ required: true, message: "请填写角色名称!" }],
-        initialValue: this.selectedRole.roleName,
-      });
-      this.form.setFieldsValue({ roleName: this.selectedRole.roleName });
-      this.form.setFieldsValue({ description: this.selectedRole.description });
-      const idSet = this.selectedRole.permissionIds
-        ? new Set(this.selectedRole.permissionIds)
+      roles: [] as any[],
+      permissions: [] as any[],
+      selectedRole: {} as any,
+      selectedPermissions: [] as any[],
+      formState: {
+        roleName: '',
+        description: '',
+      },
+      rules: {
+        roleName: [{ required: true, message: '请填写角色名称!' }],
+        description: [{ required: true, message: '请填写备注说明!' }],
+      },
+    });
+
+    const selected = (role: any) => {
+      state.selectedRole = Object.assign({}, role);
+      state.formState.roleName = state.selectedRole.roleName || '';
+      state.formState.description = state.selectedRole.description || '';
+      const idSet = state.selectedRole.permissionIds
+        ? new Set(state.selectedRole.permissionIds)
         : new Set();
-      this.selectedPermissions = [];
-      let recursive = function (e, res) {
+      state.selectedPermissions = [];
+      const recursive = (e: any, res: any[]) => {
         if (e.children) {
           const children = e.children;
-          children.forEach((c) => {
+          children.forEach((c: any) => {
             const child = Object.assign({}, c);
-            child.name = e.name + "-" + c.name;
+            child.name = e.name + '-' + c.name;
             child.label = child.name;
             child.value = child.id;
             res.push(child);
@@ -189,13 +174,11 @@ export default {
           });
         }
       };
-      // 1 级都是菜单，其它的都分到2级按钮
-      this.permissions.forEach((e) => {
+      state.permissions.forEach((e: any) => {
         const menu = Object.assign({}, e);
         if (menu.children) {
-          const arr = [];
-          menu.children.forEach((c) => {
-            // 菜单下的按扭，按扭下面还有按扭的话，都合并
+          const arr: any[] = [];
+          menu.children.forEach((c: any) => {
             const btn = Object.assign({}, c);
             arr.push(btn);
             if (btn.children) {
@@ -208,8 +191,8 @@ export default {
               recursive(btn, btnArr);
               btn.children = btnArr;
               const selected = btn.children
-                .map((bc) => bc.id)
-                .filter((id) => idSet.has(id));
+                .map((bc: any) => bc.id)
+                .filter((id: any) => idSet.has(id));
               btn.selected = selected || [];
               btn.selectAll = btn.selected.length == btn.children.length;
             } else {
@@ -220,137 +203,151 @@ export default {
               const btnArr = [self];
               btn.children = btnArr;
               const selected = btn.children
-                .map((bc) => bc.id)
-                .filter((id) => idSet.has(id));
+                .map((bc: any) => bc.id)
+                .filter((id: any) => idSet.has(id));
               btn.selected = selected || [];
               btn.selectAll = btn.selected.length == btn.children.length;
             }
           });
           menu.children = arr;
-          // menu.checked = idSet.has(menu.id);
         }
-        this.selectedPermissions.push(menu);
+        state.selectedPermissions.push(menu);
       });
-    },
-    deleteRole(role) {
+    };
+
+    const deleteRole = (role: any) => {
       if (role.adding) {
-        this.roles.pop();
+        state.roles.pop();
         return;
       }
-      this.loading = true;
+      state.loading = true;
       request({
-        url: UserManageApi.deleteRole.url + "?id=" + role.id,
+        url: UserManageApi.deleteRole.url + '?id=' + role.id,
         method: UserManageApi.deleteRole.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code == 0) {
-          this.$message.success(res.msg);
-          this.getRoles();
-          if (role.id == this.selectedRole.id) {
-            this.selectedRole = {};
+          message.success(res.msg);
+          getRoles();
+          if (role.id == state.selectedRole.id) {
+            state.selectedRole = {};
           }
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
-    addRole() {
+    };
+
+    const addRole = () => {
       const role = {
-        roleName: "角色名称",
-        description: "角色描述",
+        roleName: '角色名称',
+        description: '角色描述',
         adding: true,
       };
-      this.roles.push(role);
-      this.selected(role);
-    },
-    onSave() {
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          const params = Object.assign({}, this.selectedRole, values);
-          params.permissionIds = [];
-          this.selectedPermissions.forEach((e) => {
-            if (e.children) {
-              e.children.forEach((child) => {
-                if (child.selected) {
-                  params.permissionIds.push(...child.selected);
-                }
-              });
-            }
-          });
-          this.loading = true;
-          request({
-            url: UserManageApi.addOrUpdateRole.url,
-            method: UserManageApi.addOrUpdateRole.method,
-            data: params,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.$message.success(res.msg);
-              this.getRoles();
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
+      state.roles.push(role);
+      selected(role);
+    };
+
+    const onSave = async () => {
+      const params = Object.assign({}, state.selectedRole, state.formState);
+      params.permissionIds = [];
+      state.selectedPermissions.forEach((e: any) => {
+        if (e.children) {
+          e.children.forEach((child: any) => {
+            if (child.selected) {
+              params.permissionIds.push(...child.selected);
             }
           });
         }
       });
-    },
-    onCheckboxSelectAll(record) {
+      state.loading = true;
+      request({
+        url: UserManageApi.addOrUpdateRole.url,
+        method: UserManageApi.addOrUpdateRole.method,
+        data: params,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code == 0) {
+          message.success(res.msg);
+          getRoles();
+        } else {
+          notification.error({
+            message: 'error',
+            description: res.msg,
+          });
+        }
+      });
+    };
+
+    const onCheckboxSelectAll = (record: any) => {
       if (!record.children) {
         record.selected = [];
         return;
       }
       if (!record.selectAll) {
-        record.selected = record.children.map((bc) => bc.id);
+        record.selected = record.children.map((bc: any) => bc.id);
       } else {
         record.selected = [];
       }
-    },
-    getRoles() {
-      this.loading = true;
+    };
+
+    const getRoles = () => {
+      state.loading = true;
       request({
         url: UserManageApi.getRole.url,
         method: UserManageApi.getRole.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code == 0) {
-          this.roles = res.data;
+          state.roles = res.data;
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
-    getPermissions() {
-      this.loading = true;
+    };
+
+    const getPermissions = () => {
+      state.loading = true;
       request({
         url: UserManageApi.getPermissions.url,
         method: UserManageApi.getPermissions.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code == 0) {
-          this.permissions = res.data;
+          state.permissions = res.data;
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
+    };
+
+    onMounted(() => {
+      getRoles();
+      getPermissions();
+    });
+
+    return {
+      ...toRefs(state),
+      formRef,
+      selected,
+      deleteRole,
+      addRole,
+      onSave,
+      onCheckboxSelectAll,
+      getRoles,
+      getPermissions,
+    };
   },
-  created() {
-    this.getRoles();
-    this.getPermissions();
-  },
-};
+});
 </script>
 
 <style scoped>

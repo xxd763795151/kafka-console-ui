@@ -3,27 +3,28 @@
     <a-spin :spinning="loading">
       <div id="search-time-form-advanced-search">
         <a-form
+          ref="formRef"
           class="ant-advanced-search-form"
-          :form="form"
-          @submit="handleSearch"
+          :model="formState"
+          @finish="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="9">
-              <a-form-item label="topic">
+              <a-form-item
+                label="topic"
+                name="topic"
+                :rules="[{ required: true, message: '请选择一个topic!' }]"
+              >
                 <a-select
                   class="topic-select"
                   @change="handleTopicChange"
                   show-search
-                  option-filter-prop="children"
-                  v-decorator="[
-                    'topic',
-                    {
-                      rules: [{ required: true, message: '请选择一个topic!' }],
-                    },
-                  ]"
+                  :filter-option="true"
+                  option-filter-prop="label"
+                  v-model:value="formState.topic"
                   placeholder="请选择一个topic"
                 >
-                  <a-select-option v-for="v in topicList" :key="v" :value="v">
+                  <a-select-option v-for="v in topicList" :key="v" :value="v" :label="String(v)">
                     {{ v }}
                   </a-select-option>
                 </a-select>
@@ -34,8 +35,9 @@
                 <a-select
                   class="type-select"
                   show-search
-                  option-filter-prop="children"
-                  v-model="selectPartition"
+                  :filter-option="true"
+                  option-filter-prop="label"
+                  v-model:value="selectPartition"
                   placeholder="请选择一个分区"
                 >
                   <a-select-option v-for="v in partitions" :key="v" :value="v">
@@ -45,9 +47,13 @@
               </a-form-item>
             </a-col>
             <a-col :span="8">
-              <a-form-item label="时间">
+              <a-form-item
+                label="时间"
+                name="time"
+                :rules="rangeConfig.rules"
+              >
                 <a-range-picker
-                  v-decorator="['time', rangeConfig]"
+                  v-model:value="formState.time"
                   show-time
                   format="YYYY-MM-DD HH:mm:ss"
                 />
@@ -62,20 +68,18 @@
           <hr class="hr" />
           <a-row :gutter="24">
             <a-col :span="24">
-              <a-form-item label="最大检索数">
+              <a-form-item
+                label="最大检索数"
+                name="filterNumber"
+                :rules="[
+                  {
+                    required: true,
+                    message: '输入消息数!',
+                  },
+                ]"
+              >
                 <a-input-number
-                  v-decorator="[
-                    'filterNumber',
-                    {
-                      initialValue: 5000,
-                      rules: [
-                        {
-                          required: true,
-                          message: '输入消息数!',
-                        },
-                      ],
-                    },
-                  ]"
+                  v-model:value="formState.filterNumber"
                   :min="1"
                   :max="100000"
                 />
@@ -89,18 +93,22 @@
           <hr class="hr" />
           <a-row :gutter="24">
             <a-col :span="5">
-              <a-form-item label="消息过滤">
+              <a-form-item
+                label="消息过滤"
+                name="filter"
+              >
                 <a-select
                   class="filter-select"
-                  option-filter-prop="children"
-                  v-decorator="['filter', { initialValue: 'none' }]"
+                  :filter-option="true"
+                  option-filter-prop="label"
+                  v-model:value="formState.filter"
                   @change="onFilterChange"
                 >
-                  <a-select-option value="none"> 不启用过滤 </a-select-option>
-                  <a-select-option value="body">
+                  <a-select-option value="none" :label="String('不启用过滤')"> 不启用过滤 </a-select-option>
+                  <a-select-option value="body" :label="String('根据消息体过滤')">
                     根据消息体过滤
                   </a-select-option>
-                  <a-select-option value="header">
+                  <a-select-option value="header" :label="String('根据消息头过滤')">
                     根据消息头过滤
                   </a-select-option>
                 </a-select>
@@ -108,27 +116,27 @@
             </a-col>
             <div v-show="showBodyFilter">
               <a-col :span="8">
-                <a-form-item label="消息内容">
+                <a-form-item label="消息内容" name="value">
                   <a-input
                     class="msg-body"
-                    v-decorator="['value']"
+                    v-model:value="formState.value"
                     placeholder="请输入消息内容"
                   />
                 </a-form-item>
               </a-col>
               <a-col :span="8">
-                <a-form-item label="消息类型">
+                <a-form-item label="消息类型" name="valueDeserializer">
                   <a-select
-                    v-decorator="[
-                      'valueDeserializer',
-                      { initialValue: 'String' },
-                    ]"
+                    v-model:value="formState.valueDeserializer"
                     class="body-type"
+                    :filter-option="true"
+                    option-filter-prop="label"
                   >
                     <a-select-option
                       v-for="v in deserializerList"
                       :key="v"
                       :value="v"
+                      :label="String(v)"
                     >
                       {{ v }}
                     </a-select-option>
@@ -141,17 +149,17 @@
             </div>
             <div v-show="showHeaderFilter">
               <a-col :span="5">
-                <a-form-item label="Key">
+                <a-form-item label="Key" name="headerKey">
                   <a-input
-                    v-decorator="['headerKey']"
+                    v-model:value="formState.headerKey"
                     placeholder="消息头的key"
                   />
                 </a-form-item>
               </a-col>
               <a-col :span="11">
-                <a-form-item label="Value">
+                <a-form-item label="Value" name="headerValue">
                   <a-input
-                    v-decorator="['headerValue']"
+                    v-model:value="formState.headerValue"
                     placeholder="消息头对应key的value"
                   />
                   <span class="hint"
@@ -177,124 +185,170 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, toRefs, onMounted, ref } from "vue";
+import { message } from "ant-design-vue";
 import request from "@/utils/request";
 import { KafkaMessageApi, KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
-import MessageList from "@/views/message/MessageList";
+import MessageList from "@/views/message/MessageList.vue";
+import type { Dayjs } from "dayjs";
 
-export default {
+interface FormState {
+  topic?: string;
+  time?: [Dayjs, Dayjs];
+  filterNumber?: number;
+  filter?: string;
+  value?: string;
+  valueDeserializer?: string;
+  headerKey?: string;
+  headerValue?: string;
+  [key: string]: any;
+}
+
+interface SearchData {
+  realNum: number;
+  maxNum: number;
+  searchNum: number;
+  data?: any[];
+  [key: string]: any;
+}
+
+const defaultData: SearchData = { realNum: 0, maxNum: 0, searchNum: 0 };
+
+export default defineComponent({
   name: "SearchByTime",
   components: { MessageList },
   props: {
     topicList: {
       type: Array,
+      default: () => [],
     },
   },
-  data() {
-    return {
+  setup() {
+    const formRef = ref();
+    const formState = reactive<FormState>({
+      topic: undefined,
+      time: undefined,
+      filterNumber: 5000,
+      filter: "none",
+      value: undefined,
+      valueDeserializer: "String",
+      headerKey: undefined,
+      headerValue: undefined,
+    });
+
+    const state = reactive({
       loading: false,
-      form: this.$form.createForm(this, { name: "message_search_time" }),
-      partitions: [],
-      selectPartition: undefined,
+      partitions: [] as number[],
+      selectPartition: undefined as number | undefined,
       rangeConfig: {
-        rules: [{ type: "array", required: true, message: "请选择时间!" }],
+        rules: [{ type: "array" as const, required: true, message: "请选择时间!" }],
       },
-      data: defaultData,
-      deserializerList: [],
+      data: defaultData as SearchData,
+      deserializerList: [] as string[],
       showBodyFilter: false,
       showHeaderFilter: false,
-    };
-  },
-  methods: {
-    handleSearch(e) {
-      e.preventDefault();
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          const data = Object.assign({}, values, {
-            partition: this.selectPartition,
-          });
-          data.startTime = values.time[0].valueOf();
-          data.endTime = values.time[1];
-          this.loading = true;
-          request({
-            url: KafkaMessageApi.searchByTime.url,
-            method: KafkaMessageApi.searchByTime.method,
-            data: data,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.$message.success(res.msg);
-              this.data = res.data;
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
+    });
+
+    const handleSearch = async () => {
+      const data = Object.assign({}, formState, {
+        partition: state.selectPartition,
+      });
+      data.startTime = formState.time?.[0]?.valueOf();
+      data.endTime = formState.time?.[1];
+      state.loading = true;
+      request({
+        url: KafkaMessageApi.searchByTime.url,
+        method: KafkaMessageApi.searchByTime.method,
+        data: data,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code == 0) {
+          message.success(res.msg);
+          state.data = res.data;
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
           });
         }
       });
-    },
-    getPartitionInfo(topic) {
-      this.loading = true;
+    };
+
+    const getPartitionInfo = (topic: string) => {
+      state.loading = true;
       request({
         url: KafkaTopicApi.getPartitionInfo.url + "?topic=" + topic,
         method: KafkaTopicApi.getPartitionInfo.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code != 0) {
           notification.error({
             message: "error",
             description: res.msg,
           });
         } else {
-          this.partitions = res.data.map((v) => v.partition);
-          this.partitions.splice(0, 0, -1);
+          state.partitions = res.data.map((v: any) => v.partition);
+          state.partitions.splice(0, 0, -1);
         }
       });
-    },
-    handleTopicChange(topic) {
-      this.selectPartition = -1;
-      this.getPartitionInfo(topic);
-    },
-    onFilterChange(e) {
+    };
+
+    const handleTopicChange = (topic: string) => {
+      state.selectPartition = -1;
+      getPartitionInfo(topic);
+    };
+
+    const onFilterChange = (e: string) => {
       switch (e) {
         case "body":
-          this.showBodyFilter = true;
-          this.showHeaderFilter = false;
+          state.showBodyFilter = true;
+          state.showHeaderFilter = false;
           break;
         case "header":
-          this.showHeaderFilter = true;
-          this.showBodyFilter = false;
+          state.showHeaderFilter = true;
+          state.showBodyFilter = false;
           break;
         default:
-          this.showBodyFilter = false;
-          this.showHeaderFilter = false;
+          state.showBodyFilter = false;
+          state.showHeaderFilter = false;
           break;
       }
-    },
-    getDeserializerList() {
+    };
+
+    const getDeserializerList = () => {
       request({
         url: KafkaMessageApi.deserializerList.url,
         method: KafkaMessageApi.deserializerList.method,
-      }).then((res) => {
+      }).then((res: any) => {
         if (res.code != 0) {
           notification.error({
             message: "error",
             description: res.msg,
           });
         } else {
-          this.deserializerList = res.data;
+          state.deserializerList = res.data;
         }
       });
-    },
+    };
+
+    onMounted(() => {
+      getDeserializerList();
+    });
+
+    return {
+      ...toRefs(state),
+      formRef,
+      formState,
+      handleSearch,
+      getPartitionInfo,
+      handleTopicChange,
+      onFilterChange,
+      getDeserializerList,
+    };
   },
-  created() {
-    this.getDeserializerList();
-  },
-};
-const defaultData = { realNum: 0, maxNum: 0, searchNum: 0 };
+});
 </script>
 
 <style scoped>

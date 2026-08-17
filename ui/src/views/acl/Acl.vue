@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <a-tabs default-active-key="1" size="large" tabPosition="top">
+    <a-tabs default-active-key="1" size="large" tab-position="top">
       <a-tab-pane key="1" tab="资源授权" v-if="isAuthorized('acl:authority')">
         <acl-list></acl-list>
       </a-tab-pane>
@@ -15,17 +15,18 @@
   </div>
 </template>
 
-<script>
-import AclList from "@/views/acl/AclList";
-import SaslScram from "@/views/acl/SaslScram";
+<script lang="ts">
+import { defineComponent } from 'vue'
+import AclList from "@/views/acl/AclList.vue";
+import SaslScram from "@/views/acl/SaslScram.vue";
 import { isAuthorized } from "@/utils/auth";
 
-export default {
+export default defineComponent({
   name: "Acl",
   methods: { isAuthorized },
   components: {
     AclList,
     SaslScram,
   },
-};
+});
 </script>

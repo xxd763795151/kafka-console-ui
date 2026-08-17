@@ -4,14 +4,14 @@
       <div id="search-offset-form-advanced-search">
         <a-form
           class="ant-advanced-search-form"
-          :form="form"
+          :model="formState"
           @submit="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="16">
-              <a-form-item label="角色">
+              <a-form-item label="角色" name="roleName">
                 <a-input
-                  v-decorator="['roleName']"
+                  v-model:value="formState.roleName"
                   placeholder="请输入角色名!"
                   @change="onRoleNameChange"
                 />
@@ -36,7 +36,8 @@
           type="primary"
           @click="openCreateUserDialog()"
           v-action:user-manage:user:add
-          >新增集群归属权限
+        >
+          新增集群归属权限
         </a-button>
       </div>
       <a-table
@@ -45,141 +46,158 @@
         bordered
         row-key="id"
       >
-        <div slot="operation" slot-scope="record">
-          <a-popconfirm
-            title="确认删除?"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="deleteRelation(record)"
-          >
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              v-action:user-manage:user:del
-              >删除
-            </a-button>
-          </a-popconfirm>
-        </div>
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'operation'">
+            <a-popconfirm
+              title="确认删除?"
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="deleteRelation(record)"
+            >
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                v-action:user-manage:user:del
+              >
+                删除
+              </a-button>
+            </a-popconfirm>
+          </template>
+        </template>
       </a-table>
       <CreateClusterRoleRelation
         @closeCreateClusterRoleRelationDialog="
           closeCreateClusterRoleRelationDialog
         "
-        :visible="showCreateClusterRoleRelationDialog"
+        :open="showCreateClusterRoleRelationDialog"
       ></CreateClusterRoleRelation>
     </a-spin>
   </div>
 </template>
 
-<script>
-import request from "@/utils/request";
+<script lang="ts">
+import { defineComponent, reactive, toRefs, onMounted } from 'vue';
+import request from '@/utils/request';
+import notification from 'ant-design-vue/lib/notification';
+import { ClusterRoleRelationApi } from '@/utils/api';
+import CreateClusterRoleRelation from '@/views/user/CreateClusterRoleRelation.vue';
 
-import notification from "ant-design-vue/lib/notification";
-import { ClusterRoleRelationApi } from "@/utils/api";
-import CreateClusterRoleRelation from "@/views/user/CreateClusterRoleRelation.vue";
-
-export default {
-  name: "ClusterRoleRelation",
+export default defineComponent({
+  name: 'ClusterRoleRelation',
   components: { CreateClusterRoleRelation },
   props: {
     topicList: {
       type: Array,
     },
   },
-  data() {
-    return {
+  setup() {
+    const state = reactive({
       loading: false,
-      form: this.$form.createForm(this, { name: "user" }),
-      data: [],
-      filteredData: [],
-      filterRoleName: "",
+      formState: {
+        roleName: '',
+      },
+      data: [] as any[],
+      filteredData: [] as any[],
+      filterRoleName: '',
       showCreateClusterRoleRelationDialog: false,
       columns: [
         {
-          title: "角色",
-          dataIndex: "roleName",
-          key: "roleName",
+          title: '角色',
+          dataIndex: 'roleName',
+          key: 'roleName',
         },
         {
-          title: "集群",
-          dataIndex: "clusterName",
-          key: "clusterName",
+          title: '集群',
+          dataIndex: 'clusterName',
+          key: 'clusterName',
         },
         {
-          title: "操作",
-          key: "operation",
-          scopedSlots: { customRender: "operation" },
+          title: '操作',
+          key: 'operation',
         },
       ],
-    };
-  },
-  methods: {
-    handleSearch() {
-      this.form.validateFields((err) => {
-        if (!err) {
-          this.loading = true;
-          request({
-            url: ClusterRoleRelationApi.select.url,
-            method: ClusterRoleRelationApi.select.method,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.data = res.data;
-              this.filter();
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
-          });
-        }
-      });
-    },
-    refresh() {
-      this.handleSearch();
-    },
-    filter() {
-      this.filteredData = this.data.filter(
-        (e) => e.roleName.indexOf(this.filterRoleName) != -1
-      );
-    },
-    onRoleNameChange(input) {
-      this.filterRoleName = input.target.value;
-      this.filter();
-    },
-    openCreateUserDialog() {
-      this.showCreateClusterRoleRelationDialog = true;
-    },
-    closeCreateClusterRoleRelationDialog(p) {
-      this.showCreateClusterRoleRelationDialog = false;
-      if (p.refresh) {
-        this.refresh();
-      }
-    },
-    deleteRelation(user) {
-      this.loading = true;
+    });
+
+    const handleSearch = () => {
+      state.loading = true;
       request({
-        url: ClusterRoleRelationApi.delete.url + "?id=" + user.id,
-        method: ClusterRoleRelationApi.delete.method,
-      }).then((res) => {
-        this.loading = false;
+        url: ClusterRoleRelationApi.select.url,
+        method: ClusterRoleRelationApi.select.method,
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code == 0) {
-          this.refresh();
+          state.data = res.data;
+          filter();
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
+    };
+
+    const refresh = () => {
+      handleSearch();
+    };
+
+    const filter = () => {
+      state.filteredData = state.data.filter(
+        (e: any) => e.roleName.indexOf(state.filterRoleName) != -1
+      );
+    };
+
+    const onRoleNameChange = (input: any) => {
+      state.filterRoleName = input.target.value;
+      filter();
+    };
+
+    const openCreateUserDialog = () => {
+      state.showCreateClusterRoleRelationDialog = true;
+    };
+
+    const closeCreateClusterRoleRelationDialog = (p: any) => {
+      state.showCreateClusterRoleRelationDialog = false;
+      if (p.refresh) {
+        refresh();
+      }
+    };
+
+    const deleteRelation = (user: any) => {
+      state.loading = true;
+      request({
+        url: ClusterRoleRelationApi.delete.url + '?id=' + user.id,
+        method: ClusterRoleRelationApi.delete.method,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code == 0) {
+          refresh();
+        } else {
+          notification.error({
+            message: 'error',
+            description: res.msg,
+          });
+        }
+      });
+    };
+
+    onMounted(() => {
+      handleSearch();
+    });
+
+    return {
+      ...toRefs(state),
+      handleSearch,
+      refresh,
+      filter,
+      onRoleNameChange,
+      openCreateUserDialog,
+      closeCreateClusterRoleRelationDialog,
+      deleteRelation,
+    };
   },
-  created() {
-    this.handleSearch();
-  },
-};
+});
 </script>
 
 <style scoped>

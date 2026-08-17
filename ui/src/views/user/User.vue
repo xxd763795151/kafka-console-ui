@@ -4,18 +4,18 @@
       <div id="search-offset-form-advanced-search">
         <a-form
           class="ant-advanced-search-form"
-          :form="form"
+          :model="formState"
           @submit="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="16">
-              <a-form-item label="用户名">
-                <a-input
-                  v-decorator="['username']"
-                  placeholder="请输入用户名!"
-                  @change="onUsernameChange"
-                />
-              </a-form-item>
+              <a-form-item label="用户名" name="username">
+              <a-input
+                v-model:value="formState.username"
+                placeholder="请输入用户名!"
+                @change="onUsernameChange"
+              />
+            </a-form-item>
             </a-col>
             <a-col :span="2" :style="{ textAlign: 'right' }">
               <a-form-item>
@@ -45,60 +45,62 @@
         bordered
         row-key="id"
       >
-        <div
-          slot="operation"
-          slot-scope="record"
-          v-show="record.username != 'super-admin'"
-        >
-          <a-popconfirm
-            :title="'删除用户: ' + record.username + '？'"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="deleteUser(record)"
-          >
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              v-action:user-manage:user:del
-              >删除
-            </a-button>
-          </a-popconfirm>
-          <a-popconfirm
-            :title="'重置用户: ' + record.username + '密码？'"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="resetPassword(record)"
-          >
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              v-action:user-manage:user:reset-pass
-              >重置密码
-            </a-button>
-          </a-popconfirm>
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="openUpdateUserRoleDialog(record)"
-            v-action:user-manage:user:change-role
-            >分配角色
-          </a-button>
-        </div>
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'operation'">
+            <div v-show="record.username != 'super-admin'">
+              <a-popconfirm
+                :title="'删除用户: ' + record.username + '？'"
+                ok-text="确认"
+                cancel-text="取消"
+                @confirm="deleteUser(record)"
+              >
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  type="primary"
+                  danger
+                  v-action:user-manage:user:del
+                  >删除
+                </a-button>
+              </a-popconfirm>
+              <a-popconfirm
+                :title="'重置用户: ' + record.username + '密码？'"
+                ok-text="确认"
+                cancel-text="取消"
+                @confirm="resetPassword(record)"
+              >
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  v-action:user-manage:user:reset-pass
+                  >重置密码
+                </a-button>
+              </a-popconfirm>
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                @click="openUpdateUserRoleDialog(record)"
+                v-action:user-manage:user:change-role
+                >分配角色
+              </a-button>
+            </div>
+          </template>
+        </template>
       </a-table>
       <CreateUser
         @closeCreateUserDialog="closeCreateUserDialog"
-        :visible="showCreateUserDialog"
+        :open="showCreateUserDialog"
       ></CreateUser>
       <MessageBox
-        :visible="showMessageBox"
+        :open="showMessageBox"
         :message="messageBoxContent"
         @closeMessageBox="closeMessageBox"
       ></MessageBox>
       <UpdateUserRole
-        :visible="showUpdateUserRole"
+        :open="showUpdateUserRole"
         :user="selectUser"
         @closeUpdateUserRoleDialog="closeUpdateUserRoleDialog"
       ></UpdateUserRole>
@@ -106,156 +108,179 @@
   </div>
 </template>
 
-<script>
-import request from "@/utils/request";
+<script lang="ts">
+import { defineComponent, reactive, toRefs, onMounted } from 'vue';
+import { message } from 'ant-design-vue';
+import request from '@/utils/request';
+import notification from 'ant-design-vue/lib/notification';
+import { UserManageApi } from '@/utils/api';
+import CreateUser from '@/views/user/CreateUser.vue';
+import MessageBox from '@/components/MessageBox.vue';
+import UpdateUserRole from '@/views/user/UpdateUserRole.vue';
 
-import notification from "ant-design-vue/lib/notification";
-import { UserManageApi } from "@/utils/api";
-import CreateUser from "@/views/user/CreateUser.vue";
-import MessageBox from "@/components/MessageBox.vue";
-import UpdateUserRole from "@/views/user/UpdateUserRole.vue";
-
-export default {
-  name: "User",
+export default defineComponent({
+  name: 'User',
   components: { CreateUser, MessageBox, UpdateUserRole },
   props: {
     topicList: {
       type: Array,
     },
   },
-  data() {
-    return {
+  setup() {
+    const state = reactive({
       loading: false,
-      form: this.$form.createForm(this, { name: "user" }),
-      data: [],
-      filteredData: [],
-      filterUsername: "",
+      formState: {
+        username: '',
+      },
+      data: [] as any[],
+      filteredData: [] as any[],
+      filterUsername: '',
       showCreateUserDialog: false,
       showMessageBox: false,
       showUpdateUserRole: false,
-      messageBoxContent: "",
-      selectUser: {},
+      messageBoxContent: '',
+      selectUser: {} as any,
       columns: [
         {
-          title: "用户名",
-          dataIndex: "username",
-          key: "username",
+          title: '用户名',
+          dataIndex: 'username',
+          key: 'username',
         },
         {
-          title: "角色",
-          dataIndex: "roleNames",
-          key: "roleNames",
+          title: '角色',
+          dataIndex: 'roleNames',
+          key: 'roleNames',
         },
         {
-          title: "操作",
-          key: "operation",
-          scopedSlots: { customRender: "operation" },
+          title: '操作',
+          key: 'operation',
         },
       ],
-    };
-  },
-  methods: {
-    handleSearch() {
-      this.form.validateFields((err) => {
-        if (!err) {
-          this.loading = true;
-          request({
-            url: UserManageApi.getUsers.url,
-            method: UserManageApi.getUsers.method,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.data = res.data;
-              this.filter();
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
-          });
-        }
-      });
-    },
-    refresh() {
-      this.handleSearch();
-    },
-    filter() {
-      this.filteredData = this.data.filter(
-        (e) => e && e.username && e.username.indexOf(this.filterUsername) != -1
-      );
-    },
-    onUsernameChange(input) {
-      this.filterUsername = input.target.value;
-      this.filter();
-    },
-    openCreateUserDialog() {
-      this.showCreateUserDialog = true;
-    },
-    closeCreateUserDialog(p) {
-      this.showCreateUserDialog = false;
-      if (p.refresh) {
-        this.refresh();
-        this.messageBoxContent = "用户初始密码：" + p.data;
-        this.showMessageBox = true;
-      }
-    },
-    openUpdateUserRoleDialog(user) {
-      this.selectUser = user;
-      this.showUpdateUserRole = true;
-    },
-    closeUpdateUserRoleDialog(p) {
-      this.showUpdateUserRole = false;
-      if (p.refresh) {
-        this.refresh();
-      }
-    },
-    closeMessageBox() {
-      this.showMessageBox = false;
-    },
-    deleteUser(user) {
-      this.loading = true;
+    });
+
+    const handleSearch = () => {
+      state.loading = true;
       request({
-        url: UserManageApi.deleteUser.url + "?id=" + user.id,
-        method: UserManageApi.deleteUser.method,
-      }).then((res) => {
-        this.loading = false;
+        url: UserManageApi.getUsers.url,
+        method: UserManageApi.getUsers.method,
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code == 0) {
-          this.refresh();
+          state.data = res.data;
+          filter();
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
-    resetPassword(record) {
-      this.loading = true;
+    };
+
+    const refresh = () => {
+      handleSearch();
+    };
+
+    const filter = () => {
+      state.filteredData = state.data.filter(
+        (e: any) => e && e.username && e.username.indexOf(state.filterUsername) != -1
+      );
+    };
+
+    const onUsernameChange = (input: any) => {
+      state.filterUsername = input.target.value;
+      filter();
+    };
+
+    const openCreateUserDialog = () => {
+      state.showCreateUserDialog = true;
+    };
+
+    const closeCreateUserDialog = (p: any) => {
+      state.showCreateUserDialog = false;
+      if (p.refresh) {
+        refresh();
+        state.messageBoxContent = '用户初始密码：' + p.data;
+        state.showMessageBox = true;
+      }
+    };
+
+    const openUpdateUserRoleDialog = (user: any) => {
+      state.selectUser = user;
+      state.showUpdateUserRole = true;
+    };
+
+    const closeUpdateUserRoleDialog = (p: any) => {
+      state.showUpdateUserRole = false;
+      if (p.refresh) {
+        refresh();
+      }
+    };
+
+    const closeMessageBox = () => {
+      state.showMessageBox = false;
+    };
+
+    const deleteUser = (user: any) => {
+      state.loading = true;
+      request({
+        url: UserManageApi.deleteUser.url + '?id=' + user.id,
+        method: UserManageApi.deleteUser.method,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code == 0) {
+          refresh();
+        } else {
+          notification.error({
+            message: 'error',
+            description: res.msg,
+          });
+        }
+      });
+    };
+
+    const resetPassword = (record: any) => {
+      state.loading = true;
       const params = Object.assign({}, record);
       params.resetPassword = true;
       request({
         url: UserManageApi.addOrUpdateUser.url,
         method: UserManageApi.addOrUpdateUser.method,
         data: params,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code == 0) {
-          this.messageBoxContent = "密码重置成功，新密码：" + res.data;
-          this.showMessageBox = true;
+          state.messageBoxContent = '密码重置成功，新密码：' + res.data;
+          state.showMessageBox = true;
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
+    };
+
+    onMounted(() => {
+      handleSearch();
+    });
+
+    return {
+      ...toRefs(state),
+      handleSearch,
+      refresh,
+      filter,
+      onUsernameChange,
+      openCreateUserDialog,
+      closeCreateUserDialog,
+      openUpdateUserRoleDialog,
+      closeUpdateUserRoleDialog,
+      closeMessageBox,
+      deleteUser,
+      resetPassword,
+    };
   },
-  created() {
-    this.handleSearch();
-  },
-};
+});
 </script>
 
 <style scoped>

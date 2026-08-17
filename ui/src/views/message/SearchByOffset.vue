@@ -3,27 +3,28 @@
     <a-spin :spinning="loading">
       <div id="search-offset-form-advanced-search">
         <a-form
+          ref="formRef"
           class="ant-advanced-search-form"
-          :form="form"
-          @submit="handleSearch"
+          :model="formState"
+          @finish="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="9">
-              <a-form-item label="topic">
+              <a-form-item
+                label="topic"
+                name="topic"
+                :rules="[{ required: true, message: '请选择一个topic!' }]"
+              >
                 <a-select
                   class="topic-select"
                   @change="handleTopicChange"
                   show-search
-                  option-filter-prop="children"
-                  v-decorator="[
-                    'topic',
-                    {
-                      rules: [{ required: true, message: '请选择一个topic!' }],
-                    },
-                  ]"
+                  :filter-option="true"
+                  option-filter-prop="label"
+                  v-model:value="formState.topic"
                   placeholder="请选择一个topic"
                 >
-                  <a-select-option v-for="v in topicList" :key="v" :value="v">
+                  <a-select-option v-for="v in topicList" :key="v" :value="v" :label="String(v)">
                     {{ v }}
                   </a-select-option>
                 </a-select>
@@ -34,8 +35,9 @@
                 <a-select
                   class="type-select"
                   show-search
-                  option-filter-prop="children"
-                  v-model="selectPartition"
+                  :filter-option="true"
+                  option-filter-prop="label"
+                  v-model:value="selectPartition"
                   placeholder="请选择一个分区"
                 >
                   <a-select-option v-for="v in partitions" :key="v" :value="v">
@@ -45,14 +47,13 @@
               </a-form-item>
             </a-col>
             <a-col :span="7">
-              <a-form-item label="偏移">
+              <a-form-item
+                label="偏移"
+                name="offset"
+                :rules="[{ required: true, message: '请输入消息偏移!' }]"
+              >
                 <a-input
-                  v-decorator="[
-                    'offset',
-                    {
-                      rules: [{ required: true, message: '请输入消息偏移!' }],
-                    },
-                  ]"
+                  v-model:value="formState.offset"
                   placeholder="消息偏移"
                 />
               </a-form-item>
@@ -70,85 +71,109 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, toRefs, ref } from "vue";
+import { message } from "ant-design-vue";
 import request from "@/utils/request";
 import { KafkaMessageApi, KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
-import MessageList from "@/views/message/MessageList";
+import MessageList from "@/views/message/MessageList.vue";
 
-export default {
+interface FormState {
+  topic?: string;
+  offset?: string | number;
+  [key: string]: any;
+}
+
+interface RecordItem {
+  [key: string]: any;
+}
+
+const defaultData: RecordItem[] = [];
+
+export default defineComponent({
   name: "SearchByOffset",
   components: { MessageList },
   props: {
     topicList: {
       type: Array,
+      default: () => [],
     },
   },
-  data() {
-    return {
+  setup() {
+    const formRef = ref();
+    const formState = reactive<FormState>({
+      topic: undefined,
+      offset: undefined,
+    });
+
+    const state = reactive({
       loading: false,
-      form: this.$form.createForm(this, { name: "message_search_offset" }),
-      partitions: [],
-      selectPartition: undefined,
+      partitions: [] as number[],
+      selectPartition: undefined as number | undefined,
       rangeConfig: {
-        rules: [{ type: "array", required: true, message: "请选择时间!" }],
+        rules: [{ type: "array" as const, required: true, message: "请选择时间!" }],
       },
-      data: defaultData,
-    };
-  },
-  methods: {
-    handleSearch(e) {
-      e.preventDefault();
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          const data = Object.assign({}, values, {
-            partition: this.selectPartition,
-          });
-          this.loading = true;
-          request({
-            url: KafkaMessageApi.searchByOffset.url,
-            method: KafkaMessageApi.searchByOffset.method,
-            data: data,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.$message.success(res.msg);
-              this.data = res.data;
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
+      data: defaultData as RecordItem[],
+    });
+
+    const handleSearch = async () => {
+      const data = Object.assign({}, formState, {
+        partition: state.selectPartition,
+      });
+      state.loading = true;
+      request({
+        url: KafkaMessageApi.searchByOffset.url,
+        method: KafkaMessageApi.searchByOffset.method,
+        data: data,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code == 0) {
+          message.success(res.msg);
+          state.data = res.data;
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
           });
         }
       });
-    },
-    getPartitionInfo(topic) {
-      this.loading = true;
+    };
+
+    const getPartitionInfo = (topic: string) => {
+      state.loading = true;
       request({
         url: KafkaTopicApi.getPartitionInfo.url + "?topic=" + topic,
         method: KafkaTopicApi.getPartitionInfo.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code != 0) {
           notification.error({
             message: "error",
             description: res.msg,
           });
         } else {
-          this.partitions = res.data.map((v) => v.partition);
-          this.partitions.splice(0, 0, -1);
+          state.partitions = res.data.map((v: any) => v.partition);
+          state.partitions.splice(0, 0, -1);
         }
       });
-    },
-    handleTopicChange(topic) {
-      this.selectPartition = -1;
-      this.getPartitionInfo(topic);
-    },
+    };
+
+    const handleTopicChange = (topic: string) => {
+      state.selectPartition = -1;
+      getPartitionInfo(topic);
+    };
+
+    return {
+      ...toRefs(state),
+      formRef,
+      formState,
+      handleSearch,
+      getPartitionInfo,
+      handleTopicChange,
+    };
   },
-};
-const defaultData = [];
+});
 </script>
 
 <style scoped>

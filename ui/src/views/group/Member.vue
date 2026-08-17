@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="消费端成员"
-    :visible="show"
+    v-model:open="show"
     :width="1300"
     :mask="false"
     :destroyOnClose="true"
@@ -15,51 +15,52 @@
           :columns="columns"
           :data-source="data"
           bordered
-          :rowKey="(record) => record.memberId"
+          :rowKey="(record: any) => record.memberId"
         >
-          <ul slot="partitions" slot-scope="text">
-            <ol v-for="i in text" :key="i.topic + i.partition">
-              {{
-                i.topic
-              }}:
-              {{
-                i.partition
-              }}
-            </ol>
-          </ul>
+          <template #bodyCell="{ column, text }">
+            <template v-if="column.key === 'partitions'">
+              <ul>
+                <ol v-for="i in text" :key="i.topic + i.partition">
+                  {{ i.topic }}: {{ i.partition }}
+                </ol>
+              </ul>
+            </template>
+          </template>
         </a-table>
       </a-spin>
     </div>
   </a-modal>
 </template>
 
-<script>
-import request from "@/utils/request";
-import { KafkaConsumerApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
+<script lang="ts">
+import { defineComponent } from 'vue';
+import request from '@/utils/request';
+import { KafkaConsumerApi } from '@/utils/api';
+import { notification } from 'ant-design-vue';
 
-export default {
-  name: "Member",
+export default defineComponent({
+  name: 'Member',
   props: {
     group: {
       type: String,
-      default: "",
+      default: '',
     },
     visible: {
       type: Boolean,
       default: false,
     },
   },
+  emits: ['closeConsumerMemberDialog', 'update:visible'],
   data() {
     return {
-      columns: columns,
+      columns,
       show: this.visible,
-      data: [],
+      data: [] as any[],
       loading: false,
     };
   },
   watch: {
-    visible(v) {
+    visible(v: boolean) {
       this.show = v;
       if (this.show) {
         this.getPartitionInfo();
@@ -70,13 +71,13 @@ export default {
     getPartitionInfo() {
       this.loading = true;
       request({
-        url: KafkaConsumerApi.getConsumerMembers.url + "?groupId=" + this.group,
+        url: KafkaConsumerApi.getConsumerMembers.url + '?groupId=' + this.group,
         method: KafkaConsumerApi.getConsumerMembers.method,
-      }).then((res) => {
+      }).then((res: any) => {
         this.loading = false;
         if (res.code != 0) {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         } else {
@@ -86,40 +87,40 @@ export default {
     },
     handleCancel() {
       this.data = [];
-      this.$emit("closeConsumerMemberDialog", {});
+      this.$emit('update:visible', false);
+      this.$emit('closeConsumerMemberDialog', {});
     },
   },
-};
+});
 
 const columns = [
   {
-    title: "成员ID",
-    dataIndex: "memberId",
-    key: "memberId",
+    title: '成员ID',
+    dataIndex: 'memberId',
+    key: 'memberId',
     width: 300,
   },
   {
-    title: "客户端ID",
-    dataIndex: "clientId",
-    key: "clientId",
+    title: '客户端ID',
+    dataIndex: 'clientId',
+    key: 'clientId',
     width: 300,
   },
   {
-    title: "实例ID",
-    dataIndex: "groupInstanceId",
-    key: "groupInstanceId",
+    title: '实例ID',
+    dataIndex: 'groupInstanceId',
+    key: 'groupInstanceId',
     width: 150,
   },
   {
-    title: "主机",
-    dataIndex: "host",
-    key: "host",
+    title: '主机',
+    dataIndex: 'host',
+    key: 'host',
   },
   {
-    title: "订阅分区信息",
-    dataIndex: "partitions",
-    key: "partitions",
-    scopedSlots: { customRender: "partitions" },
+    title: '订阅分区信息',
+    dataIndex: 'partitions',
+    key: 'partitions',
     width: 300,
   },
 ];

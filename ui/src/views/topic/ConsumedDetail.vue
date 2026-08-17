@@ -1,7 +1,7 @@
 <template>
   <a-modal
     :title="'Topic: ' + topic"
-    :visible="show"
+    :open="show"
     :width="1200"
     :mask="false"
     :destroyOnClose="true"
@@ -16,11 +16,11 @@
           ><strong> | 积压: </strong><span class="color-font">{{ v.lag }}</span>
           <a-button
             type="primary"
-            icon="reload"
             size="small"
             style="float: right"
             @click="getConsumerDetail"
           >
+            <template #icon><ReloadOutlined /></template>
             刷新
           </a-button>
           <hr />
@@ -30,9 +30,11 @@
             bordered
             :rowKey="(record) => record.topic + record.partition"
           >
-            <span slot="clientId" slot-scope="text, record">
-              <span v-if="text"> {{ text }}@{{ record.host }} </span>
-            </span>
+            <template #bodyCell="{ column, text, record }">
+              <template v-if="column.key === 'clientId'">
+                <span v-if="text"> {{ text }}@{{ record.host }} </span>
+              </template>
+            </template>
           </a-table>
         </div>
       </a-spin>
@@ -40,124 +42,12 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from "vue";
+import { message, notification } from "ant-design-vue";
+import { ReloadOutlined } from "@ant-design/icons-vue";
 import request from "@/utils/request";
 import { KafkaConsumerApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
-
-export default {
-  name: "ConsumedDetail",
-  props: {
-    topic: {
-      type: String,
-      default: "",
-    },
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      columns: columns,
-      show: this.visible,
-      data: [],
-      loading: false,
-      showResetPartitionOffsetDialog: false,
-      select: {
-        topic: "",
-        partition: 0,
-      },
-      resetPartitionOffsetForm: this.$form.createForm(this, {
-        name: "resetPartitionOffsetForm",
-      }),
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getConsumerDetail();
-      }
-    },
-  },
-  methods: {
-    getConsumerDetail() {
-      this.loading = true;
-      request({
-        url:
-          KafkaConsumerApi.getTopicSubscribedByGroups.url +
-          "?topic=" +
-          this.topic,
-        method: KafkaConsumerApi.getTopicSubscribedByGroups.method,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.data = res.data;
-        }
-      });
-    },
-    handleCancel() {
-      this.data = [];
-      this.$emit("closeConsumedDetailDialog", {});
-    },
-    resetTopicOffsetToEndpoint(groupId, topic, type) {
-      this.requestResetOffset({
-        groupId: groupId,
-        topic: topic,
-        level: 1,
-        type: type,
-      });
-    },
-    requestResetOffset(data, callbackOnSuccess) {
-      this.loading = true;
-      request({
-        url: KafkaConsumerApi.resetOffset.url,
-        method: KafkaConsumerApi.resetOffset.method,
-        data: data,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.$message.success(res.msg);
-          this.getConsumerDetail();
-          if (callbackOnSuccess) {
-            callbackOnSuccess();
-          }
-        }
-      });
-    },
-    openResetPartitionOffsetDialog(topic, partition) {
-      this.showResetPartitionOffsetDialog = true;
-      this.select.topic = topic;
-      this.select.partition = partition;
-    },
-    closeResetPartitionOffsetDialog() {
-      this.showResetPartitionOffsetDialog = false;
-    },
-    resetPartitionOffset() {
-      this.resetPartitionOffsetForm.validateFields((err, values) => {
-        if (!err) {
-          const data = Object.assign({}, values);
-          Object.assign(data, this.select);
-          data.groupId = this.group;
-          data.level = 2;
-          data.type = 4;
-          this.requestResetOffset(data, this.closeResetPartitionOffsetDialog());
-        }
-      });
-    },
-  },
-};
 
 const columns = [
   {
@@ -169,7 +59,6 @@ const columns = [
     title: "客户端",
     dataIndex: "clientId",
     key: "clientId",
-    scopedSlots: { customRender: "clientId" },
     width: 400,
   },
   {
@@ -188,6 +77,129 @@ const columns = [
     key: "lag",
   },
 ];
+
+export default defineComponent({
+  name: "ConsumedDetail",
+  components: {
+    ReloadOutlined,
+  },
+  props: {
+    topic: {
+      type: String,
+      default: "",
+    },
+    open: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ["closeConsumedDetailDialog"],
+  setup(props, { emit }) {
+    const show = ref(props.open);
+    const data = ref<any>([]);
+    const loading = ref(false);
+    const showResetPartitionOffsetDialog = ref(false);
+    const select = reactive({
+      topic: "",
+      partition: 0,
+    });
+    const group = ref("");
+
+    watch(
+      () => props.open,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          getConsumerDetail();
+        }
+      }
+    );
+
+    function getConsumerDetail() {
+      loading.value = true;
+      request({
+        url:
+          KafkaConsumerApi.getTopicSubscribedByGroups.url +
+          "?topic=" +
+          props.topic,
+        method: KafkaConsumerApi.getTopicSubscribedByGroups.method,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          data.value = res.data;
+        }
+      });
+    }
+
+    function handleCancel() {
+      data.value = [];
+      emit("closeConsumedDetailDialog", {});
+    }
+
+    function resetTopicOffsetToEndpoint(groupId: string, topic: string, type: string) {
+      requestResetOffset({
+        groupId: groupId,
+        topic: topic,
+        level: 1,
+        type: type,
+      });
+    }
+
+    function requestResetOffset(data: any, callbackOnSuccess?: Function) {
+      loading.value = true;
+      request({
+        url: KafkaConsumerApi.resetOffset.url,
+        method: KafkaConsumerApi.resetOffset.method,
+        data: data,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          message.success(res.msg);
+          getConsumerDetail();
+          if (callbackOnSuccess) {
+            callbackOnSuccess();
+          }
+        }
+      });
+    }
+
+    function openResetPartitionOffsetDialog(topic: string, partition: number) {
+      showResetPartitionOffsetDialog.value = true;
+      select.topic = topic;
+      select.partition = partition;
+    }
+
+    function closeResetPartitionOffsetDialog() {
+      showResetPartitionOffsetDialog.value = false;
+    }
+
+    return {
+      columns,
+      show,
+      data,
+      loading,
+      showResetPartitionOffsetDialog,
+      select,
+      group,
+      getConsumerDetail,
+      handleCancel,
+      resetTopicOffsetToEndpoint,
+      requestResetOffset,
+      openResetPartitionOffsetDialog,
+      closeResetPartitionOffsetDialog,
+    };
+  },
+});
 </script>
 
 <style scoped>

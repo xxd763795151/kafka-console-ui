@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="位移对齐记录"
-    :visible="show"
+    :open="show"
     :width="1200"
     :mask="false"
     :destroyOnClose="true"
@@ -15,116 +15,58 @@
           :columns="columns"
           bordered
           :data-source="data"
-          :rowKey="(record) => record.id"
+          :rowKey="(record: any) => record.id"
         >
-          <ul slot="thisOffset" slot-scope="text">
-            <ol v-for="(v, k) in text" :key="k">
-              {{
-                k
-              }}:
-              {{
-                v
-              }}
-            </ol>
-          </ul>
-          <ul slot="thatOffset" slot-scope="text">
-            <ol v-for="(v, k) in text" :key="k">
-              {{
-                k
-              }}:
-              {{
-                v
-              }}
-            </ol>
-          </ul>
-          <div slot="operation" slot-scope="record">
-            <a-popconfirm
-              title="删除当前记录？"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="onDeleteOffsetAlignment(record)"
-            >
-              <a-button size="small" href="javascript:;" class="operation-btn"
-                >删除</a-button
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.key === 'thisOffset'">
+              <ul>
+                <ol v-for="(v, k) in text" :key="k">
+                  {{
+                    k
+                  }}:
+                  {{
+                    v
+                  }}
+                </ol>
+              </ul>
+            </template>
+            <template v-if="column.key === 'thatOffset'">
+              <ul>
+                <ol v-for="(v, k) in text" :key="k">
+                  {{
+                    k
+                  }}:
+                  {{
+                    v
+                  }}
+                </ol>
+              </ul>
+            </template>
+            <template v-if="column.key === 'operation'">
+              <a-popconfirm
+                title="删除当前记录？"
+                ok-text="确认"
+                cancel-text="取消"
+                @confirm="onDeleteOffsetAlignment(record)"
               >
-            </a-popconfirm>
-          </div>
+                <a-button size="small" href="javascript:;" class="operation-btn" type="primary" danger
+                  >删除</a-button
+                >
+              </a-popconfirm>
+            </template>
+          </template>
         </a-table>
       </a-spin>
     </div>
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, watch } from "vue";
+import { message } from "ant-design-vue";
+import notification from "ant-design-vue/es/notification";
 import request from "@/utils/request";
 import { KafkaOpApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
-export default {
-  name: "OffsetAlignmentTable",
-  props: {
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      columns: columns,
-      show: this.visible,
-      data: [],
-      loading: false,
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getAlignmentList();
-      }
-    },
-  },
-  methods: {
-    getAlignmentList() {
-      this.loading = true;
-      request({
-        url: KafkaOpApi.getOffsetAlignmentList.url,
-        method: KafkaOpApi.getOffsetAlignmentList.method,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.data = res.data;
-        }
-      });
-    },
-    handleCancel() {
-      this.data = [];
-      this.$emit("closeOffsetAlignmentInfoDialog", {});
-    },
-    onDeleteOffsetAlignment(record) {
-      this.loading = true;
-      request({
-        url: KafkaOpApi.deleteAlignment.url + "?id=" + record.id,
-        method: KafkaOpApi.deleteAlignment.method,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.$message.success(res.msg);
-          this.getAlignmentList();
-        }
-      });
-    },
-  },
-};
 
 const columns = [
   {
@@ -141,13 +83,11 @@ const columns = [
     title: "当前集群标记位点",
     dataIndex: "thisOffset",
     key: "thisOffset",
-    scopedSlots: { customRender: "thisOffset" },
   },
   {
     title: "外部集群标记位点",
     dataIndex: "thatOffset",
     key: "thatOffset",
-    scopedSlots: { customRender: "thatOffset" },
   },
   {
     title: "更新时间",
@@ -157,9 +97,85 @@ const columns = [
   {
     title: "操作",
     key: "operation",
-    scopedSlots: { customRender: "operation" },
   },
 ];
+
+export default defineComponent({
+  name: "OffsetAlignmentTable",
+  props: {
+    visible: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup(props, { emit }) {
+    const show = ref(props.visible);
+    const data = ref<any[]>([]);
+    const loading = ref(false);
+
+    watch(
+      () => props.visible,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          getAlignmentList();
+        }
+      }
+    );
+
+    const getAlignmentList = () => {
+      loading.value = true;
+      request({
+        url: KafkaOpApi.getOffsetAlignmentList.url,
+        method: KafkaOpApi.getOffsetAlignmentList.method,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          data.value = res.data;
+        }
+      });
+    };
+
+    const handleCancel = () => {
+      data.value = [];
+      emit("closeOffsetAlignmentInfoDialog", {});
+    };
+
+    const onDeleteOffsetAlignment = (record: any) => {
+      loading.value = true;
+      request({
+        url: KafkaOpApi.deleteAlignment.url + "?id=" + record.id,
+        method: KafkaOpApi.deleteAlignment.method,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          message.success(res.msg);
+          getAlignmentList();
+        }
+      });
+    };
+
+    return {
+      columns,
+      show,
+      data,
+      loading,
+      getAlignmentList,
+      handleCancel,
+      onDeleteOffsetAlignment,
+    };
+  },
+});
 </script>
 
 <style scoped></style>

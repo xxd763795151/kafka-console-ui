@@ -1,55 +1,55 @@
 <template>
   <a-modal
     title="新增集群归属权限"
-    :visible="show"
+    :open="show"
     :width="800"
     :mask="false"
-    :destroyOnClose="true"
+    :destroy-on-close="true"
     :footer="null"
-    :maskClosable="false"
+    :mask-closable="false"
     @cancel="handleCancel"
   >
     <div>
       <a-spin :spinning="loading">
         <a-form
-          :form="form"
+          :model="formState"
+          :rules="rules"
+          ref="formRef"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
           @submit="handleSubmit"
         >
-          <a-form-item label="角色">
+          <a-form-item label="角色" name="roleId">
             <a-select
               show-search
-              option-filter-prop="children"
-              v-decorator="[
-                'roleId',
-                { rules: [{ required: true, message: '请选择一个角色!' }] },
-              ]"
+              :filter-option="true"
+              option-filter-prop="label"
+              v-model:value="formState.roleId"
               placeholder="请选择一个角色"
             >
               <a-select-option
                 v-for="role in roles"
                 :key="role.id"
                 :value="role.id"
+                :label="role.roleName"
               >
                 {{ role.roleName }}
               </a-select-option>
             </a-select>
           </a-form-item>
-          <a-form-item label="集群">
+          <a-form-item label="集群" name="clusterInfoId">
             <a-select
               show-search
-              option-filter-prop="children"
-              v-decorator="[
-                'clusterInfoId',
-                { rules: [{ required: true, message: '请选择集群!' }] },
-              ]"
+              :filter-option="true"
+              option-filter-prop="label"
+              v-model:value="formState.clusterInfoId"
               placeholder="请选择集群"
             >
               <a-select-option
                 v-for="clusterInfo in clusterInfoList"
                 :key="clusterInfo.id"
                 :value="clusterInfo.id"
+                :label="clusterInfo.clusterName"
               >
                 {{ clusterInfo.clusterName }}
               </a-select-option>
@@ -64,112 +64,134 @@
   </a-modal>
 </template>
 
-<script>
-import request from "@/utils/request";
-import notification from "ant-design-vue/es/notification";
+<script lang="ts">
+import { defineComponent, reactive, toRefs, onMounted, ref, watch } from 'vue';
+import { message } from 'ant-design-vue';
+import request from '@/utils/request';
+import notification from 'ant-design-vue/es/notification';
 import {
   UserManageApi,
   KafkaClusterApi,
   ClusterRoleRelationApi,
-} from "@/utils/api";
+} from '@/utils/api';
 
-export default {
-  name: "CreateClusterRoleRelation",
+export default defineComponent({
+  name: 'CreateClusterRoleRelation',
   props: {
-    visible: {
+    open: {
       type: Boolean,
       default: false,
     },
   },
-  data() {
-    return {
-      show: this.visible,
-      data: [],
+  emits: ['closeCreateClusterRoleRelationDialog'],
+  setup(props, { emit }) {
+    const formRef = ref();
+
+    const state = reactive({
+      show: props.open,
+      data: [] as any[],
       loading: false,
-      form: this.$form.createForm(this, { name: "coordinated" }),
-      roles: [],
-      clusterInfoList: [],
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getRoles();
+      roles: [] as any[],
+      clusterInfoList: [] as any[],
+      formState: {
+        roleId: undefined as any,
+        clusterInfoId: undefined as any,
+      },
+      rules: {
+        roleId: [{ required: true, message: '请选择一个角色!' }],
+        clusterInfoId: [{ required: true, message: '请选择集群!' }],
+      },
+    });
+
+    watch(
+      () => props.open,
+      (v) => {
+        state.show = v;
+        if (state.show) {
+          getRoles();
+        }
       }
-    },
-  },
-  methods: {
-    handleSubmit(e) {
+    );
+
+    const handleSubmit = async (e: any) => {
       e.preventDefault();
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          this.loading = true;
-          request({
-            url: ClusterRoleRelationApi.add.url,
-            method: ClusterRoleRelationApi.add.method,
-            data: values,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.$message.success(res.msg);
-              this.$emit("closeCreateClusterRoleRelationDialog", {
-                refresh: true,
-                data: res.data,
-              });
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
+      state.loading = true;
+      request({
+        url: ClusterRoleRelationApi.add.url,
+        method: ClusterRoleRelationApi.add.method,
+        data: state.formState,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code == 0) {
+          message.success(res.msg);
+          emit('closeCreateClusterRoleRelationDialog', {
+            refresh: true,
+            data: res.data,
+          });
+        } else {
+          notification.error({
+            message: 'error',
+            description: res.msg,
           });
         }
       });
-    },
-    getRoles() {
-      this.loading = true;
+    };
+
+    const getRoles = () => {
+      state.loading = true;
       request({
         url: UserManageApi.getRole.url,
         method: UserManageApi.getRole.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code == 0) {
-          this.roles = res.data;
+          state.roles = res.data;
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
-    getClusterInfoList() {
+    };
+
+    const getClusterInfoList = () => {
       request({
         url: KafkaClusterApi.getClusterInfoListForSelect.url,
         method: KafkaClusterApi.getClusterInfoListForSelect.method,
-      }).then((res) => {
+      }).then((res: any) => {
         if (res.code == 0) {
-          this.clusterInfoList = res.data;
-          this.clusterInfoList.splice(0, 0, { id: -1, clusterName: "全部" });
+          state.clusterInfoList = res.data;
+          state.clusterInfoList.splice(0, 0, { id: -1, clusterName: '全部' });
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
-    handleCancel() {
-      this.data = [];
-      this.$emit("closeCreateClusterRoleRelationDialog", { refresh: true });
-    },
+    };
+
+    const handleCancel = () => {
+      state.data = [];
+      emit('closeCreateClusterRoleRelationDialog', { refresh: true });
+    };
+
+    onMounted(() => {
+      getRoles();
+      getClusterInfoList();
+    });
+
+    return {
+      ...toRefs(state),
+      formRef,
+      handleSubmit,
+      getRoles,
+      getClusterInfoList,
+      handleCancel,
+    };
   },
-  created() {
-    this.getRoles();
-    this.getClusterInfoList();
-  },
-};
+});
 </script>
 
 <style scoped></style>

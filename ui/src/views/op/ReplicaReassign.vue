@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="副本重分配"
-    :visible="show"
+    :open="show"
     :width="800"
     :mask="false"
     :destroyOnClose="true"
@@ -12,38 +12,39 @@
     <div>
       <a-spin :spinning="loading">
         <a-form
-          :form="form"
+          :model="formState"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
-          @submit="handleSubmit"
+          @finish="handleSubmit"
         >
-          <a-form-item label="Topic">
+          <a-form-item
+            label="Topic"
+            name="topic"
+            :rules="[{ required: true, message: '请选择一个topic!' }]"
+          >
             <a-select
+              v-model:value="formState.topic"
               @change="handleTopicChange"
               show-search
-              option-filter-prop="children"
-              v-decorator="[
-                'topic',
-                { rules: [{ required: true, message: '请选择一个topic!' }] },
-              ]"
+              :filter-option="true"
+              option-filter-prop="label"
               placeholder="请选择一个topic"
             >
-              <a-select-option v-for="v in topicList" :key="v" :value="v">
+              <a-select-option v-for="v in topicList" :key="v" :value="v" :label="String(v)">
                 {{ v }}
               </a-select-option>
             </a-select>
           </a-form-item>
-          <a-form-item label="分配到Broker">
+          <a-form-item
+            label="分配到Broker"
+            name="brokers"
+            :rules="[{ required: true, message: '请选择一个broker!' }]"
+          >
             <a-select
+              v-model:value="formState.brokers"
               mode="multiple"
-              option-filter-prop="children"
-              v-decorator="[
-                'brokers',
-                {
-                  initialValue: brokers,
-                  rules: [{ required: true, message: '请选择一个broker!' }],
-                },
-              ]"
+              :filter-option="true"
+              option-filter-prop="label"
               placeholder="请选择一个broker"
             >
               <a-select-option v-for="v in brokers" :key="v" :value="v">
@@ -56,7 +57,7 @@
             :columns="columns"
             :data-source="currentAssignment"
             :rowKey="
-              (record, index) => {
+              (record: any, index: number) => {
                 return index;
               }
             "
@@ -75,13 +76,13 @@
           :columns="columns"
           :data-source="proposedAssignmentShow"
           :rowKey="
-            (record, index) => {
+            (record: any, index: number) => {
               return index;
             }
           "
         >
         </a-table>
-        <a-button type="danger" @click="updateAssignment"> 更新分配 </a-button>
+        <a-button type="primary" danger @click="updateAssignment"> 更新分配 </a-button>
       </a-spin>
       <hr />
       <h4>注意</h4>
@@ -100,183 +101,12 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from "vue";
+import { message } from "ant-design-vue";
+import notification from "ant-design-vue/es/notification";
 import request from "@/utils/request";
 import { KafkaTopicApi, KafkaOpApi, KafkaClusterApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
-export default {
-  name: "ReplicaReassign",
-  props: {
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      show: this.visible,
-      data: [],
-      loading: false,
-      form: this.$form.createForm(this, { name: "ReplicaReassignForm" }),
-      topicList: [],
-      partitions: [],
-      brokers: [],
-      currentAssignment: [],
-      proposedAssignment: [],
-      proposedAssignmentShow: [],
-      columns,
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.clearData();
-        this.getTopicNameList();
-        this.getClusterInfo();
-      }
-    },
-  },
-  methods: {
-    handleSubmit(e) {
-      e.preventDefault();
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          this.getProposedAssignment(values);
-        }
-      });
-    },
-    getTopicReplicaInfo(topic) {
-      this.loading = true;
-      request({
-        url: KafkaTopicApi.getCurrentReplicaAssignment.url + "?topic=" + topic,
-        method: KafkaTopicApi.getCurrentReplicaAssignment.method,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code == 0) {
-          this.currentAssignment = res.data.partitions;
-          this.currentAssignment.forEach(
-            (e) => (e.replicas = e.replicas.join(","))
-          );
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    },
-    getTopicNameList() {
-      request({
-        url: KafkaTopicApi.getTopicNameList.url,
-        method: KafkaTopicApi.getTopicNameList.method,
-      }).then((res) => {
-        if (res.code == 0) {
-          this.topicList = res.data;
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    },
-    getPartitionInfo(topic) {
-      this.loading = true;
-      request({
-        url: KafkaTopicApi.getPartitionInfo.url + "?topic=" + topic,
-        method: KafkaTopicApi.getPartitionInfo.method,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.partitions = res.data.map((v) => v.partition);
-          this.partitions.splice(0, 0, -1);
-        }
-      });
-    },
-    handleTopicChange(topic) {
-      // this.getPartitionInfo(topic);
-      this.clearData();
-      this.getTopicReplicaInfo(topic);
-    },
-    getClusterInfo() {
-      this.loading = true;
-      request({
-        url: KafkaClusterApi.getClusterInfo.url,
-        method: KafkaClusterApi.getClusterInfo.method,
-      }).then((res) => {
-        this.loading = false;
-        this.brokers = [];
-        res.data.nodes.forEach((node) => this.brokers.push(node.id));
-      });
-    },
-    getProposedAssignment(params) {
-      this.loading = true;
-      request({
-        url: KafkaOpApi.proposedAssignment.url,
-        method: KafkaOpApi.proposedAssignment.method,
-        data: params,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.proposedAssignmentShow = res.data;
-          this.proposedAssignment = JSON.parse(
-            JSON.stringify(this.proposedAssignmentShow)
-          );
-          this.proposedAssignmentShow.forEach(
-            (e) => (e.replicas = e.replicas.join(","))
-          );
-        }
-      });
-    },
-    clearData() {
-      this.currentAssignment = [];
-      this.proposedAssignment = [];
-      this.proposedAssignmentShow = [];
-    },
-    handleCancel() {
-      this.data = [];
-      this.$emit("closeReplicaReassignDialog", { refresh: false });
-    },
-    updateAssignment() {
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          if (this.proposedAssignment.length == 0) {
-            this.$message.warn("请先生成分配计划！");
-            return;
-          }
-          this.loading = true;
-          request({
-            url: KafkaTopicApi.updateReplicaAssignment.url,
-            method: KafkaTopicApi.updateReplicaAssignment.method,
-            data: { partitions: this.proposedAssignment },
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.$message.success(res.msg);
-              this.handleTopicChange(values.topic);
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
-          });
-        }
-      });
-    },
-  },
-};
 
 const columns = [
   {
@@ -288,9 +118,212 @@ const columns = [
     title: "副本所在broker",
     dataIndex: "replicas",
     key: "replicas",
-    scopedSlots: { customRender: "replicas" },
   },
 ];
+
+export default defineComponent({
+  name: "ReplicaReassign",
+  props: {
+    visible: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup(props, { emit }) {
+    const show = ref(props.visible);
+    const data = ref<any[]>([]);
+    const loading = ref(false);
+    const topicList = ref<any[]>([]);
+    const partitions = ref<any[]>([]);
+    const brokers = ref<any[]>([]);
+    const currentAssignment = ref<any[]>([]);
+    const proposedAssignment = ref<any[]>([]);
+    const proposedAssignmentShow = ref<any[]>([]);
+
+    const formState = reactive({
+      topic: undefined as any,
+      brokers: [] as any[],
+    });
+
+    watch(
+      () => props.visible,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          clearData();
+          getTopicNameList();
+          getClusterInfo();
+        }
+      }
+    );
+
+    const handleSubmit = (values: any) => {
+      getProposedAssignment(values);
+    };
+
+    const getTopicReplicaInfo = (topic: string) => {
+      loading.value = true;
+      request({
+        url: KafkaTopicApi.getCurrentReplicaAssignment.url + "?topic=" + topic,
+        method: KafkaTopicApi.getCurrentReplicaAssignment.method,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          currentAssignment.value = res.data.partitions;
+          currentAssignment.value.forEach(
+            (e: any) => (e.replicas = e.replicas.join(","))
+          );
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    };
+
+    const getTopicNameList = () => {
+      request({
+        url: KafkaTopicApi.getTopicNameList.url,
+        method: KafkaTopicApi.getTopicNameList.method,
+      }).then((res: any) => {
+        if (res.code == 0) {
+          topicList.value = res.data;
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    };
+
+    const getPartitionInfo = (topic: string) => {
+      loading.value = true;
+      request({
+        url: KafkaTopicApi.getPartitionInfo.url + "?topic=" + topic,
+        method: KafkaTopicApi.getPartitionInfo.method,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          partitions.value = res.data.map((v: any) => v.partition);
+          partitions.value.splice(0, 0, -1);
+        }
+      });
+    };
+
+    const handleTopicChange = (topic: string) => {
+      clearData();
+      getTopicReplicaInfo(topic);
+    };
+
+    const getClusterInfo = () => {
+      loading.value = true;
+      request({
+        url: KafkaClusterApi.getClusterInfo.url,
+        method: KafkaClusterApi.getClusterInfo.method,
+      }).then((res: any) => {
+        loading.value = false;
+        brokers.value = [];
+        formState.brokers = [];
+        res.data.nodes.forEach((node: any) => brokers.value.push(node.id));
+      });
+    };
+
+    const getProposedAssignment = (params: any) => {
+      loading.value = true;
+      request({
+        url: KafkaOpApi.proposedAssignment.url,
+        method: KafkaOpApi.proposedAssignment.method,
+        data: params,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          proposedAssignmentShow.value = res.data;
+          proposedAssignment.value = JSON.parse(
+            JSON.stringify(proposedAssignmentShow.value)
+          );
+          proposedAssignmentShow.value.forEach(
+            (e: any) => (e.replicas = e.replicas.join(","))
+          );
+        }
+      });
+    };
+
+    const clearData = () => {
+      currentAssignment.value = [];
+      proposedAssignment.value = [];
+      proposedAssignmentShow.value = [];
+    };
+
+    const handleCancel = () => {
+      data.value = [];
+      emit("closeReplicaReassignDialog", { refresh: false });
+    };
+
+    const updateAssignment = () => {
+      if (formState.topic == null) {
+        message.warn("请先选择Topic！");
+        return;
+      }
+      if (proposedAssignment.value.length == 0) {
+        message.warn("请先生成分配计划！");
+        return;
+      }
+      loading.value = true;
+      request({
+        url: KafkaTopicApi.updateReplicaAssignment.url,
+        method: KafkaTopicApi.updateReplicaAssignment.method,
+        data: { partitions: proposedAssignment.value },
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          message.success(res.msg);
+          handleTopicChange(formState.topic);
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    };
+
+    return {
+      columns,
+      show,
+      data,
+      loading,
+      topicList,
+      partitions,
+      brokers,
+      currentAssignment,
+      proposedAssignment,
+      proposedAssignmentShow,
+      formState,
+      handleSubmit,
+      getTopicReplicaInfo,
+      getTopicNameList,
+      getPartitionInfo,
+      handleTopicChange,
+      getClusterInfo,
+      getProposedAssignment,
+      clearData,
+      handleCancel,
+      updateAssignment,
+    };
+  },
+});
 </script>
 
 <style scoped></style>

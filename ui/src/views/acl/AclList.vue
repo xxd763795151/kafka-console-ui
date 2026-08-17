@@ -5,34 +5,34 @@
         <div id="components-form-acl-advanced-search">
           <a-form
             class="ant-advanced-search-form"
-            :form="form"
-            @submit="handleSearch"
+            :model="formState"
+            @finish="handleSearch"
           >
             <a-row :gutter="24">
               <a-col :span="8">
-                <a-form-item :label="`主体`">
+                <a-form-item :label="`主体`" name="username">
                   <a-input
+                    v-model:value="formState.username"
                     placeholder="比如, 用户名"
                     class="input-w"
-                    v-decorator="['username']"
                   />
                 </a-form-item>
               </a-col>
               <a-col :span="8">
-                <a-form-item :label="`topic`">
+                <a-form-item :label="`topic`" name="topic">
                   <a-input
+                    v-model:value="formState.topic"
                     placeholder="topic"
                     class="input-w"
-                    v-decorator="['topic']"
                   />
                 </a-form-item>
               </a-col>
               <a-col :span="8">
-                <a-form-item :label="`消费组`">
+                <a-form-item :label="`消费组`" name="groupId">
                   <a-input
+                    v-model:value="formState.groupId"
                     placeholder="groupId"
                     class="input-w"
-                    v-decorator="['groupId']"
                   />
                 </a-form-item>
               </a-col>
@@ -58,64 +58,63 @@
           >
         </div>
         <a-table :columns="columns" :data-source="data" bordered>
-          <div slot="username" slot-scope="username">
-            <span>{{ username }}</span>
-          </div>
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.dataIndex === 'username'">
+              <span>{{ text }}</span>
+            </template>
+            <template v-else-if="column.dataIndex === 'topicList'">
+              <a
+                href="#"
+                v-for="t in text"
+                :key="t"
+                @click="onTopicDetail(t, record.username)"
+                ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
+              </a>
+            </template>
+            <template v-else-if="column.dataIndex === 'groupList'">
+              <a
+                href="#"
+                v-for="t in text"
+                :key="t"
+                @click="onGroupDetail(t, record.username)"
+                ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
+              </a>
+            </template>
+            <template v-else-if="column.key === 'operation'">
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                @click="onManageProducerAuth(record)"
+                >管理生产权限
+              </a-button>
 
-          <div slot="topicList" slot-scope="topicList, record">
-            <a
-              href="#"
-              v-for="t in topicList"
-              :key="t"
-              @click="onTopicDetail(t, record.username)"
-              ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
-            </a>
-          </div>
-
-          <div slot="groupList" slot-scope="groupList, record">
-            <a
-              href="#"
-              v-for="t in groupList"
-              :key="t"
-              @click="onGroupDetail(t, record.username)"
-              ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
-            </a>
-          </div>
-
-          <div slot="operation" slot-scope="record">
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="onManageProducerAuth(record)"
-              >管理生产权限
-            </a-button>
-
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="onManageConsumerAuth(record)"
-              >管理消费权限
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="onAddAuth(record)"
-              >增加权限
-            </a-button>
-            <a-popconfirm
-              :title="'清除: ' + record.username + '所有资源权限？'"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="onClearUserAcl(record)"
-            >
-              <a-button size="small" href="javascript:;" class="operation-btn"
-                >清除权限</a-button
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                @click="onManageConsumerAuth(record)"
+                >管理消费权限
+              </a-button>
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                @click="onAddAuth(record)"
+                >增加权限
+              </a-button>
+              <a-popconfirm
+                :title="'清除: ' + record.username + '所有资源权限？'"
+                ok-text="确认"
+                cancel-text="取消"
+                @confirm="onClearUserAcl(record)"
               >
-            </a-popconfirm>
-          </div>
+                <a-button size="small" href="javascript:;" class="operation-btn"
+                  >清除权限</a-button
+                >
+              </a-popconfirm>
+            </template>
+          </template>
         </a-table>
         <AclDetail
           :visible="openAclDetailDialog"
@@ -146,17 +145,19 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, onMounted } from 'vue'
+import { message } from 'ant-design-vue'
 import request from "@/utils/request";
 import notification from "ant-design-vue/es/notification";
 import { KafkaAclApi } from "@/utils/api";
-import ManageProducerAuth from "@/views/acl/ManageProducerAuth";
-import ManageConsumerAuth from "@/views/acl/ManageConsumerAuth";
-import AddAuth from "@/views/acl/AddAuth";
-import AclDetail from "@/views/acl/AclDetail";
-import AddPrincipalAuth from "@/views/acl/AddPrincipalAuth";
+import ManageProducerAuth from "@/views/acl/ManageProducerAuth.vue";
+import ManageConsumerAuth from "@/views/acl/ManageConsumerAuth.vue";
+import AddAuth from "@/views/acl/AddAuth.vue";
+import AclDetail from "@/views/acl/AclDetail.vue";
+import AddPrincipalAuth from "@/views/acl/AddPrincipalAuth.vue";
 
-export default {
+export default defineComponent({
   name: "AclList",
   components: {
     ManageProducerAuth,
@@ -165,135 +166,169 @@ export default {
     AclDetail,
     AddPrincipalAuth,
   },
-  data() {
-    return {
-      queryParam: {},
-      data: [],
-      columns,
-      selectRow: {},
-      form: this.$form.createForm(this, { name: "advanced_search" }),
-      openManageProducerAuthDialog: false,
-      openManageConsumerAuthDialog: false,
-      openAddAuthDialog: false,
-      openAclDetailDialog: false,
-      openAddPrincipalAuthDialog: false,
-      selectDetail: {
-        resourceName: "",
-        resourceType: "",
-        username: "",
-      },
-      loading: false,
-      hint: "",
-    };
-  },
-  methods: {
-    handleSearch(e) {
-      e.preventDefault();
-      this.form.validateFields((error, values) => {
-        let queryParam = {};
-        queryParam.username = values.username ? values.username : null;
-        // if (values.username) {
-        //   queryParam.username = values.username;
-        // }
-        if (values.topic) {
-          queryParam.resourceType = "TOPIC";
-          queryParam.resourceName = values.topic;
-        } else if (values.groupId) {
-          queryParam.resourceType = "GROUP";
-          queryParam.resourceName = values.groupId;
-        }
-        Object.assign(this.queryParam, queryParam);
-        this.getAclList();
-      });
-    },
+  setup() {
+    const queryParam = reactive<any>({})
+    const data = ref<any[]>([])
+    const selectRow = ref<any>({})
+    const openManageProducerAuthDialog = ref(false)
+    const openManageConsumerAuthDialog = ref(false)
+    const openAddAuthDialog = ref(false)
+    const openAclDetailDialog = ref(false)
+    const openAddPrincipalAuthDialog = ref(false)
+    const selectDetail = reactive({
+      resourceName: "",
+      resourceType: "",
+      username: "",
+    })
+    const loading = ref(false)
+    const hint = ref("")
 
-    handleReset() {
-      this.form.resetFields();
-    },
-    onClearUserAcl(row) {
-      this.loading = true;
+    const formState = reactive({
+      username: undefined as any,
+      topic: undefined as any,
+      groupId: undefined as any,
+    })
+
+    const columns = [
+      {
+        title: "主体标识",
+        dataIndex: "username",
+        key: "username",
+        width: 300,
+      },
+      {
+        title: "topic列表",
+        dataIndex: "topicList",
+        key: "topicList",
+      },
+      {
+        title: "消费组列表",
+        dataIndex: "groupList",
+        key: "groupList",
+      },
+      {
+        title: "操作",
+        key: "operation",
+        width: 500,
+      },
+    ]
+
+    function handleSearch(values: any) {
+      const query: any = {};
+      query.username = values.username ? values.username : null;
+      if (values.topic) {
+        query.resourceType = "TOPIC";
+        query.resourceName = values.topic;
+      } else if (values.groupId) {
+        query.resourceType = "GROUP";
+        query.resourceName = values.groupId;
+      }
+      Object.assign(queryParam, query);
+      getAclList();
+    }
+
+    function handleReset() {
+      formState.username = undefined
+      formState.topic = undefined
+      formState.groupId = undefined
+    }
+
+    function onClearUserAcl(row: any) {
+      loading.value = true;
       request({
         url: KafkaAclApi.clearAcl.url,
         method: KafkaAclApi.clearAcl.method,
         data: { username: row.username },
-      }).then((res) => {
-        this.loading = false;
-        this.getAclList();
+      }).then((res: any) => {
+        loading.value = false;
+        getAclList();
         if (res.code == 0) {
-          this.$message.success(res.msg);
+          message.success(res.msg);
         } else {
-          this.$message.error(res.msg);
+          message.error(res.msg);
         }
       });
-    },
-    onManageProducerAuth(row) {
-      this.openManageProducerAuthDialog = true;
-      const rowData = {};
+    }
+
+    function onManageProducerAuth(row: any) {
+      openManageProducerAuthDialog.value = true;
+      const rowData: any = {};
       Object.assign(rowData, row);
-      this.selectRow = rowData;
-    },
-    onManageConsumerAuth(row) {
-      this.openManageConsumerAuthDialog = true;
-      const rowData = {};
+      selectRow.value = rowData;
+    }
+
+    function onManageConsumerAuth(row: any) {
+      openManageConsumerAuthDialog.value = true;
+      const rowData: any = {};
       Object.assign(rowData, row);
-      this.selectRow = rowData;
-    },
-    onAddAuth(row) {
-      this.openAddAuthDialog = true;
-      const rowData = {};
+      selectRow.value = rowData;
+    }
+
+    function onAddAuth(row: any) {
+      openAddAuthDialog.value = true;
+      const rowData: any = {};
       Object.assign(rowData, row);
-      this.selectRow = rowData;
-    },
-    onTopicDetail(topic, username) {
-      this.selectDetail.resourceType = "TOPIC";
-      this.selectDetail.resourceName = topic;
-      this.selectDetail.username = username;
-      this.openAclDetailDialog = true;
-    },
-    onGroupDetail(group, username) {
-      this.selectDetail.resourceType = "GROUP";
-      this.selectDetail.resourceName = group;
-      this.selectDetail.username = username;
-      this.openAclDetailDialog = true;
-    },
-    onAddPrincipalAuth() {
-      this.openAddPrincipalAuthDialog = true;
-    },
-    closeManageProducerAuthDialog() {
-      this.openManageProducerAuthDialog = false;
-      this.getAclList();
-    },
-    closeManageConsumerAuthDialog() {
-      this.openManageConsumerAuthDialog = false;
-      this.getAclList();
-    },
-    closeAddAuthDialog(p) {
-      this.openAddAuthDialog = false;
+      selectRow.value = rowData;
+    }
+
+    function onTopicDetail(topic: string, username: string) {
+      selectDetail.resourceType = "TOPIC";
+      selectDetail.resourceName = topic;
+      selectDetail.username = username;
+      openAclDetailDialog.value = true;
+    }
+
+    function onGroupDetail(group: string, username: string) {
+      selectDetail.resourceType = "GROUP";
+      selectDetail.resourceName = group;
+      selectDetail.username = username;
+      openAclDetailDialog.value = true;
+    }
+
+    function onAddPrincipalAuth() {
+      openAddPrincipalAuthDialog.value = true;
+    }
+
+    function closeManageProducerAuthDialog() {
+      openManageProducerAuthDialog.value = false;
+      getAclList();
+    }
+
+    function closeManageConsumerAuthDialog() {
+      openManageConsumerAuthDialog.value = false;
+      getAclList();
+    }
+
+    function closeAddAuthDialog(p: any) {
+      openAddAuthDialog.value = false;
       if (p.refresh) {
-        this.getAclList();
+        getAclList();
       }
-    },
-    closeAddPrincipalAuthDialog(p) {
-      this.openAddPrincipalAuthDialog = false;
+    }
+
+    function closeAddPrincipalAuthDialog(p: any) {
+      openAddPrincipalAuthDialog.value = false;
       if (p.refresh) {
-        this.getAclList();
+        getAclList();
       }
-    },
-    closeAclDetailDialog(p) {
-      this.openAclDetailDialog = false;
+    }
+
+    function closeAclDetailDialog(p: any) {
+      openAclDetailDialog.value = false;
       if (p.refresh) {
-        this.getAclList();
+        getAclList();
       }
-    },
-    getAclList() {
-      this.loading = true;
+    }
+
+    function getAclList() {
+      loading.value = true;
       request({
         url: KafkaAclApi.getAclList.url,
         method: KafkaAclApi.getAclList.method,
-        data: this.queryParam,
-      }).then((response) => {
-        this.loading = false;
-        this.data.splice(0, this.data.length);
+        data: queryParam,
+      }).then((response: any) => {
+        loading.value = false;
+        data.value.splice(0, data.value.length);
         if (response.code != 0) {
           notification.error({
             message: response.msg,
@@ -301,10 +336,10 @@ export default {
           return;
         }
         if (!response.data.total && response.data.hint) {
-          this.hint = response.data.hint;
+          hint.value = response.data.hint;
           return;
         }
-        this.hint = "";
+        hint.value = "";
         for (let k in response.data.map) {
           let v = response.data.map[k];
           let topicList = Object.keys(v)
@@ -313,86 +348,54 @@ export default {
           let groupList = Object.keys(v)
             .filter((e) => e.startsWith("GROUP"))
             .map((e) => e.split("#")[1]);
-          this.data.push({
+          data.value.push({
             key: k,
             username: k,
             topicList: topicList,
             groupList: groupList,
             user: response.data.map[k]["USER"],
           });
-          this.data.sort((a, b) => a.username.localeCompare(b.username));
+          data.value.sort((a, b) => a.username.localeCompare(b.username));
         }
       });
-    },
-  },
-  created() {
-    this.getAclList();
-  },
-};
+    }
 
-// function getAclList(data, requestParameters) {
-//   request({
-//     url: KafkaAclApi.getAclList.url,
-//     method: KafkaAclApi.getAclList.method,
-//     data: requestParameters,
-//   }).then((response) => {
-//     data.splice(0, data.length);
-//     if (response.code != 0) {
-//       notification.error({
-//         message: response.msg,
-//       });
-//       return;
-//     }
-//     for (let k in response.data.map) {
-//       let v = response.data.map[k];
-//       let topicList = Object.keys(v)
-//         .filter((e) => e.startsWith("TOPIC"))
-//         .map((e) => e.split("#")[1]);
-//       let groupList = Object.keys(v)
-//         .filter((e) => e.startsWith("GROUP"))
-//         .map((e) => e.split("#")[1]);
-//       data.push({
-//         key: k,
-//         username: k,
-//         topicList: topicList,
-//         groupList: groupList,
-//         user: response.data.map[k]["USER"],
-//       });
-//       data.sort((a, b) => a.username.localeCompare(b.username));
-//     }
-//   });
-// }
+    onMounted(() => {
+      getAclList();
+    })
 
-const columns = [
-  {
-    title: "主体标识",
-    dataIndex: "username", //历史原因使用变量username
-    key: "username",
-    width: 300,
-    slots: { title: "username" },
-    scopedSlots: { customRender: "username" },
-  },
-  {
-    title: "topic列表",
-    dataIndex: "topicList",
-    key: "topicList",
-    slots: { title: "topicList" },
-    scopedSlots: { customRender: "topicList" },
-  },
-  {
-    title: "消费组列表",
-    dataIndex: "groupList",
-    key: "groupList",
-    slots: { title: "groupList" },
-    scopedSlots: { customRender: "groupList" },
-  },
-  {
-    title: "操作",
-    key: "operation",
-    scopedSlots: { customRender: "operation" },
-    width: 500,
-  },
-];
+    return {
+      queryParam,
+      data,
+      columns,
+      selectRow,
+      openManageProducerAuthDialog,
+      openManageConsumerAuthDialog,
+      openAddAuthDialog,
+      openAclDetailDialog,
+      openAddPrincipalAuthDialog,
+      selectDetail,
+      loading,
+      hint,
+      formState,
+      handleSearch,
+      handleReset,
+      onClearUserAcl,
+      onManageProducerAuth,
+      onManageConsumerAuth,
+      onAddAuth,
+      onTopicDetail,
+      onGroupDetail,
+      onAddPrincipalAuth,
+      closeManageProducerAuthDialog,
+      closeManageConsumerAuthDialog,
+      closeAddAuthDialog,
+      closeAddPrincipalAuthDialog,
+      closeAclDetailDialog,
+      getAclList,
+    }
+  }
+});
 </script>
 
 <style scoped>

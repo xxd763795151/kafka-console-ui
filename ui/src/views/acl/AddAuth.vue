@@ -1,58 +1,62 @@
 <template>
   <a-modal
     title="增加权限"
-    :visible="show"
+    :open="show"
     :confirm-loading="confirmLoading"
     :width="800"
     @ok="handleOk"
     @cancel="handleCancel"
-    okText="提交"
-    cancelText="取消"
+    ok-text="提交"
+    cancel-text="取消"
     :mask="false"
-    :destroyOnClose="true"
+    :destroy-on-close="true"
   >
-    <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
-      <a-form-item label="用户名">
+    <a-form
+      ref="formRef"
+      :model="formState"
+      :label-col="{ span: 5 }"
+      :wrapper-col="{ span: 12 }"
+    >
+      <a-form-item label="用户名" name="username">
         <a-input
-          v-decorator="['username', { initialValue: record.username }]"
-          disabled="disabled"
+          v-model:value="formState.username"
+          disabled
         />
       </a-form-item>
-      <a-form-item label="资源类型">
-        <a-radio-group
-          v-decorator="['resourceType', { initialValue: 'TOPIC' }]"
-        >
+      <a-form-item label="资源类型" name="resourceType">
+        <a-radio-group v-model:value="formState.resourceType">
           <a-radio value="TOPIC"> topic</a-radio>
           <a-radio value="GROUP"> 消费组</a-radio>
         </a-radio-group>
       </a-form-item>
-      <a-form-item label="资源名称">
+      <a-form-item
+        label="资源名称"
+        name="resourceName"
+        :rules="[{ required: true, message: '请输入!' }]"
+      >
         <a-input
-          v-decorator="[
-            'resourceName',
-            { rules: [{ required: true, message: '请输入!' }] },
-          ]"
+          v-model:value="formState.resourceName"
           placeholder="请输入topic或消费组名称"
         />
       </a-form-item>
-      <a-form-item label="主机">
+      <a-form-item
+        label="主机"
+        name="host"
+        :rules="[{ required: true, message: '请输入!' }]"
+      >
         <a-input
-          v-decorator="[
-            'host',
-            {
-              rules: [{ required: true, message: '请输入!' }],
-              initialValue: '*',
-            },
-          ]"
+          v-model:value="formState.host"
           placeholder="请输入主机地址，比如：*，全部匹配"
         />
       </a-form-item>
-      <a-form-item label="操作类型" has-feedback>
+      <a-form-item
+        label="操作类型"
+        name="operation"
+        has-feedback
+        :rules="[{ required: true, message: '请选择!' }]"
+      >
         <a-select
-          v-decorator="[
-            'operation',
-            { rules: [{ required: true, message: '请选择!' }] },
-          ]"
+          v-model:value="formState.operation"
           placeholder="请选择!"
         >
           <a-select-option v-for="i in operations" :key="i">
@@ -60,10 +64,8 @@
           >
         </a-select>
       </a-form-item>
-      <a-form-item label="权限类型">
-        <a-radio-group
-          v-decorator="['permissionType', { initialValue: 'ALLOW' }]"
-        >
+      <a-form-item label="权限类型" name="permissionType">
+        <a-radio-group v-model:value="formState.permissionType">
           <a-radio value="ALLOW"> 允许</a-radio>
           <a-radio value="DENY"> 拒绝</a-radio>
         </a-radio-group>
@@ -72,11 +74,14 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from 'vue'
+import { message } from 'ant-design-vue'
+import type { FormInstance } from 'ant-design-vue'
 import { KafkaAclApi } from "@/utils/api";
 import request from "@/utils/request";
 
-export default {
+export default defineComponent({
   name: "AddAuth",
   props: {
     visible: {
@@ -84,72 +89,85 @@ export default {
       default: false,
     },
     record: {
-      default: {},
+      default: () => ({}),
     },
   },
-  data() {
-    return {
-      formLayout: "horizontal",
-      form: this.$form.createForm(this, { name: "AddProducerAuthForm" }),
-      confirmLoading: false,
-      show: this.visible,
-      operations: operationList,
-    };
-  },
-  watch: {
-    visible(v) {
-      if (this.show != v) {
-        this.show = v;
-        if (this.show) {
-          this.getOperationList();
+  setup(props, { emit }) {
+    const formRef = ref<FormInstance>()
+    const confirmLoading = ref(false)
+    const show = ref(props.visible)
+    const operations = ref<any[]>([])
+
+    const formState = reactive({
+      username: '',
+      resourceType: 'TOPIC',
+      resourceName: '',
+      host: '*',
+      operation: undefined as any,
+      permissionType: 'ALLOW',
+    })
+
+    watch(() => props.visible, (v) => {
+      if (show.value != v) {
+        show.value = v;
+        if (show.value) {
+          formState.username = (props.record as any).username || ''
+          getOperationList();
         }
       }
-    },
-  },
-  methods: {
-    handleOk() {
-      const form = this.form;
-      form.validateFields((e, v) => {
-        if (e) {
-          return;
-        }
-        const param = Object.assign({}, v);
+    })
+
+    function handleOk() {
+      formRef.value?.validate().then((values: any) => {
+        const param = Object.assign({}, values);
         const api = KafkaAclApi.addAclAuth;
-        this.confirmLoading = true;
+        confirmLoading.value = true;
         request({
           url: api.url,
           method: api.method,
           data: param,
-        }).then((res) => {
-          this.confirmLoading = false;
+        }).then((res: any) => {
+          confirmLoading.value = false;
           if (res.code == 0) {
-            this.$message.success(res.msg);
-            this.$emit("addAuthDialog", { refresh: true });
+            message.success(res.msg);
+            emit("addAuthDialog", { refresh: true });
           } else {
-            this.$message.error(res.msg);
+            message.error(res.msg);
           }
         });
+      }).catch(() => {
       });
-    },
-    handleCancel() {
-      this.$emit("addAuthDialog", { refresh: false });
-    },
-    getOperationList() {
+    }
+
+    function handleCancel() {
+      emit("addAuthDialog", { refresh: false });
+    }
+
+    function getOperationList() {
       request({
         url: KafkaAclApi.getOperationList.url,
         method: KafkaAclApi.getOperationList.method,
-      }).then((res) => {
+      }).then((res: any) => {
         if (res.code != 0) {
-          this.$message.error(res.msg);
+          message.error(res.msg);
         } else {
-          operationList.splice(0, operationList.length);
-          operationList.push(...res.data);
+          operations.value.splice(0, operations.value.length);
+          operations.value.push(...res.data);
         }
       });
-    },
-  },
-};
-const operationList = [];
+    }
+
+    return {
+      formRef,
+      confirmLoading,
+      show,
+      operations,
+      formState,
+      handleOk,
+      handleCancel,
+    }
+  }
+});
 </script>
 
 <style scoped></style>

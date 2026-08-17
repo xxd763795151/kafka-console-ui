@@ -5,31 +5,33 @@
         <div id="components-form-topic-advanced-search">
           <a-form
             class="ant-advanced-search-form"
-            :form="form"
+            :model="queryParam"
             @submit="handleSearch"
           >
             <a-row :gutter="24">
               <a-col :span="8">
-                <a-form-item :label="`topic`">
+                <a-form-item label="topic">
                   <a-input
                     placeholder="topic"
                     class="input-w"
-                    v-decorator="['topic']"
+                    v-model:value="queryParam.topic"
                     @change="onTopicUpdate"
                   />
                 </a-form-item>
               </a-col>
               <a-col :span="8">
-                <a-form-item :label="`类型`">
+                <a-form-item label="类型">
                   <a-select
                     class="type-select"
-                    v-model="type"
+                    v-model:value="type"
                     placeholder="选择类型"
+                    :filter-option="true"
+                    option-filter-prop="label"
                     @change="getTopicList"
                   >
-                    <a-select-option value="all"> 所有</a-select-option>
-                    <a-select-option value="normal"> 普通</a-select-option>
-                    <a-select-option value="system"> 系统</a-select-option>
+                    <a-select-option value="all" :label="'所有'"> 所有</a-select-option>
+                    <a-select-option value="normal" :label="'普通'"> 普通</a-select-option>
+                    <a-select-option value="system" :label="'系统'"> 系统</a-select-option>
                   </a-select>
                 </a-form-item>
               </a-col>
@@ -43,9 +45,6 @@
                   >
                     刷新</a-button
                   >
-                  <!--                  <a-button :style="{ marginLeft: '8px' }" @click="handleReset">-->
-                  <!--                    重置-->
-                  <!--                  </a-button>-->
                 </a-form-item>
               </a-col>
             </a-row>
@@ -65,7 +64,8 @@
             @confirm="deleteTopics(selectedRowKeys)"
           >
             <a-button
-              type="danger"
+              type="primary"
+              danger
               class="btn-left"
               :disabled="!hasSelected"
               :loading="loading"
@@ -90,127 +90,131 @@
           bordered
           row-key="name"
         >
-          <div slot="partitions" slot-scope="text, record">
-            <a href="#" @click="openPartitionInfoDialog(record.name)"
-              >{{ text }}
-            </a>
-          </div>
-
-          <div slot="internal" slot-scope="text">
-            <span v-if="text" style="color: red">是</span><span v-else>否</span>
-          </div>
-
-          <div slot="operation" slot-scope="record" v-show="!record.internal">
-            <a-popconfirm
-              :title="'删除topic: ' + record.name + '？'"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="deleteTopic(record.name)"
-            >
-              <a-button
-                size="small"
-                href="javascript:;"
-                class="operation-btn"
-                v-action:topic:del
-                >删除
-              </a-button>
-            </a-popconfirm>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openPartitionInfoDialog(record.name)"
-              v-action:topic:partition-detail
-              >分区详情
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openAddPartitionDialog(record.name)"
-              v-action:topic:partition-add
-              >增加分区
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openConsumedDetailDialog(record.name)"
-              v-action:topic:consumer-detail
-              >消费详情
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openTopicConfigDialog(record.name)"
-              v-action:topic:property-config
-              >属性配置
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openUpdateReplicaDialog(record.name)"
-              v-action:topic:replication-modify
-              >变更副本
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openMessageStatsDialog(record.name)"
-              v-action:topic:send-count
-              >发送统计
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openThrottleDialog(record.name)"
-              v-action:topic:replication-sync-throttle
-              >限流
-            </a-button>
-          </div>
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.key === 'partitions'">
+              <a href="#" @click="openPartitionInfoDialog(record.name)"
+                >{{ text }}
+              </a>
+            </template>
+            <template v-else-if="column.key === 'internal'">
+              <span v-if="text" style="color: red">是</span><span v-else>否</span>
+            </template>
+            <template v-else-if="column.key === 'operation'">
+              <template v-if="!record.internal">
+                <a-popconfirm
+                  :title="'删除topic: ' + record.name + '？'"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @confirm="deleteTopic(record.name)"
+                >
+                  <a-button
+                    size="small"
+                    href="javascript:;"
+                    class="operation-btn"
+                    type="primary"
+                    danger
+                    v-action:topic:del
+                    >删除
+                  </a-button>
+                </a-popconfirm>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openPartitionInfoDialog(record.name)"
+                  v-action:topic:partition-detail
+                  >分区详情
+                </a-button>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openAddPartitionDialog(record.name)"
+                  v-action:topic:partition-add
+                  >增加分区
+                </a-button>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openConsumedDetailDialog(record.name)"
+                  v-action:topic:consumer-detail
+                  >消费详情
+                </a-button>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openTopicConfigDialog(record.name)"
+                  v-action:topic:property-config
+                  >属性配置
+                </a-button>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openUpdateReplicaDialog(record.name)"
+                  v-action:topic:replication-modify
+                  >变更副本
+                </a-button>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openMessageStatsDialog(record.name)"
+                  v-action:topic:send-count
+                  >发送统计
+                </a-button>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openThrottleDialog(record.name)"
+                  v-action:topic:replication-sync-throttle
+                  >限流
+                </a-button>
+              </template>
+            </template>
+          </template>
         </a-table>
         <PartitionInfo
           :topic="selectDetail.resourceName"
-          :visible="showPartitionInfo"
+          :open="showPartitionInfo"
           @closePartitionInfoDialog="closePartitionInfoDialog"
         ></PartitionInfo>
         <CreateTopic
-          :visible="showCreateTopic"
+          :open="showCreateTopic"
           @closeCreateTopicDialog="closeCreateTopicDialog"
         >
         </CreateTopic>
         <AddPartition
-          :visible="showAddPartition"
+          :open="showAddPartition"
           :topic="selectDetail.resourceName"
           @closeAddPartitionDialog="closeAddPartitionDialog"
         ></AddPartition>
         <ConsumedDetail
-          :visible="showConsumedDetailDialog"
+          :open="showConsumedDetailDialog"
           :topic="selectDetail.resourceName"
           @closeConsumedDetailDialog="closeConsumedDetailDialog"
         >
         </ConsumedDetail>
         <TopicConfig
-          :visible="showTopicConfigDialog"
+          :open="showTopicConfigDialog"
           :topic="selectDetail.resourceName"
           @closeTopicConfigDialog="closeTopicConfigDialog"
         ></TopicConfig>
         <UpdateReplica
-          :visible="showUpdateReplicaDialog"
+          :open="showUpdateReplicaDialog"
           :topic="selectDetail.resourceName"
           @closeUpdateReplicaDialog="closeUpdateReplicaDialog"
         ></UpdateReplica>
         <ConfigTopicThrottle
-          :visible="showThrottleDialog"
+          :open="showThrottleDialog"
           :topic="selectDetail.resourceName"
           @closeThrottleDialog="closeThrottleDialog"
         ></ConfigTopicThrottle>
         <SendStats
-          :visible="showSendStatsDialog"
+          :open="showSendStatsDialog"
           :topic="selectDetail.resourceName"
           @closeMessageStatsDialog="closeMessageStatsDialog"
         ></SendStats>
@@ -219,194 +223,19 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, computed } from "vue";
+import { message, notification } from "ant-design-vue";
 import request from "@/utils/request";
 import { KafkaTopicApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
-import PartitionInfo from "@/views/topic/PartitionInfo";
-import CreateTopic from "@/views/topic/CreateTopic";
-import AddPartition from "@/views/topic/AddPartition";
-import ConsumedDetail from "@/views/topic/ConsumedDetail";
-import TopicConfig from "@/views/topic/TopicConfig";
-import UpdateReplica from "@/views/topic/UpdateReplica";
-import ConfigTopicThrottle from "@/views/topic/ConfigTopicThrottle";
-import SendStats from "@/views/topic/SendStats";
-
-export default {
-  name: "Topic",
-  components: {
-    PartitionInfo,
-    CreateTopic,
-    AddPartition,
-    ConsumedDetail,
-    TopicConfig,
-    UpdateReplica,
-    ConfigTopicThrottle,
-    SendStats,
-  },
-  data() {
-    return {
-      queryParam: { type: "normal" },
-      data: [],
-      columns,
-      selectRow: {},
-      form: this.$form.createForm(this, { name: "topic_advanced_search" }),
-      showUpdateUser: false,
-      deleteUserConfirm: false,
-      selectDetail: {
-        resourceName: "",
-        resourceType: "",
-        username: "",
-      },
-      showPartitionInfo: false,
-      loading: false,
-      showCreateTopic: false,
-      showAddPartition: false,
-      showConsumedDetailDialog: false,
-      showTopicConfigDialog: false,
-      showUpdateReplicaDialog: false,
-      showThrottleDialog: false,
-      showSendStatsDialog: false,
-      filterTopic: "",
-      filteredData: [],
-      type: "normal",
-      selectedRowKeys: [], // Check here to configure the default column
-    };
-  },
-  computed: {
-    hasSelected() {
-      return this.selectedRowKeys.length > 0;
-    },
-  },
-  methods: {
-    handleSearch(e) {
-      e.preventDefault();
-      this.getTopicList();
-    },
-    handleReset() {
-      this.form.resetFields();
-    },
-    getTopicList() {
-      Object.assign(this.queryParam, { type: this.type });
-      // delete this.queryParam.topic;
-      this.loading = true;
-      request({
-        url: KafkaTopicApi.getTopicList.url,
-        method: KafkaTopicApi.getTopicList.method,
-        params: this.queryParam,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code == 0) {
-          this.data = res.data;
-          this.filter();
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    },
-    deleteTopics(topics) {
-      request({
-        url: KafkaTopicApi.deleteTopic.url,
-        method: KafkaTopicApi.deleteTopic.method,
-        data: topics,
-      }).then((res) => {
-        if (res.code == 0) {
-          this.$message.success(res.msg);
-          this.getTopicList();
-          this.selectedRowKeys = [];
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    },
-    deleteTopic(topic) {
-      this.deleteTopics([topic]);
-    },
-    onTopicUpdate(input) {
-      this.filterTopic = input.target.value;
-      this.filter();
-    },
-    filter() {
-      this.filteredData = this.data.filter(
-        (e) => e.name.indexOf(this.filterTopic) != -1
-      );
-    },
-    openPartitionInfoDialog(topic) {
-      this.selectDetail.resourceName = topic;
-      this.showPartitionInfo = true;
-    },
-    closePartitionInfoDialog() {
-      this.showPartitionInfo = false;
-    },
-    openCreateTopicDialog() {
-      this.showCreateTopic = true;
-    },
-    closeCreateTopicDialog(res) {
-      this.showCreateTopic = false;
-      if (res.refresh) {
-        this.getTopicList();
-      }
-    },
-    openAddPartitionDialog(topic) {
-      this.selectDetail.resourceName = topic;
-      this.showAddPartition = true;
-    },
-    closeAddPartitionDialog(res) {
-      this.showAddPartition = false;
-      if (res.refresh) {
-        this.getTopicList();
-      }
-    },
-    openConsumedDetailDialog(topic) {
-      this.showConsumedDetailDialog = true;
-      this.selectDetail.resourceName = topic;
-    },
-    closeConsumedDetailDialog() {
-      this.showConsumedDetailDialog = false;
-    },
-    openTopicConfigDialog(topic) {
-      this.showTopicConfigDialog = true;
-      this.selectDetail.resourceName = topic;
-    },
-    closeTopicConfigDialog() {
-      this.showTopicConfigDialog = false;
-    },
-    openUpdateReplicaDialog(topic) {
-      this.showUpdateReplicaDialog = true;
-      this.selectDetail.resourceName = topic;
-    },
-    closeUpdateReplicaDialog() {
-      this.showUpdateReplicaDialog = false;
-    },
-    openMessageStatsDialog(topic) {
-      this.showSendStatsDialog = true;
-      this.selectDetail.resourceName = topic;
-    },
-    closeMessageStatsDialog() {
-      this.showSendStatsDialog = false;
-    },
-    openThrottleDialog(topic) {
-      this.showThrottleDialog = true;
-      this.selectDetail.resourceName = topic;
-    },
-    closeThrottleDialog() {
-      this.showThrottleDialog = false;
-    },
-    onSelectChange(selectedRowKeys) {
-      this.selectedRowKeys = selectedRowKeys;
-    },
-  },
-  created() {
-    this.getTopicList();
-    this.selectedRowKeys = [];
-  },
-};
+import PartitionInfo from "@/views/topic/PartitionInfo.vue";
+import CreateTopic from "@/views/topic/CreateTopic.vue";
+import AddPartition from "@/views/topic/AddPartition.vue";
+import ConsumedDetail from "@/views/topic/ConsumedDetail.vue";
+import TopicConfig from "@/views/topic/TopicConfig.vue";
+import UpdateReplica from "@/views/topic/UpdateReplica.vue";
+import ConfigTopicThrottle from "@/views/topic/ConfigTopicThrottle.vue";
+import SendStats from "@/views/topic/SendStats.vue";
 
 const columns = [
   {
@@ -419,23 +248,256 @@ const columns = [
     title: "分区数",
     dataIndex: "partitions",
     key: "partitions",
-    slots: { title: "partitions" },
-    scopedSlots: { customRender: "partitions" },
   },
   {
     title: "内部topic",
     dataIndex: "internal",
     key: "internal",
-    slots: { title: "internal" },
-    scopedSlots: { customRender: "internal" },
   },
   {
     title: "操作",
     key: "operation",
-    scopedSlots: { customRender: "operation" },
     width: 800,
   },
 ];
+
+export default defineComponent({
+  name: "Topic",
+  components: {
+    PartitionInfo,
+    CreateTopic,
+    AddPartition,
+    ConsumedDetail,
+    TopicConfig,
+    UpdateReplica,
+    ConfigTopicThrottle,
+    SendStats,
+  },
+  setup() {
+    const queryParam = reactive<{ type: string; topic?: string }>({
+      type: "normal",
+    });
+    const data = ref<any[]>([]);
+    const showUpdateUser = ref(false);
+    const deleteUserConfirm = ref(false);
+    const selectDetail = reactive({
+      resourceName: "",
+      resourceType: "",
+      username: "",
+    });
+    const showPartitionInfo = ref(false);
+    const loading = ref(false);
+    const showCreateTopic = ref(false);
+    const showAddPartition = ref(false);
+    const showConsumedDetailDialog = ref(false);
+    const showTopicConfigDialog = ref(false);
+    const showUpdateReplicaDialog = ref(false);
+    const showThrottleDialog = ref(false);
+    const showSendStatsDialog = ref(false);
+    const filterTopic = ref("");
+    const filteredData = ref<any[]>([]);
+    const type = ref("normal");
+    const selectedRowKeys = ref<any[]>([]);
+
+    const hasSelected = computed(() => selectedRowKeys.value.length > 0);
+
+    function handleSearch(e: Event) {
+      e.preventDefault();
+      getTopicList();
+    }
+
+    function handleReset() {
+      queryParam.topic = "";
+    }
+
+    function getTopicList() {
+      Object.assign(queryParam, { type: type.value });
+      loading.value = true;
+      request({
+        url: KafkaTopicApi.getTopicList.url,
+        method: KafkaTopicApi.getTopicList.method,
+        params: queryParam,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          data.value = res.data;
+          filter();
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    }
+
+    function deleteTopics(topics: any[]) {
+      request({
+        url: KafkaTopicApi.deleteTopic.url,
+        method: KafkaTopicApi.deleteTopic.method,
+        data: topics,
+      }).then((res: any) => {
+        if (res.code == 0) {
+          message.success(res.msg);
+          getTopicList();
+          selectedRowKeys.value = [];
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    }
+
+    function deleteTopic(topic: string) {
+      deleteTopics([topic]);
+    }
+
+    function onTopicUpdate(input: Event) {
+      const target = input.target as HTMLInputElement;
+      filterTopic.value = target.value;
+      filter();
+    }
+
+    function filter() {
+      filteredData.value = data.value.filter(
+        (e) => e.name.indexOf(filterTopic.value) != -1
+      );
+    }
+
+    function openPartitionInfoDialog(topic: string) {
+      selectDetail.resourceName = topic;
+      showPartitionInfo.value = true;
+    }
+
+    function closePartitionInfoDialog() {
+      showPartitionInfo.value = false;
+    }
+
+    function openCreateTopicDialog() {
+      showCreateTopic.value = true;
+    }
+
+    function closeCreateTopicDialog(res: { refresh: boolean }) {
+      showCreateTopic.value = false;
+      if (res.refresh) {
+        getTopicList();
+      }
+    }
+
+    function openAddPartitionDialog(topic: string) {
+      selectDetail.resourceName = topic;
+      showAddPartition.value = true;
+    }
+
+    function closeAddPartitionDialog(res: { refresh: boolean }) {
+      showAddPartition.value = false;
+      if (res.refresh) {
+        getTopicList();
+      }
+    }
+
+    function openConsumedDetailDialog(topic: string) {
+      showConsumedDetailDialog.value = true;
+      selectDetail.resourceName = topic;
+    }
+
+    function closeConsumedDetailDialog() {
+      showConsumedDetailDialog.value = false;
+    }
+
+    function openTopicConfigDialog(topic: string) {
+      showTopicConfigDialog.value = true;
+      selectDetail.resourceName = topic;
+    }
+
+    function closeTopicConfigDialog() {
+      showTopicConfigDialog.value = false;
+    }
+
+    function openUpdateReplicaDialog(topic: string) {
+      showUpdateReplicaDialog.value = true;
+      selectDetail.resourceName = topic;
+    }
+
+    function closeUpdateReplicaDialog() {
+      showUpdateReplicaDialog.value = false;
+    }
+
+    function openMessageStatsDialog(topic: string) {
+      showSendStatsDialog.value = true;
+      selectDetail.resourceName = topic;
+    }
+
+    function closeMessageStatsDialog() {
+      showSendStatsDialog.value = false;
+    }
+
+    function openThrottleDialog(topic: string) {
+      showThrottleDialog.value = true;
+      selectDetail.resourceName = topic;
+    }
+
+    function closeThrottleDialog() {
+      showThrottleDialog.value = false;
+    }
+
+    function onSelectChange(keys: any[]) {
+      selectedRowKeys.value = keys;
+    }
+
+    getTopicList();
+    selectedRowKeys.value = [];
+
+    return {
+      queryParam,
+      data,
+      columns,
+      showUpdateUser,
+      deleteUserConfirm,
+      selectDetail,
+      showPartitionInfo,
+      loading,
+      showCreateTopic,
+      showAddPartition,
+      showConsumedDetailDialog,
+      showTopicConfigDialog,
+      showUpdateReplicaDialog,
+      showThrottleDialog,
+      showSendStatsDialog,
+      filterTopic,
+      filteredData,
+      type,
+      selectedRowKeys,
+      hasSelected,
+      handleSearch,
+      handleReset,
+      getTopicList,
+      deleteTopics,
+      deleteTopic,
+      onTopicUpdate,
+      filter,
+      openPartitionInfoDialog,
+      closePartitionInfoDialog,
+      openCreateTopicDialog,
+      closeCreateTopicDialog,
+      openAddPartitionDialog,
+      closeAddPartitionDialog,
+      openConsumedDetailDialog,
+      closeConsumedDetailDialog,
+      openTopicConfigDialog,
+      closeTopicConfigDialog,
+      openUpdateReplicaDialog,
+      closeUpdateReplicaDialog,
+      openMessageStatsDialog,
+      closeMessageStatsDialog,
+      openThrottleDialog,
+      closeThrottleDialog,
+      onSelectChange,
+    };
+  },
+});
 </script>
 
 <style scoped>

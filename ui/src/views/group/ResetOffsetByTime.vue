@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="重置消费位点"
-    :visible="show"
+    v-model:open="show"
     :width="600"
     :mask="false"
     :destroyOnClose="true"
@@ -14,21 +14,19 @@
     <div>
       <a-spin :spinning="loading">
         <a-form
-          :form="resetOffsetForm"
+          :model="formState"
           :label-col="{ span: 8 }"
           :wrapper-col="{ span: 12 }"
         >
-          <a-form-item label="重置消费位点到">
+          <a-form-item
+            label="重置消费位点到"
+            name="dateTime"
+            :rules="[{ required: true, message: '输入消费位点!' }]"
+          >
             <a-date-picker
+              v-model:value="formState.dateTime"
               show-time
               placeholder="选择重置到哪个时间"
-              :locale="locale"
-              v-decorator="[
-                'dateTime',
-                {
-                  rules: [{ required: true, message: '输入消费位点!' }],
-                },
-              ]"
             />
           </a-form-item>
         </a-form>
@@ -41,80 +39,81 @@
   </a-modal>
 </template>
 
-<script>
-import request from "@/utils/request";
-import { KafkaConsumerApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
+<script lang="ts">
+import { defineComponent, reactive } from 'vue';
+import request from '@/utils/request';
+import { KafkaConsumerApi } from '@/utils/api';
+import { notification } from 'ant-design-vue';
+import dayjs from 'dayjs';
 
-import locale from "ant-design-vue/lib/date-picker/locale/zh_CN";
-
-import moment from "moment";
-export default {
-  name: "ResetOffsetByTime",
+export default defineComponent({
+  name: 'ResetOffsetByTime',
   props: {
     group: {
       type: String,
-      default: "",
+      default: '',
     },
     topic: {
       type: String,
-      default: "",
+      default: '',
     },
     visible: {
       type: Boolean,
       default: false,
     },
   },
+  emits: ['closeResetOffsetByTimeDialog', 'update:visible'],
+  setup() {
+    const formState = reactive({
+      dateTime: undefined as dayjs.Dayjs | undefined,
+    });
+    return {
+      formState,
+    };
+  },
   data() {
     return {
-      locale,
       show: this.visible,
       loading: false,
-      resetOffsetForm: this.$form.createForm(this, {
-        name: "resetOffsetForm",
-      }),
     };
   },
   watch: {
-    visible(v) {
+    visible(v: boolean) {
       this.show = v;
     },
   },
   methods: {
     handleCancel() {
-      this.$emit("closeResetOffsetByTimeDialog", {});
+      this.$emit('update:visible', false);
+      this.$emit('closeResetOffsetByTimeDialog', {});
     },
-    resetOffset() {
-      this.resetOffsetForm.validateFields((e, v) => {
-        if (e) {
-          return;
+    async resetOffset() {
+      const v = { ...this.formState };
+      const dateStr = dayjs(v.dateTime).format('YYYY-MM-DD HH:mm:ss');
+      const data: any = { dateStr };
+      data.groupId = this.group;
+      data.topic = this.topic;
+      data.level = 1;
+      data.type = 3;
+      this.loading = true;
+      request({
+        url: KafkaConsumerApi.resetOffset.url,
+        method: KafkaConsumerApi.resetOffset.method,
+        data: data,
+      }).then((res: any) => {
+        this.loading = false;
+        if (res.code != 0) {
+          notification.error({
+            message: 'error',
+            description: res.msg,
+          });
+        } else {
+          this.$emit('closeResetOffsetByTimeDialog', { refresh: true });
         }
-        v.dateStr = moment(v.dateTime).format("YYYY-MM-DD HH:mm:ss");
-        const data = { dateStr: v.dateStr };
-        data.groupId = this.group;
-        data.topic = this.topic;
-        data.level = 1;
-        data.type = 3;
-        this.loading = true;
-        request({
-          url: KafkaConsumerApi.resetOffset.url,
-          method: KafkaConsumerApi.resetOffset.method,
-          data: data,
-        }).then((res) => {
-          this.loading = false;
-          if (res.code != 0) {
-            notification.error({
-              message: "error",
-              description: res.msg,
-            });
-          } else {
-            this.$emit("closeResetOffsetByTimeDialog", { refresh: true });
-          }
-        });
       });
     },
   },
-};
+});
 </script>
 
 <style scoped></style>

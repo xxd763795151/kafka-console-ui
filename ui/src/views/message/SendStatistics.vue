@@ -3,27 +3,28 @@
     <a-spin :spinning="loading">
       <div id="search-time-form-advanced-search">
         <a-form
+          ref="formRef"
           class="ant-advanced-search-form"
-          :form="form"
-          @submit="handleSearch"
+          :model="formState"
+          @finish="handleSearch"
         >
           <a-row>
             <a-col :span="16">
-              <a-form-item label="topic">
+              <a-form-item
+                label="topic"
+                name="topic"
+                :rules="[{ required: true, message: '请选择一个topic!' }]"
+              >
                 <a-select
                   class="topic-select"
                   @change="handleTopicChange"
                   show-search
-                  option-filter-prop="children"
-                  v-decorator="[
-                    'topic',
-                    {
-                      rules: [{ required: true, message: '请选择一个topic!' }],
-                    },
-                  ]"
+                  :filter-option="true"
+                  option-filter-prop="label"
+                  v-model:value="formState.topic"
                   placeholder="请选择一个topic"
                 >
-                  <a-select-option v-for="v in topicList" :key="v" :value="v">
+                  <a-select-option v-for="v in topicList" :key="v" :value="v" :label="String(v)">
                     {{ v }}
                   </a-select-option>
                 </a-select>
@@ -35,8 +36,9 @@
                   class="type-select"
                   show-search
                   mode="multiple"
-                  option-filter-prop="children"
-                  v-model="selectPartition"
+                  :filter-option="true"
+                  option-filter-prop="label"
+                  v-model:value="selectPartition"
                   placeholder="请选择分区"
                 >
                   <a-select-option v-for="v in partitions" :key="v" :value="v">
@@ -48,15 +50,19 @@
           </a-row>
           <a-row :gutter="24">
             <a-col :span="20">
-              <a-form-item label="时间">
+              <a-form-item
+                label="时间"
+                name="time"
+                :rules="rangeConfig.rules"
+              >
                 <a-range-picker
-                  v-decorator="['time', rangeConfig]"
+                  v-model:value="formState.time"
                   format="YYYY-MM-DD HH:mm:ss.SSS"
                   :show-time="{
                     hideDisabledOptions: true,
                     defaultValue: [
-                      moment('00:00:00.000', 'HH:mm:ss.SSS'),
-                      moment('23:59:59.999', 'HH:mm:ss.SSS'),
+                      dayjs('00:00:00.000', 'HH:mm:ss.SSS'),
+                      dayjs('23:59:59.999', 'HH:mm:ss.SSS'),
                     ],
                   }"
                 />
@@ -71,18 +77,6 @@
         </a-form>
       </div>
       <div id="search-result-view">
-        <!--        <ul>-->
-        <!--          <li v-for="(item, index) in data" :key="index">-->
-        <!--            <fieldset>-->
-        <!--              <legend>-->
-        <!--                {{ item.topic }}, 时间: [{{ item.startTime }} ~-->
-        <!--                {{ item.endTime }}], 总数: {{ item.total }}, 查询时间:-->
-        <!--                {{ item.searchTime }}-->
-        <!--              </legend>-->
-
-        <!--            </fieldset>-->
-        <!--          </li>-->
-        <!--        </ul>-->
         <a-collapse>
           <a-collapse-panel
             v-for="(item, index) in data"
@@ -111,88 +105,115 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, toRefs, ref } from "vue";
 import request from "@/utils/request";
 import { KafkaMessageApi, KafkaTopicApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
-import locale from "ant-design-vue/lib/date-picker/locale/zh_CN";
-import moment from "moment";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import type { Dayjs } from "dayjs";
 
-export default {
+dayjs.extend(customParseFormat);
+
+interface FormState {
+  topic?: string;
+  time?: [Dayjs, Dayjs];
+  [key: string]: any;
+}
+
+interface StatisticsDetail {
+  [partition: string]: number;
+}
+
+interface StatisticsItem {
+  topic: string;
+  startTime: string;
+  endTime: string;
+  total: number;
+  searchTime: string;
+  detail: StatisticsDetail;
+  [key: string]: any;
+}
+
+export default defineComponent({
   name: "SendStatistics",
   props: {
     topicList: {
       type: Array,
+      default: () => [],
     },
   },
-  data() {
-    return {
-      moment,
-      locale,
+  setup() {
+    const formRef = ref();
+    const formState = reactive<FormState>({
+      topic: undefined,
+      time: undefined,
+    });
+
+    const state = reactive({
+      dayjs,
+      locale: {} as any,
       loading: false,
-      form: this.$form.createForm(this, { name: "message_send_statistics" }),
-      partitions: [],
-      selectPartition: [],
+      partitions: [] as number[],
+      selectPartition: [] as number[],
       rangeConfig: {
-        rules: [{ type: "array", required: true, message: "请选择时间!" }],
+        rules: [{ type: "array" as const, required: true, message: "请选择时间!" }],
       },
-      data: [],
-    };
-  },
-  methods: {
-    handleSearch(e) {
-      e.preventDefault();
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          const data = Object.assign({}, values);
-          delete data.time;
-          data.startTime = values.time[0];
-          data.endTime = values.time[1];
-          data.partition = Array.isArray(this.selectPartition)
-            ? this.selectPartition
-            : [this.selectPartition];
-          this.loading = true;
-          request({
-            url: KafkaMessageApi.sendStatistics.url,
-            method: KafkaMessageApi.sendStatistics.method,
-            data: data,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.data.splice(0, 0, res.data);
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
+      data: [] as StatisticsItem[],
+    });
+
+    const handleSearch = async () => {
+      const data: any = Object.assign({}, formState);
+      delete data.time;
+      data.startTime = formState.time?.[0];
+      data.endTime = formState.time?.[1];
+      data.partition = Array.isArray(state.selectPartition)
+        ? state.selectPartition
+        : [state.selectPartition];
+      state.loading = true;
+      request({
+        url: KafkaMessageApi.sendStatistics.url,
+        method: KafkaMessageApi.sendStatistics.method,
+        data: data,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code == 0) {
+          state.data.splice(0, 0, res.data);
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
           });
         }
       });
-    },
-    getPartitionInfo(topic) {
-      this.loading = true;
+    };
+
+    const getPartitionInfo = (topic: string) => {
+      state.loading = true;
       request({
         url: KafkaTopicApi.getPartitionInfo.url + "?topic=" + topic,
         method: KafkaTopicApi.getPartitionInfo.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code != 0) {
           notification.error({
             message: "error",
             description: res.msg,
           });
         } else {
-          this.partitions = res.data.map((v) => v.partition);
-          this.partitions.splice(0, 0, -1);
+          state.partitions = res.data.map((v: any) => v.partition);
+          state.partitions.splice(0, 0, -1);
         }
       });
-    },
-    handleTopicChange(topic) {
-      this.selectPartition = -1;
-      this.getPartitionInfo(topic);
-    },
-    getCurrentTime() {
+    };
+
+    const handleTopicChange = (topic: string) => {
+      state.selectPartition = [-1] as any;
+      getPartitionInfo(topic);
+    };
+
+    const getCurrentTime = () => {
       const date = new Date();
       const yy = date.getFullYear();
       const month = date.getMonth() + 1;
@@ -205,9 +226,19 @@ export default {
       const seconds = date.getSeconds();
       const ss = seconds < 10 ? "0" + seconds : seconds;
       return yy + "-" + mm + "-" + dd + " " + hh + ":" + mf + ":" + ss;
-    },
+    };
+
+    return {
+      ...toRefs(state),
+      formRef,
+      formState,
+      handleSearch,
+      getPartitionInfo,
+      handleTopicChange,
+      getCurrentTime,
+    };
   },
-};
+});
 </script>
 
 <style scoped>
@@ -281,11 +312,11 @@ export default {
 
 #search-result-view fieldset {
   border: 1px solid #333;
-  border-radius: 5px; /* 设置圆角 */
+  border-radius: 5px;
 }
 
 #search-result-view legend {
-  padding: 0.5em; /* 设置内边距 */
+  padding: 0.5em;
 }
 #search-result-view .ant-collapse {
   margin-top: 1%;

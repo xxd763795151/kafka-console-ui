@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <a-spin :spinning="loading">
-      <a-tabs default-active-key="1" size="large" tabPosition="top">
+      <a-tabs default-active-key="1" size="large" tab-position="top">
         <a-tab-pane key="1" tab="使用说明">
           <ClientQuotaIntroduce></ClientQuotaIntroduce>
         </a-tab-pane>
@@ -18,36 +18,36 @@
         >
           <UserAndClientIDQuota></UserAndClientIDQuota>
         </a-tab-pane>
-        <!--        <a-tab-pane key="5" tab="IP">-->
-        <!--          <IpQuota></IpQuota>-->
-        <!--        </a-tab-pane>-->
       </a-tabs>
     </a-spin>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref } from "vue";
 import ClientIDQuota from "@/views/quota/ClientIDQuota.vue";
 import UserQuota from "@/views/quota/UserQuota.vue";
 import UserAndClientIDQuota from "@/views/quota/UserAndClientIDQuota.vue";
 import ClientQuotaIntroduce from "@/views/quota/ClientQuotaIntroduce.vue";
 import { isAuthorized } from "@/utils/auth";
 
-export default {
+export default defineComponent({
   name: "ClientQuota",
-  methods: { isAuthorized },
   components: {
     ClientIDQuota,
     UserQuota,
     UserAndClientIDQuota,
     ClientQuotaIntroduce,
   },
-  data() {
+  setup() {
+    const loading = ref<boolean>(false);
+
     return {
-      loading: false,
+      loading,
+      isAuthorized,
     };
   },
-};
+});
 </script>
 
 <style scoped></style>

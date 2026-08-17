@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="API版本信息"
-    :visible="show"
+    :open="show"
     :width="600"
     :mask="false"
     :destroyOnClose="true"
@@ -28,14 +28,17 @@
   </a-modal>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({
   name: "APIVersionInfo",
   props: {
     versionInfo: {
-      type: Array,
+      type: Array as () => string[],
+      default: () => [],
     },
-    visible: {
+    open: {
       type: Boolean,
       default: false,
     },
@@ -46,7 +49,7 @@ export default {
     };
   },
   watch: {
-    visible(v) {
+    open(v: boolean) {
       this.show = v;
     },
   },
@@ -55,7 +58,7 @@ export default {
       this.$emit("closeApiVersionInfoDialog", {});
     },
   },
-};
+});
 </script>
 
 <style scoped></style>

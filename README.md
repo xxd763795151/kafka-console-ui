@@ -72,8 +72,10 @@ sh bin/shutdown.sh
 
 ## 技术栈版本要求
 * JDK版本：最低要求 JDK 17
+* Node版本：最低要求 Node v24.13.0
 * Spring Boot版本：4.1.0
 * Kafka版本：当前使用的kafka 3.5.0
+* 前端技术栈：Vue 3 + TypeScript + Vite + Ant Design Vue 4.x
 ## 监控
 仅提供运维管理功能，监控、告警需要配合其它组件，如有需要，建议请查看：https://blog.csdn.net/x763795151/article/details/119705372
 

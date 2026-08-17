@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="集群信息"
-    :visible="show"
+    :open="show"
     :width="1200"
     :mask="false"
     :destroyOnClose="true"
@@ -27,45 +27,52 @@
           :columns="columns"
           :data-source="data"
           bordered
-          :rowKey="(record) => record.id"
+          :rowKey="(record: any) => record.id"
         >
-          <div slot="properties" slot-scope="record">
-            <div v-for="p in record" :key="p">{{ p }}</div>
-          </div>
-          <div slot="operation" slot-scope="record">
-            <a-button
-              type="primary"
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="switchCluster(record)"
-              v-action:op:cluster-switch:switch
-              >切换
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openUpdateClusterInfoDialog(record)"
-              v-action:op:cluster-switch:edit
-              >编辑
-            </a-button>
-            <a-popconfirm
-              :title="'删除: ' + record.clusterName + '？'"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="deleteClusterInfo(record)"
-            >
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.key === 'properties'">
+              <div
+                v-for="(p, idx) in parseProperties(record.properties)"
+                :key="idx"
+                >{{ p }}</div
+              >
+            </template>
+            <template v-if="column.key === 'operation'">
+              <a-button
+                type="primary"
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                @click="switchCluster(record)"
+                v-action:op:cluster-switch:switch
+                >切换
+              </a-button>
               <a-button
                 size="small"
                 href="javascript:;"
                 class="operation-btn"
-                type="danger"
-                v-action:op:cluster-switch:del
-                >删除
+                @click="openUpdateClusterInfoDialog(record)"
+                v-action:op:cluster-switch:edit
+                >编辑
               </a-button>
-            </a-popconfirm>
-          </div>
+              <a-popconfirm
+                :title="'删除: ' + record.clusterName + '？'"
+                ok-text="确认"
+                cancel-text="取消"
+                @confirm="deleteClusterInfo(record)"
+              >
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  type="primary"
+                  danger
+                  v-action:op:cluster-switch:del
+                  >删除
+                </a-button>
+              </a-popconfirm>
+            </template>
+          </template>
         </a-table>
         <AddClusterInfo
           :visible="showAddClusterInfoDialog"
@@ -86,107 +93,15 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from "vue";
+import { useStore } from "vuex";
+import { message } from "ant-design-vue";
+import notification from "ant-design-vue/lib/notification";
 import request from "@/utils/request";
 import { KafkaClusterApi } from "@/utils/api";
-import AddClusterInfo from "@/views/op/AddClusterInfo";
-import notification from "ant-design-vue/lib/notification";
-import { mapMutations } from "vuex";
+import AddClusterInfo from "@/views/op/AddClusterInfo.vue";
 import { CLUSTER } from "@/store/mutation-types";
-
-export default {
-  name: "Cluster",
-  components: { AddClusterInfo },
-  props: {
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      columns: columns,
-      show: this.visible,
-      data: [],
-      loading: false,
-      showAddClusterInfoDialog: false,
-      showUpdateClusterInfoDialog: false,
-      select: {},
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getClusterInfoList();
-      }
-    },
-  },
-  methods: {
-    getClusterInfoList() {
-      this.loading = true;
-      request({
-        url: KafkaClusterApi.getClusterInfoList.url,
-        method: KafkaClusterApi.getClusterInfoList.method,
-      }).then((res) => {
-        this.loading = false;
-        this.data = res.data;
-      });
-    },
-    deleteClusterInfo(record) {
-      request({
-        url: KafkaClusterApi.deleteClusterInfo.url,
-        method: KafkaClusterApi.deleteClusterInfo.method,
-        data: Object.assign({}, { id: record.id }),
-      }).then((res) => {
-        this.loading = false;
-        if (res.code == 0) {
-          this.$message.success(res.msg);
-          this.getClusterInfoList();
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    },
-    handleCancel() {
-      this.data = [];
-      this.$emit("closeClusterInfoDialog", {});
-    },
-    openAddClusterInfoDialog() {
-      this.showAddClusterInfoDialog = true;
-    },
-    closeAddClusterInfoDialog(res) {
-      this.showAddClusterInfoDialog = false;
-      if (res.refresh) {
-        this.getClusterInfoList();
-      }
-    },
-    openUpdateClusterInfoDialog(record) {
-      this.showUpdateClusterInfoDialog = true;
-      const r = Object.assign({}, record);
-      if (r.properties) {
-        let str = "";
-        r.properties.forEach((e) => {
-          str = str + e + "\r\n";
-        });
-        r.properties = str;
-      }
-      this.select = r;
-    },
-    closeUpdateClusterInfoDialog(res) {
-      this.showUpdateClusterInfoDialog = false;
-      if (res.refresh) {
-        this.getClusterInfoList();
-      }
-    },
-    ...mapMutations({
-      switchCluster: CLUSTER.SWITCH,
-    }),
-  },
-};
 
 const columns = [
   {
@@ -204,16 +119,165 @@ const columns = [
     title: "属性",
     dataIndex: "properties",
     key: "properties",
-    scopedSlots: { customRender: "properties" },
     width: 300,
   },
   {
     title: "操作",
     key: "operation",
-    scopedSlots: { customRender: "operation" },
     width: 200,
   },
 ];
+
+export default defineComponent({
+  name: "Cluster",
+  components: { AddClusterInfo },
+  props: {
+    visible: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup(props, { emit }) {
+    const store = useStore();
+    const show = ref(props.visible);
+    const data = ref<any[]>([]);
+    const loading = ref(false);
+    const showAddClusterInfoDialog = ref(false);
+    const showUpdateClusterInfoDialog = ref(false);
+    const select = reactive<any>({});
+
+    watch(
+      () => props.visible,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          getClusterInfoList();
+        }
+      }
+    );
+
+    const switchCluster = (record: any) => {
+      store.commit(CLUSTER.SWITCH, record);
+    };
+
+    const parseProperties = (properties: any): string[] => {
+      if (properties == null) return [];
+      if (Array.isArray(properties)) {
+        return properties.map((p) => String(p)).filter((s) => s.length > 0);
+      }
+      if (typeof properties === "string") {
+        const str = properties.trim();
+        if (!str) return [];
+        try {
+          if (
+            (str.startsWith("[") && str.endsWith("]")) ||
+            (str.startsWith('"') && str.endsWith('"'))
+          ) {
+            const parsed = JSON.parse(str);
+            if (Array.isArray(parsed)) {
+              return parsed
+                .map((p) => String(p).trim())
+                .filter((s) => s.length > 0);
+            }
+          }
+        } catch (e) {}
+        return str
+          .split(/\r?\n|,/)
+          .map((s) => s.trim().replace(/^["']+|["']+$/g, ""))
+          .filter((s) => s.length > 0);
+      }
+      return String(properties)
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+    };
+
+    const getClusterInfoList = () => {
+      loading.value = true;
+      request({
+        url: KafkaClusterApi.getClusterInfoList.url,
+        method: KafkaClusterApi.getClusterInfoList.method,
+      }).then((res: any) => {
+        loading.value = false;
+        data.value = res.data;
+      });
+    };
+
+    const deleteClusterInfo = (record: any) => {
+      request({
+        url: KafkaClusterApi.deleteClusterInfo.url,
+        method: KafkaClusterApi.deleteClusterInfo.method,
+        data: Object.assign({}, { id: record.id }),
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          message.success(res.msg);
+          getClusterInfoList();
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    };
+
+    const handleCancel = () => {
+      data.value = [];
+      emit("closeClusterInfoDialog", {});
+    };
+
+    const openAddClusterInfoDialog = () => {
+      showAddClusterInfoDialog.value = true;
+    };
+
+    const closeAddClusterInfoDialog = (res: any) => {
+      showAddClusterInfoDialog.value = false;
+      if (res.refresh) {
+        getClusterInfoList();
+      }
+    };
+
+    const openUpdateClusterInfoDialog = (record: any) => {
+      showUpdateClusterInfoDialog.value = true;
+      const r = Object.assign({}, record);
+      if (r.properties) {
+        let str = "";
+        r.properties.forEach((e: string) => {
+          str = str + e + "\r\n";
+        });
+        r.properties = str;
+      }
+      Object.assign(select, r);
+    };
+
+    const closeUpdateClusterInfoDialog = (res: any) => {
+      showUpdateClusterInfoDialog.value = false;
+      if (res.refresh) {
+        getClusterInfoList();
+      }
+    };
+
+    return {
+      columns,
+      show,
+      data,
+      loading,
+      showAddClusterInfoDialog,
+      showUpdateClusterInfoDialog,
+      select,
+      getClusterInfoList,
+      deleteClusterInfo,
+      handleCancel,
+      openAddClusterInfoDialog,
+      closeAddClusterInfoDialog,
+      openUpdateClusterInfoDialog,
+      closeUpdateClusterInfoDialog,
+      switchCluster,
+      parseProperties,
+    };
+  },
+});
 </script>
 
 <style scoped>

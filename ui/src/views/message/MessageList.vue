@@ -11,7 +11,7 @@
       "
       @change="handleChange"
     >
-      <div slot="operation" slot-scope="record">
+      <template #operation="record">
         <a-button
           size="small"
           href="javascript:;"
@@ -20,7 +20,7 @@
           v-action:message:detail
           >消息详情
         </a-button>
-      </div>
+      </template>
     </a-table>
     <MessageDetail
       :visible="showDetailDialog"
@@ -30,40 +30,57 @@
   </div>
 </template>
 
-<script>
-import moment from "moment";
-import MessageDetail from "@/views/message/MessageDetail";
-export default {
+<script lang="ts">
+import { defineComponent, reactive, toRefs, computed } from "vue";
+import dayjs from "dayjs";
+import MessageDetail from "@/views/message/MessageDetail.vue";
+
+interface RecordItem {
+  topic: string;
+  partition: number;
+  offset: number;
+  timestamp: number;
+  [key: string]: any;
+}
+
+interface SortedInfo {
+  columnKey?: string;
+  order?: string;
+  [key: string]: any;
+}
+
+export default defineComponent({
   name: "MessageList",
   components: { MessageDetail },
   props: {
     data: {
       type: Array,
+      default: () => [],
     },
   },
-  data() {
-    return {
+  setup() {
+    const state = reactive({
       showDetailDialog: false,
-      record: {},
-      sortedInfo: null,
+      record: {} as RecordItem,
+      sortedInfo: null as SortedInfo | null,
+    });
+
+    const openDetailDialog = (record: RecordItem) => {
+      state.record = record;
+      state.showDetailDialog = true;
     };
-  },
-  methods: {
-    openDetailDialog(record) {
-      this.record = record;
-      this.showDetailDialog = true;
-    },
-    closeDetailDialog() {
-      this.showDetailDialog = false;
-    },
-    handleChange() {
-      this.sortedInfo = arguments[2];
-    },
-  },
-  computed: {
-    columns() {
-      let sortedInfo = this.sortedInfo || {};
-      const columns = [
+
+    const closeDetailDialog = () => {
+      state.showDetailDialog = false;
+    };
+
+    const handleChange = (_pagination: any, _filters: any, sorter: any) => {
+      state.sortedInfo = sorter;
+    };
+
+    const columns = computed(() => {
+      let sortedInfo = state.sortedInfo || {};
+      const cols = [
         {
           title: "topic",
           dataIndex: "topic",
@@ -84,28 +101,33 @@ export default {
           title: "时间",
           dataIndex: "timestamp",
           key: "timestamp",
-          slots: { title: "timestamp" },
-          scopedSlots: { customRender: "timestamp" },
-          customRender: (text) => {
+          customRender: ({ text }: { text: number }) => {
             return text == -1
               ? -1
-              : moment(text).format("YYYY-MM-DD HH:mm:ss:SSS");
+              : dayjs(text).format("YYYY-MM-DD HH:mm:ss:SSS");
           },
-          sorter: (a, b) => a.timestamp - b.timestamp,
+          sorter: (a: RecordItem, b: RecordItem) => a.timestamp - b.timestamp,
           sortOrder: sortedInfo.columnKey === "timestamp" && sortedInfo.order,
           sortDirections: ["ascend", "descend"],
         },
         {
           title: "操作",
           key: "operation",
-          scopedSlots: { customRender: "operation" },
           width: 200,
         },
       ];
-      return columns;
-    },
+      return cols;
+    });
+
+    return {
+      ...toRefs(state),
+      openDetailDialog,
+      closeDetailDialog,
+      handleChange,
+      columns,
+    };
   },
-};
+});
 </script>
 
 <style scoped></style>

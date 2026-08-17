@@ -4,16 +4,16 @@
       <div id="components-form-acl-advanced-search">
         <a-form
           class="ant-advanced-search-form"
-          :form="form"
-          @submit="handleSearch"
+          :model="formState"
+          @finish="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="8">
-              <a-form-item :label="`用户名`">
+              <a-form-item :label="`用户名`" name="username">
                 <a-input
+                  v-model:value="formState.username"
                   placeholder="username"
                   class="input-w"
-                  v-decorator="['username']"
                 />
               </a-form-item>
             </a-col>
@@ -42,74 +42,74 @@
         ></UpdateUser>
       </div>
       <a-table :columns="columns" :data-source="data" bordered>
-        <div slot="username" slot-scope="username">
-          <span>{{ username }}</span
-          ><a-button
-            size="small"
-            shape="round"
-            type="dashed"
-            style="float: right"
-            @click="onUserDetail(username)"
-            v-action:acl:sasl-scram:detail
-            >详情</a-button
-          >
-        </div>
-        <div
-          slot="operation"
-          slot-scope="record"
-          v-show="!record.user || record.user.role != 'admin'"
-        >
-          <a-popconfirm
-            :title="'删除用户: ' + record.username + '？'"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="onDeleteUser(record)"
-            v-action:acl:sasl-scram:del
-          >
-            <a-button size="small" href="javascript:;" class="operation-btn"
-              >删除</a-button
-            >
-          </a-popconfirm>
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="onManageProducerAuth(record)"
-            v-action:acl:sasl-scram:producer
-            >管理生产权限
-          </a-button>
-
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="onManageConsumerAuth(record)"
-            v-action:acl:sasl-scram:consumer
-            >管理消费权限
-          </a-button>
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="onAddAuth(record)"
-            v-action:acl:sasl-scram:add-auth
-            >增加权限
-          </a-button>
-          <a-popconfirm
-            :title="'删除用户: ' + record.username + '及相关权限？'"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="onDeleteUserAndAuth(record)"
-          >
+        <template #bodyCell="{ column, text, record }">
+          <template v-if="column.dataIndex === 'username'">
+            <span>{{ text }}</span>
             <a-button
               size="small"
-              href="javascript:;"
-              class="operation-btn"
-              v-action:acl:sasl-scram:pure
-              >彻底删除</a-button
+              shape="round"
+              type="dashed"
+              style="float: right"
+              @click="onUserDetail(text)"
+              v-action:acl:sasl-scram:detail
+              >详情</a-button
             >
-          </a-popconfirm>
-        </div>
+          </template>
+          <template v-else-if="column.key === 'operation'">
+            <div v-show="!record.user || record.user.role != 'admin'">
+              <a-popconfirm
+                :title="'删除用户: ' + record.username + '？'"
+                ok-text="确认"
+                cancel-text="取消"
+                @confirm="onDeleteUser(record)"
+                v-action:acl:sasl-scram:del
+              >
+                <a-button size="small" href="javascript:;" class="operation-btn" type="primary" danger
+                  >删除</a-button
+                >
+              </a-popconfirm>
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                @click="onManageProducerAuth(record)"
+                v-action:acl:sasl-scram:producer
+                >管理生产权限
+              </a-button>
+
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                @click="onManageConsumerAuth(record)"
+                v-action:acl:sasl-scram:consumer
+                >管理消费权限
+              </a-button>
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                @click="onAddAuth(record)"
+                v-action:acl:sasl-scram:add-auth
+                >增加权限
+              </a-button>
+              <a-popconfirm
+                :title="'删除用户: ' + record.username + '及相关权限？'"
+                ok-text="确认"
+                cancel-text="取消"
+                @confirm="onDeleteUserAndAuth(record)"
+              >
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  v-action:acl:sasl-scram:pure
+                  >彻底删除</a-button
+                >
+              </a-popconfirm>
+            </div>
+          </template>
+        </template>
       </a-table>
       <UserDetail
         :visible="openUserDetailDialog"
@@ -140,19 +140,21 @@
   </a-spin>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, computed, onMounted } from 'vue'
+import { message } from 'ant-design-vue'
+import { useStore } from 'vuex'
 import request from "@/utils/request";
 import notification from "ant-design-vue/es/notification";
-import UpdateUser from "@/views/acl/UpdateUser";
+import UpdateUser from "@/views/acl/UpdateUser.vue";
 import { KafkaAclApi } from "@/utils/api";
-import ManageProducerAuth from "@/views/acl/ManageProducerAuth";
-import ManageConsumerAuth from "@/views/acl/ManageConsumerAuth";
-import AddAuth from "@/views/acl/AddAuth";
-import AclDetail from "@/views/acl/AclDetail";
-import UserDetail from "@/views/acl/UserDetail";
-import { mapState } from "vuex";
+import ManageProducerAuth from "@/views/acl/ManageProducerAuth.vue";
+import ManageConsumerAuth from "@/views/acl/ManageConsumerAuth.vue";
+import AddAuth from "@/views/acl/AddAuth.vue";
+import AclDetail from "@/views/acl/AclDetail.vue";
+import UserDetail from "@/views/acl/UserDetail.vue";
 
-export default {
+export default defineComponent({
   name: "SaslScram",
   components: {
     UpdateUser,
@@ -162,158 +164,185 @@ export default {
     AclDetail,
     UserDetail,
   },
-  data() {
-    return {
-      queryParam: {},
-      data: [],
-      columns,
-      selectRow: {},
-      form: this.$form.createForm(this, { name: "advanced_search" }),
-      showUpdateUser: false,
-      deleteUserConfirm: false,
-      openManageProducerAuthDialog: false,
-      openManageConsumerAuthDialog: false,
-      openAddAuthDialog: false,
-      openAclDetailDialog: false,
-      openUserDetailDialog: false,
-      selectDetail: {
-        resourceName: "",
-        resourceType: "",
-        username: "",
+  setup() {
+    const store = useStore()
+    const queryParam = reactive<any>({})
+    const data = ref<any[]>([])
+    const selectRow = ref<any>({})
+    const showUpdateUser = ref(false)
+    const deleteUserConfirm = ref(false)
+    const openManageProducerAuthDialog = ref(false)
+    const openManageConsumerAuthDialog = ref(false)
+    const openAddAuthDialog = ref(false)
+    const openAclDetailDialog = ref(false)
+    const openUserDetailDialog = ref(false)
+    const selectDetail = reactive({
+      resourceName: "",
+      resourceType: "",
+      username: "",
+    })
+    const loading = ref(false)
+
+    const formState = reactive({
+      username: undefined as any,
+    })
+
+    const enableSasl = computed(() => (store.state as any).clusterInfo.enableSasl)
+
+    const columns = [
+      {
+        title: "用户名",
+        dataIndex: "username",
+        key: "username",
+        width: 300,
       },
-      loading: false,
-    };
-  },
-  methods: {
-    handleSearch(e) {
-      e.preventDefault();
-      this.form.validateFields((error, values) => {
-        let queryParam = {};
-        if (values.username) {
-          queryParam.username = values.username;
-        }
-        if (values.topic) {
-          queryParam.resourceType = "TOPIC";
-          queryParam.resourceName = values.topic;
-        } else if (values.groupId) {
-          queryParam.resourceType = "GROUP";
-          queryParam.resourceName = values.groupId;
-        }
-        this.queryParam = {};
-        Object.assign(this.queryParam, queryParam);
-        this.getSaslScramUserList();
-      });
-    },
+      {
+        title: "操作",
+        key: "operation",
+        width: 500,
+      },
+    ]
 
-    handleReset() {
-      this.form.resetFields();
-    },
-
-    updateUser() {
-      this.showUpdateUser = true;
-    },
-    closeUpdateUserDialog(data) {
-      this.showUpdateUser = data.show;
-      if (data.ok) {
-        this.getSaslScramUserList();
+    function handleSearch(values: any) {
+      const query: any = {};
+      if (values.username) {
+        query.username = values.username;
       }
-    },
-    onDeleteUser(row) {
-      this.loading = true;
+      if (values.topic) {
+        query.resourceType = "TOPIC";
+        query.resourceName = values.topic;
+      } else if (values.groupId) {
+        query.resourceType = "GROUP";
+        query.resourceName = values.groupId;
+      }
+      Object.assign(queryParam, query);
+      getSaslScramUserList();
+    }
+
+    function handleReset() {
+      formState.username = undefined
+    }
+
+    function updateUser() {
+      showUpdateUser.value = true;
+    }
+
+    function closeUpdateUserDialog(data: any) {
+      showUpdateUser.value = data.show;
+      if (data.ok) {
+        getSaslScramUserList();
+      }
+    }
+
+    function onDeleteUser(row: any) {
+      loading.value = true;
       request({
         url: KafkaAclApi.deleteSaslScramUser.url,
         method: KafkaAclApi.deleteSaslScramUser.method,
         data: { username: row.username },
-      }).then((res) => {
-        this.loading = false;
-        this.getSaslScramUserList();
+      }).then((res: any) => {
+        loading.value = false;
+        getSaslScramUserList();
         if (res.code == 0) {
-          this.$message.success(res.msg);
+          message.success(res.msg);
         } else {
-          this.$message.error(res.msg);
+          message.error(res.msg);
         }
       });
-    },
-    onDeleteUserAndAuth(row) {
-      this.loading = true;
+    }
+
+    function onDeleteUserAndAuth(row: any) {
+      loading.value = true;
       request({
         url: KafkaAclApi.deleteKafkaUser.url,
         method: KafkaAclApi.deleteKafkaUser.method,
         data: { username: row.username },
-      }).then((res) => {
-        this.loading = false;
-        this.getSaslScramUserList();
+      }).then((res: any) => {
+        loading.value = false;
+        getSaslScramUserList();
         if (res.code == 0) {
-          this.$message.success(res.msg);
+          message.success(res.msg);
         } else {
-          this.$message.error(res.msg);
+          message.error(res.msg);
         }
       });
-    },
-    onManageProducerAuth(row) {
-      this.openManageProducerAuthDialog = true;
-      const rowData = {};
+    }
+
+    function onManageProducerAuth(row: any) {
+      openManageProducerAuthDialog.value = true;
+      const rowData: any = {};
       Object.assign(rowData, row);
-      this.selectRow = rowData;
-    },
-    onManageConsumerAuth(row) {
-      this.openManageConsumerAuthDialog = true;
-      const rowData = {};
+      selectRow.value = rowData;
+    }
+
+    function onManageConsumerAuth(row: any) {
+      openManageConsumerAuthDialog.value = true;
+      const rowData: any = {};
       Object.assign(rowData, row);
-      this.selectRow = rowData;
-    },
-    onAddAuth(row) {
-      this.openAddAuthDialog = true;
-      const rowData = {};
+      selectRow.value = rowData;
+    }
+
+    function onAddAuth(row: any) {
+      openAddAuthDialog.value = true;
+      const rowData: any = {};
       Object.assign(rowData, row);
-      this.selectRow = rowData;
-    },
-    onTopicDetail(topic, username) {
-      this.selectDetail.resourceType = "TOPIC";
-      this.selectDetail.resourceName = topic;
-      this.selectDetail.username = username;
-      this.openAclDetailDialog = true;
-    },
-    onGroupDetail(group, username) {
-      this.selectDetail.resourceType = "GROUP";
-      this.selectDetail.resourceName = group;
-      this.selectDetail.username = username;
-      this.openAclDetailDialog = true;
-    },
-    onUserDetail(username) {
-      this.selectDetail.username = username;
-      this.openUserDetailDialog = true;
-    },
-    closeManageProducerAuthDialog() {
-      this.openManageProducerAuthDialog = false;
-    },
-    closeManageConsumerAuthDialog() {
-      this.openManageConsumerAuthDialog = false;
-    },
-    closeAddAuthDialog() {
-      this.openAddAuthDialog = false;
-    },
-    closeAclDetailDialog(p) {
-      this.openAclDetailDialog = false;
+      selectRow.value = rowData;
+    }
+
+    function onTopicDetail(topic: string, username: string) {
+      selectDetail.resourceType = "TOPIC";
+      selectDetail.resourceName = topic;
+      selectDetail.username = username;
+      openAclDetailDialog.value = true;
+    }
+
+    function onGroupDetail(group: string, username: string) {
+      selectDetail.resourceType = "GROUP";
+      selectDetail.resourceName = group;
+      selectDetail.username = username;
+      openAclDetailDialog.value = true;
+    }
+
+    function onUserDetail(username: string) {
+      selectDetail.username = username;
+      openUserDetailDialog.value = true;
+    }
+
+    function closeManageProducerAuthDialog() {
+      openManageProducerAuthDialog.value = false;
+    }
+
+    function closeManageConsumerAuthDialog() {
+      openManageConsumerAuthDialog.value = false;
+    }
+
+    function closeAddAuthDialog() {
+      openAddAuthDialog.value = false;
+    }
+
+    function closeAclDetailDialog(p: any) {
+      openAclDetailDialog.value = false;
       if (p.refresh) {
-        this.getSaslScramUserList();
+        getSaslScramUserList();
       }
-    },
-    closeUserDetailDialog() {
-      this.openUserDetailDialog = false;
-    },
-    getSaslScramUserList() {
-      if (!this.enableSasl) {
+    }
+
+    function closeUserDetailDialog() {
+      openUserDetailDialog.value = false;
+    }
+
+    function getSaslScramUserList() {
+      if (!enableSasl.value) {
         return;
       }
-      this.loading = true;
+      loading.value = true;
       request({
         url: KafkaAclApi.getSaslScramUserList.url,
         method: KafkaAclApi.getSaslScramUserList.method,
-        params: this.queryParam,
-      }).then((response) => {
-        this.loading = false;
-        this.data.splice(0, this.data.length);
+        params: queryParam,
+      }).then((response: any) => {
+        loading.value = false;
+        data.value.splice(0, data.value.length);
         if (response.code != 0) {
           notification.error({
             message: response.msg,
@@ -328,44 +357,59 @@ export default {
           let groupList = Object.keys(v)
             .filter((e) => e.startsWith("GROUP"))
             .map((e) => e.split("#")[1]);
-          this.data.push({
+          data.value.push({
             key: k,
             username: k,
             topicList: topicList,
             groupList: groupList,
             user: response.data.map[k]["USER"],
           });
-          this.data.sort((a, b) => a.username.localeCompare(b.username));
+          data.value.sort((a, b) => a.username.localeCompare(b.username));
         }
       });
-    },
-  },
-  created() {
-    this.getSaslScramUserList();
-  },
-  computed: {
-    ...mapState({
-      enableSasl: (state) => state.clusterInfo.enableSasl,
-    }),
-  },
-};
+    }
 
-const columns = [
-  {
-    title: "用户名",
-    dataIndex: "username",
-    key: "username",
-    width: 300,
-    slots: { title: "username" },
-    scopedSlots: { customRender: "username" },
-  },
-  {
-    title: "操作",
-    key: "operation",
-    scopedSlots: { customRender: "operation" },
-    width: 500,
-  },
-];
+    onMounted(() => {
+      getSaslScramUserList();
+    })
+
+    return {
+      queryParam,
+      data,
+      columns,
+      selectRow,
+      showUpdateUser,
+      deleteUserConfirm,
+      openManageProducerAuthDialog,
+      openManageConsumerAuthDialog,
+      openAddAuthDialog,
+      openAclDetailDialog,
+      openUserDetailDialog,
+      selectDetail,
+      loading,
+      formState,
+      enableSasl,
+      handleSearch,
+      handleReset,
+      updateUser,
+      closeUpdateUserDialog,
+      onDeleteUser,
+      onDeleteUserAndAuth,
+      onManageProducerAuth,
+      onManageConsumerAuth,
+      onAddAuth,
+      onTopicDetail,
+      onGroupDetail,
+      onUserDetail,
+      closeManageProducerAuthDialog,
+      closeManageConsumerAuthDialog,
+      closeAddAuthDialog,
+      closeAclDetailDialog,
+      closeUserDetailDialog,
+      getSaslScramUserList,
+    }
+  }
+});
 </script>
 
 <style scoped>

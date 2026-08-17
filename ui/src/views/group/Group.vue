@@ -5,23 +5,23 @@
         <div id="form-consumer-group-advanced-search">
           <a-form
             class="ant-advanced-search-form"
-            :form="form"
+            :model="formState"
             @submit="handleSearch"
           >
             <a-row :gutter="24">
               <a-col :span="8">
-                <a-form-item :label="`消费组`">
+                <a-form-item label="消费组" name="groupId">
                   <a-input
                     placeholder="groupId"
                     class="input-w"
-                    v-decorator="['groupId']"
+                    v-model:value="formState.groupId"
                   />
                 </a-form-item>
               </a-col>
               <a-col :span="12">
-                <a-form-item :label="`状态`">
+                <a-form-item label="状态" name="states">
                   <a-checkbox-group
-                    v-decorator="['states']"
+                    v-model:value="formState.states"
                     style="width: 100%"
                   >
                     <a-row>
@@ -61,11 +61,11 @@
             <hr class="hr" />
             <a-row :gutter="24">
               <a-col :span="24">
-                <a-form-item label="过滤消费组">
+                <a-form-item label="过滤消费组" name="filterGroupId">
                   <a-input
                     placeholder="groupId 模糊过滤"
                     class="input-w"
-                    v-decorator="['filterGroupId']"
+                    v-model:value="formState.filterGroupId"
                     @change="onFilterGroupIdUpdate"
                   />
                   <span>
@@ -90,57 +90,60 @@
           bordered
           row-key="groupId"
         >
-          <div slot="members" slot-scope="text, record">
-            <a href="#" @click="openConsumerMemberDialog(record.groupId)"
-              >{{ text }}
-            </a>
-          </div>
-
-          <div slot="state" slot-scope="text">
-            {{ text }}
-            <!--          <span v-if="text" style="color: red">是</span><span v-else>否</span>-->
-          </div>
-
-          <div slot="operation" slot-scope="record" v-show="!record.internal">
-            <a-popconfirm
-              :title="'删除消费组: ' + record.groupId + '？'"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="deleteGroup(record.groupId)"
-            >
-              <a-button
-                size="small"
-                href="javascript:;"
-                class="operation-btn"
-                v-action:group:del
-                >删除
-              </a-button>
-            </a-popconfirm>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openConsumerMemberDialog(record.groupId)"
-              v-action:group:client
-              >消费端
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openConsumerDetailDialog(record.groupId)"
-              v-action:group:consumer-detail
-              >消费详情
-            </a-button>
-            <a-button
-              size="small"
-              href="javascript:;"
-              class="operation-btn"
-              @click="openOffsetPartitionDialog(record.groupId)"
-              v-action:group:offset-partition
-              >位移分区
-            </a-button>
-          </div>
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.key === 'members'">
+              <a href="#" @click="openConsumerMemberDialog(record.groupId)"
+                >{{ text }}
+              </a>
+            </template>
+            <template v-else-if="column.key === 'state'">
+              {{ text }}
+            </template>
+            <template v-else-if="column.key === 'operation'">
+              <span v-show="!record.internal">
+                <a-popconfirm
+                  :title="'删除消费组: ' + record.groupId + '？'"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @confirm="deleteGroup(record.groupId)"
+                >
+                  <a-button
+                    size="small"
+                    href="javascript:;"
+                    class="operation-btn"
+                    type="primary"
+                    danger
+                    v-action:group:del
+                    >删除
+                  </a-button>
+                </a-popconfirm>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openConsumerMemberDialog(record.groupId)"
+                  v-action:group:client
+                  >消费端
+                </a-button>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openConsumerDetailDialog(record.groupId)"
+                  v-action:group:consumer-detail
+                  >消费详情
+                </a-button>
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  @click="openOffsetPartitionDialog(record.groupId)"
+                  v-action:group:offset-partition
+                  >位移分区
+                </a-button>
+              </span>
+            </template>
+          </template>
         </a-table>
         <Member
           :visible="showConsumerGroupDialog"
@@ -168,94 +171,106 @@
   </div>
 </template>
 
-<script>
-import request from "@/utils/request";
-import { KafkaConsumerApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
-import Member from "@/views/group/Member";
-import ConsumerDetail from "@/views/group/ConsumerDetail";
-import AddSupscription from "@/views/group/AddSupscription";
-import OffsetTopicPartition from "@/views/group/OffsetTopicPartition";
-import { isAuthorized } from "@/utils/auth";
+<script lang="ts">
+import { defineComponent, reactive } from 'vue';
+import request from '@/utils/request';
+import { KafkaConsumerApi } from '@/utils/api';
+import { notification } from 'ant-design-vue';
+import Member from '@/views/group/Member.vue';
+import ConsumerDetail from '@/views/group/ConsumerDetail.vue';
+import AddSupscription from '@/views/group/AddSupscription.vue';
+import OffsetTopicPartition from '@/views/group/OffsetTopicPartition.vue';
+import { isAuthorized } from '@/utils/auth';
 
-export default {
-  name: "ConsumerGroup",
+export default defineComponent({
+  name: 'ConsumerGroup',
   components: { Member, ConsumerDetail, AddSupscription, OffsetTopicPartition },
+  setup() {
+    const formState = reactive({
+      groupId: '',
+      states: [] as string[],
+      filterGroupId: '',
+    });
+    return {
+      formState,
+    };
+  },
   data() {
     return {
-      queryParam: {},
-      data: [],
-      filteredData: [],
+      queryParam: {} as Record<string, any>,
+      data: [] as any[],
+      filteredData: [] as any[],
       columns,
-      selectRow: {},
-      form: this.$form.createForm(this, {
-        name: "consumer_group_advanced_search",
-      }),
+      selectRow: {} as Record<string, any>,
       showUpdateUser: false,
       deleteUserConfirm: false,
       selectDetail: {
-        resourceName: "",
-        resourceType: "",
-        username: "",
+        resourceName: '',
+        resourceType: '',
+        username: '',
       },
       loading: false,
       showConsumerGroupDialog: false,
       showConsumerDetailDialog: false,
       showAddSubscriptionDialog: false,
       showOffsetPartitionDialog: false,
-      filterGroupId: "",
+      filterGroupId: '',
     };
   },
   methods: {
-    handleSearch(e) {
+    handleSearch(e: Event) {
       e.preventDefault();
       this.getConsumerGroupList();
     },
 
     handleReset() {
-      this.form.resetFields();
+      Object.assign(this.formState, {
+        groupId: '',
+        states: [],
+        filterGroupId: '',
+      });
     },
 
     getConsumerGroupList() {
-      Object.assign(this.queryParam, this.form.getFieldsValue());
+      Object.assign(this.queryParam, { ...this.formState });
       this.loading = true;
       request({
         url: KafkaConsumerApi.getConsumerGroupList.url,
         method: KafkaConsumerApi.getConsumerGroupList.method,
         data: this.queryParam,
-      }).then((res) => {
+      }).then((res: any) => {
         this.loading = false;
         if (res.code == 0) {
           this.data = res.data.list;
           this.filter();
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
     },
-    deleteGroup(group) {
+    deleteGroup(group: string) {
       this.loading = true;
       request({
-        url: KafkaConsumerApi.deleteConsumerGroup.url + "?groupId=" + group,
+        url: KafkaConsumerApi.deleteConsumerGroup.url + '?groupId=' + group,
         method: KafkaConsumerApi.deleteConsumerGroup.method,
-      }).then((res) => {
+      }).then((res: any) => {
         this.loading = false;
         if (res.code == 0) {
           this.$message.success(res.msg);
           this.getConsumerGroupList();
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
     },
-    openConsumerMemberDialog(groupId) {
-      if (!isAuthorized("group:client")) {
+    openConsumerMemberDialog(groupId: string) {
+      if (!isAuthorized('group:client')) {
         return;
       }
       this.showConsumerGroupDialog = true;
@@ -264,7 +279,7 @@ export default {
     closeConsumerDialog() {
       this.showConsumerGroupDialog = false;
     },
-    openConsumerDetailDialog(groupId) {
+    openConsumerDetailDialog(groupId: string) {
       this.showConsumerDetailDialog = true;
       this.selectDetail.resourceName = groupId;
     },
@@ -274,27 +289,27 @@ export default {
     openAddSubscriptionDialog() {
       this.showAddSubscriptionDialog = true;
     },
-    closeAddSubscriptionDialog(res) {
+    closeAddSubscriptionDialog(res: any) {
       this.showAddSubscriptionDialog = false;
       if (res.refresh) {
         this.getConsumerGroupList();
       }
     },
-    openOffsetPartitionDialog(groupId) {
+    openOffsetPartitionDialog(groupId: string) {
       this.showOffsetPartitionDialog = true;
       this.selectDetail.resourceName = groupId;
     },
     closeOffsetPartitionDialog() {
       this.showOffsetPartitionDialog = false;
     },
-    onFilterGroupIdUpdate(input) {
-      this.filterGroupId = input.target.value;
+    onFilterGroupIdUpdate(input: Event) {
+      this.filterGroupId = (input.target as HTMLInputElement).value;
       this.filter();
     },
     filter() {
       if (this.filterGroupId) {
         this.filteredData = this.data.filter(
-          (e) => e.groupId.indexOf(this.filterGroupId) != -1
+          (e: any) => e.groupId.indexOf(this.filterGroupId) != -1
         );
       } else {
         this.filteredData = this.data;
@@ -304,48 +319,38 @@ export default {
   created() {
     this.getConsumerGroupList();
   },
-};
+});
 
 const columns = [
   {
-    title: "消费组",
-    dataIndex: "groupId",
-    key: "groupId",
+    title: '消费组',
+    dataIndex: 'groupId',
+    key: 'groupId',
     width: 300,
   },
   {
-    title: "消费端数量",
-    dataIndex: "members",
-    key: "members",
-    slots: { title: "members" },
-    scopedSlots: { customRender: "members" },
+    title: '消费端数量',
+    dataIndex: 'members',
+    key: 'members',
   },
   {
-    title: "当前状态",
-    dataIndex: "state",
-    key: "state",
-    slots: { title: "state" },
-    scopedSlots: { customRender: "state" },
+    title: '当前状态',
+    dataIndex: 'state',
+    key: 'state',
   },
   {
-    title: "分区分配器",
-    dataIndex: "partitionAssignor",
-    key: "partitionAssignor",
+    title: '分区分配器',
+    dataIndex: 'partitionAssignor',
+    key: 'partitionAssignor',
   },
   {
-    title: "协调者节点",
-    dataIndex: "coordinator",
-    key: "coordinator",
+    title: '协调者节点',
+    dataIndex: 'coordinator',
+    key: 'coordinator',
   },
-  // {
-  //   title: "授权操作数量",
-  //   dataIndex: "authorizedOperations",
-  //   key: "authorizedOperations",
-  // },
   {
-    title: "操作",
-    key: "operation",
-    scopedSlots: { customRender: "operation" },
+    title: '操作',
+    key: 'operation',
     width: 500,
   },
 ];

@@ -1,96 +1,138 @@
 <template>
   <a-modal
     :title="selectDetail.resourceName + '权限明细'"
-    :visible="show"
+    :open="show"
     :confirm-loading="confirmLoading"
     :width="1200"
     @cancel="handleCancel"
     :mask="false"
-    :destroyOnClose="true"
+    :destroy-on-close="true"
     :footer="null"
-    :maskClosable="false"
+    :mask-closable="false"
   >
     <a-spin :spinning="loading">
       <div>
         <a-table
           :columns="columns"
           :data-source="data"
-          :rowKey="
+          :row-key="
             (record, index) => {
               return index;
             }
           "
-          >>
-          <a slot="action" slot-scope="record">
-            <a-popconfirm
-              :title="'删除操作权限: ' + record.operation + '？'"
-              ok-text="确认"
-              cancel-text="取消"
-              @confirm="onDelete(record)"
-              v-action:acl:authority:clean
-            >
-              <a-button>删除</a-button>
-            </a-popconfirm>
-          </a>
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'action'">
+              <a-popconfirm
+                :title="'删除操作权限: ' + record.operation + '？'"
+                ok-text="确认"
+                cancel-text="取消"
+                @confirm="onDelete(record)"
+                v-action:acl:authority:clean
+              >
+                <a-button
+                  size="small"
+                  href="javascript:;"
+                  class="operation-btn"
+                  type="primary"
+                  danger
+                  >删除</a-button
+                >
+              </a-popconfirm>
+            </template>
+          </template>
         </a-table>
       </div>
     </a-spin>
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, watch } from 'vue'
+import { message } from 'ant-design-vue'
 import { KafkaAclApi } from "@/utils/api";
 import request from "@/utils/request";
 
-export default {
+export default defineComponent({
   name: "AuthDetail",
   props: {
-    selectDetail: {},
+    selectDetail: {
+      type: Object as () => { resourceName?: string; resourceType?: string; username?: string },
+      default: () => ({ resourceName: '', resourceType: '', username: '' }),
+    },
     visible: {
       type: Boolean,
       default: false,
     },
   },
-  data() {
-    return {
-      formLayout: "horizontal",
-      confirmLoading: false,
-      show: this.visible,
-      data,
-      columns,
-      loading: false,
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.data = [];
-        this.getAclDetail();
+  setup(props, { emit }) {
+    const confirmLoading = ref(false)
+    const show = ref(props.visible)
+    const data = ref<any[]>([])
+    const loading = ref(false)
+
+    const columns = [
+      {
+        title: "用户名",
+        dataIndex: "principal",
+        key: "principal",
+      },
+      {
+        title: "资源名称",
+        dataIndex: "name",
+        key: "name",
+      },
+      {
+        title: "主机",
+        dataIndex: "host",
+        key: "host",
+      },
+      {
+        title: "操作类型",
+        dataIndex: "operation",
+        key: "operation",
+      },
+      {
+        title: "权限类型",
+        dataIndex: "permissionType",
+        key: "permissionType",
+      },
+      {
+        title: "操作",
+        key: "action",
+      },
+    ]
+
+    watch(() => props.visible, (v) => {
+      show.value = v;
+      if (show.value) {
+        data.value = [];
+        getAclDetail();
       }
-    },
-  },
-  methods: {
-    handleCancel() {
-      this.$emit("aclDetailDialog", { refresh: true });
-    },
-    getAclDetail() {
-      this.loading = true;
+    })
+
+    function handleCancel() {
+      emit("aclDetailDialog", { refresh: true });
+    }
+
+    function getAclDetail() {
+      loading.value = true;
       const api = KafkaAclApi.getAclDetailList;
       request({
         url: api.url,
         method: api.method,
-        data: this.selectDetail,
-      }).then((res) => {
-        this.loading = false;
+        data: props.selectDetail,
+      }).then((res: any) => {
+        loading.value = false;
         if (res.code != 0) {
-          this.$message.error(res.msg);
+          message.error(res.msg);
         } else {
-          this.data = res.data.list;
+          data.value = res.data.list;
         }
       });
-    },
-    onDelete(record) {
+    }
+
+    function onDelete(record: any) {
       const param = Object.assign({}, record);
       delete param["null"];
       const api = KafkaAclApi.deleteAcl;
@@ -98,55 +140,27 @@ export default {
         url: api.url,
         method: api.method,
         data: param,
-      }).then((res) => {
+      }).then((res: any) => {
         if (res.code != 0) {
-          this.$message.error(res.msg);
+          message.error(res.msg);
         } else {
-          this.$message.success(res.msg);
-          this.getAclDetail();
+          message.success(res.msg);
+          getAclDetail();
         }
       });
-    },
-  },
-  beforeMount() {
-    // this.getAclDetail();
-  },
-};
+    }
 
-const columns = [
-  {
-    title: "用户名",
-    dataIndex: "principal",
-    key: "principal",
-  },
-  {
-    title: "资源名称",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "主机",
-    dataIndex: "host",
-    key: "host",
-  },
-  {
-    title: "操作类型",
-    dataIndex: "operation",
-    key: "operation",
-  },
-  {
-    title: "权限类型",
-    dataIndex: "permissionType",
-    key: "permissionType",
-  },
-  {
-    title: "操作",
-    key: "action",
-    scopedSlots: { customRender: "action" },
-  },
-];
-
-const data = [];
+    return {
+      confirmLoading,
+      show,
+      data,
+      columns,
+      loading,
+      handleCancel,
+      onDelete,
+    }
+  }
+});
 </script>
 
 <style scoped></style>

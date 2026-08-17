@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="解除限流"
-    :visible="show"
+    :open="show"
     :width="1000"
     :mask="false"
     :maskClosable="false"
@@ -14,21 +14,20 @@
     <div>
       <a-spin :spinning="loading">
         <a-form
-          :form="form"
+          :model="formState"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
         >
-          <a-form-item label="Broker">
+          <a-form-item
+            label="Broker"
+            name="brokerList"
+            :rules="[{ required: true, message: '请选择一个broker!' }]"
+          >
             <a-select
+              v-model:value="formState.brokerList"
               mode="multiple"
-              option-filter-prop="children"
-              v-decorator="[
-                'brokerList',
-                {
-                  initialValue: brokers,
-                  rules: [{ required: true, message: '请选择一个broker!' }],
-                },
-              ]"
+              :filter-option="true"
+              option-filter-prop="label"
               placeholder="请选择一个broker"
             >
               <a-select-option v-for="v in brokers" :key="v" :value="v">
@@ -52,12 +51,14 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from "vue";
+import { message } from "ant-design-vue";
+import notification from "ant-design-vue/lib/notification";
 import request from "@/utils/request";
 import { KafkaClusterApi, KafkaOpApi } from "@/utils/api";
-import notification from "ant-design-vue/lib/notification";
 
-export default {
+export default defineComponent({
   name: "RemoveThrottle",
   props: {
     visible: {
@@ -65,63 +66,74 @@ export default {
       default: false,
     },
   },
-  data() {
-    return {
-      show: this.visible,
-      loading: false,
-      form: this.$form.createForm(this, { name: "RemoveThrottleForm" }),
-      brokers: [],
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getClusterInfo();
+  setup(props, { emit }) {
+    const show = ref(props.visible);
+    const loading = ref(false);
+    const brokers = ref<any[]>([]);
+
+    const formState = reactive({
+      brokerList: [] as any[],
+    });
+
+    watch(
+      () => props.visible,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          getClusterInfo();
+        }
       }
-    },
-  },
-  methods: {
-    handleCancel() {
-      this.$emit("closeRemoveThrottleDialog", { refresh: false });
-    },
-    getClusterInfo() {
-      this.loading = true;
+    );
+
+    const handleCancel = () => {
+      emit("closeRemoveThrottleDialog", { refresh: false });
+    };
+
+    const getClusterInfo = () => {
+      loading.value = true;
       request({
         url: KafkaClusterApi.getClusterInfo.url,
         method: KafkaClusterApi.getClusterInfo.method,
-      }).then((res) => {
-        this.loading = false;
-        this.brokers = [];
-        res.data.nodes.forEach((node) => this.brokers.push(node.id));
+      }).then((res: any) => {
+        loading.value = false;
+        brokers.value = [];
+        formState.brokerList = [];
+        res.data.nodes.forEach((node: any) => brokers.value.push(node.id));
       });
-    },
-    ok() {
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          const data = Object.assign({}, values);
-          this.loading = true;
-          request({
-            url: KafkaOpApi.removeThrottle.url,
-            method: KafkaOpApi.removeThrottle.method,
-            data: data,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.$message.success(res.msg);
-              this.$emit("closeRemoveThrottleDialog", { refresh: false });
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
+    };
+
+    const ok = () => {
+      const data = Object.assign({}, formState);
+      loading.value = true;
+      request({
+        url: KafkaOpApi.removeThrottle.url,
+        method: KafkaOpApi.removeThrottle.method,
+        data: data,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          message.success(res.msg);
+          emit("closeRemoveThrottleDialog", { refresh: false });
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
           });
         }
       });
-    },
+    };
+
+    return {
+      show,
+      loading,
+      brokers,
+      formState,
+      handleCancel,
+      getClusterInfo,
+      ok,
+    };
   },
-};
+});
 </script>
 
 <style scoped></style>
