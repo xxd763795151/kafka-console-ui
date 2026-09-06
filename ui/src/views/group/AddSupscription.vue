@@ -15,7 +15,7 @@
           :model="formState"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
-          @submit="handleSubmit"
+          @finish="handleSubmit"
         >
           <a-form-item
             label="消费组"
@@ -114,9 +114,7 @@ export default defineComponent({
         }
       });
     },
-    async handleSubmit(e: Event) {
-      e.preventDefault();
-      const values = { ...this.formState };
+    async handleSubmit(values: Record<string, any>) {
       this.loading = true;
       request({
         url: KafkaConsumerApi.addSubscription.url,

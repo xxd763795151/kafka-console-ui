@@ -17,7 +17,7 @@
           ref="formRef"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
-          @submit="handleSubmit"
+          @finish="handleSubmit"
         >
           <a-form-item label="用户名" name="username">
             <a-input
@@ -99,10 +99,9 @@ export default defineComponent({
       }
     );
 
-    const handleSubmit = async (e: any) => {
-      e.preventDefault();
-      const params = Object.assign({}, props.user, state.formState);
-      params.roleIds = state.formState.roleIds;
+    const handleSubmit = async (values: any) => {
+      const params = Object.assign({}, props.user, values);
+      params.roleIds = values.roleIds;
       state.loading = true;
       request({
         url: UserManageApi.addOrUpdateUser.url,

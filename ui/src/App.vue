@@ -47,7 +47,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { SmileOutlined } from '@ant-design/icons-vue';
-import { KafkaClusterApi, AuthApi } from '@/utils/api';
+import { KafkaClusterApi } from '@/utils/api';
 import request from '@/utils/request';
 import { mapMutations, mapState } from 'vuex';
 import {
@@ -69,7 +69,7 @@ export default defineComponent({
     };
   },
   created() {
-    this.intAuthState();
+    this.beforeLoadFn();
     this.initClusterInfo();
   },
   computed: {
@@ -84,7 +84,6 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       switchCluster: CLUSTER.SWITCH,
-      enableAuth: AUTH.ENABLE,
       setUsername: AUTH.SET_USERNAME,
       setPermissions: AUTH.SET_PERMISSIONS,
     }),
@@ -97,15 +96,6 @@ export default defineComponent({
       if (perms) {
         this.setPermissions(perms);
       }
-    },
-    intAuthState() {
-      request({
-        url: AuthApi.enable.url,
-        method: AuthApi.enable.method,
-      }).then((res: any) => {
-        const enable = res as boolean;
-        this.enableAuth(enable);
-      });
     },
     initClusterInfo() {
       const clusterInfo = getClusterInfo();
@@ -132,9 +122,6 @@ export default defineComponent({
       deleteUsername();
       this.$router.push('/login-page');
     },
-  },
-  mounted() {
-    this.beforeLoadFn();
   },
 });
 </script>

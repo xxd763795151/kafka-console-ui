@@ -17,7 +17,7 @@
           ref="formRef"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
-          @submit="handleSubmit"
+          @finish="handleSubmit"
         >
           <a-form-item label="角色" name="roleId">
             <a-select
@@ -113,13 +113,12 @@ export default defineComponent({
       }
     );
 
-    const handleSubmit = async (e: any) => {
-      e.preventDefault();
+    const handleSubmit = async (values: any) => {
       state.loading = true;
       request({
         url: ClusterRoleRelationApi.add.url,
         method: ClusterRoleRelationApi.add.method,
-        data: state.formState,
+        data: values,
       }).then((res: any) => {
         state.loading = false;
         if (res.code == 0) {

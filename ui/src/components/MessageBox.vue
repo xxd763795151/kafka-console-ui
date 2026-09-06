@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="消息提示"
-    v-model:open="visible"
+    :open="open"
     :width="400"
     :mask="false"
     :destroyOnClose="true"
@@ -25,15 +25,14 @@ export default defineComponent({
       type: String,
       default: '',
     },
-    visible: {
+    open: {
       type: Boolean,
       default: false,
     },
   },
-  emits: ['closeMessageBox', 'update:visible'],
+  emits: ['closeMessageBox'],
   methods: {
     handleCancel() {
-      this.$emit('update:visible', false);
       this.$emit('closeMessageBox', {});
     },
   },

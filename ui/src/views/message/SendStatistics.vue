@@ -41,7 +41,12 @@
                   v-model:value="selectPartition"
                   placeholder="请选择分区"
                 >
-                  <a-select-option v-for="v in partitions" :key="v" :value="v">
+                  <a-select-option
+                    v-for="v in partitions"
+                    :key="v"
+                    :value="v"
+                    :label="v == -1 ? '全部' : String(v)"
+                  >
                     <span v-if="v == -1">全部</span> <span v-else>{{ v }}</span>
                   </a-select-option>
                 </a-select>

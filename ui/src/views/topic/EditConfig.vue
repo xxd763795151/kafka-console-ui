@@ -15,7 +15,7 @@
           :model="formState"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
-          @submit="handleSubmit"
+          @finish="handleSubmit"
         >
           <a-form-item label="属性" name="name">
             <a-input
@@ -92,14 +92,13 @@ export default defineComponent({
       { deep: true }
     );
 
-    function handleSubmit(e: Event) {
-      e.preventDefault();
+    function handleSubmit(values: Record<string, any>) {
       loading.value = true;
       const api = KafkaConfigApi.setTopicConfig;
       request({
         url: api.url,
         method: api.method,
-        data: Object.assign({ entity: props.topic }, formState),
+        data: Object.assign({ entity: props.topic }, values),
       }).then((res: any) => {
         loading.value = false;
         if (res.code == 0) {

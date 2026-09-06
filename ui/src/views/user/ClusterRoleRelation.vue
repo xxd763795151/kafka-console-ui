@@ -5,7 +5,7 @@
         <a-form
           class="ant-advanced-search-form"
           :model="formState"
-          @submit="handleSearch"
+          @finish="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="16">
@@ -22,7 +22,6 @@
                 <a-button
                   type="primary"
                   html-type="submit"
-                  @click="handleSearch()"
                 >
                   刷新
                 </a-button>

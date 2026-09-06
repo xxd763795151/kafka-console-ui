@@ -47,7 +47,12 @@
               option-filter-prop="label"
               placeholder="请选择一个broker"
             >
-              <a-select-option v-for="v in brokers" :key="v" :value="v">
+              <a-select-option
+                v-for="v in brokers"
+                :key="v"
+                :value="v"
+                :label="v == -1 ? '全部' : String(v)"
+              >
                 <span v-if="v == -1">全部</span> <span v-else>{{ v }}</span>
               </a-select-option>
             </a-select>

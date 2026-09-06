@@ -136,14 +136,6 @@ export default defineComponent({
       return String(properties);
     };
 
-    const parseTextToProperties = (text: string): any[] => {
-      if (!text || !text.trim()) return [];
-      return text
-        .split(/\r?\n|,/)
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
-    };
-
     const formState = reactive({
       clusterName: props.clusterInfo?.clusterName || "",
       address: props.clusterInfo?.address || "",
@@ -174,12 +166,9 @@ export default defineComponent({
       const api = props.isModify
         ? KafkaClusterApi.updateClusterInfo
         : KafkaClusterApi.addClusterInfo;
-      const normalizedValues = Object.assign({}, values, {
-        properties: parseTextToProperties(values.properties || ""),
-      });
       const submitData = props.isModify
-        ? Object.assign({}, props.clusterInfo, normalizedValues)
-        : Object.assign({}, normalizedValues);
+        ? Object.assign({}, props.clusterInfo, values)
+        : Object.assign({}, values);
       request({
         url: api.url,
         method: api.method,

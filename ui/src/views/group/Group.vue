@@ -92,7 +92,7 @@
         >
           <template #bodyCell="{ column, text, record }">
             <template v-if="column.key === 'members'">
-              <a href="#" @click="openConsumerMemberDialog(record.groupId)"
+              <a href="#" @click.prevent="openConsumerMemberDialog(record.groupId)"
                 >{{ text }}
               </a>
             </template>

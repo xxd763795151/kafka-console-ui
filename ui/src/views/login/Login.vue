@@ -14,7 +14,6 @@
       :rules="[{ required: true, message: '请输入账号' }]"
     >
       <a-input
-        @keyup.enter="handleSubmit"
         style="width: 200px"
         allowClear
         v-model:value="formState.username"
@@ -27,7 +26,6 @@
       :rules="[{ required: true, message: '请输入密码' }]"
     >
       <a-input-password
-        @keyup.enter="handleSubmit"
         style="width: 200px"
         v-model:value="formState.password"
       />
@@ -36,9 +34,7 @@
       <a-button
         type="primary"
         html-type="submit"
-        @click="handleSubmit"
         :loading="loading"
-        @keyup.enter="handleSubmit"
         >登录</a-button
       >
     </a-form-item>

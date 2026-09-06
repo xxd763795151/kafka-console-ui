@@ -36,7 +36,7 @@
                 </span>
               </div>
             </template>
-            <template v-else-if="column.key === 'operation'" v-show="!record.internal">
+            <template v-else-if="column.key === 'operation' && !record.internal">
               <a-popconfirm
                 :title="
                   'topic: ' +

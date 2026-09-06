@@ -14,6 +14,7 @@
     <div>
       <a-spin :spinning="loading">
         <a-form
+          ref="formRef"
           :model="formState"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
@@ -94,6 +95,7 @@ export default defineComponent({
     const loading = ref(false);
     const partitions = ref<any[]>([]);
     const showPartition = ref(true);
+    const formRef = ref();
 
     const formState = reactive({
       operation: "ON",
@@ -136,7 +138,12 @@ export default defineComponent({
       });
     }
 
-    function ok() {
+    async function ok() {
+      try {
+        await formRef.value?.validate();
+      } catch {
+        return;
+      }
       const data = Object.assign({}, formState, { topic: props.topic });
       loading.value = true;
       request({
@@ -166,6 +173,7 @@ export default defineComponent({
       loading,
       partitions,
       showPartition,
+      formRef,
       formState,
       handleCancel,
       getPartitionInfo,

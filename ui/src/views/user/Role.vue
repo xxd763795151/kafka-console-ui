@@ -252,6 +252,11 @@ export default defineComponent({
     };
 
     const onSave = async () => {
+      try {
+        await formRef.value?.validate();
+      } catch {
+        return;
+      }
       const params = Object.assign({}, state.selectedRole, state.formState);
       params.permissionIds = [];
       state.selectedPermissions.forEach((e: any) => {

@@ -92,7 +92,7 @@
         >
           <template #bodyCell="{ column, text, record }">
             <template v-if="column.key === 'partitions'">
-              <a href="#" @click="openPartitionInfoDialog(record.name)"
+              <a href="#" @click.prevent="openPartitionInfoDialog(record.name)"
                 >{{ text }}
               </a>
             </template>

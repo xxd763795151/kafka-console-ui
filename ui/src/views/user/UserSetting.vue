@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <a-spin :spinning="loading">
-      <a-form :model="formState" :rules="rules" ref="formRef" @submit="handleSubmit">
+      <a-form :model="formState" :rules="rules" ref="formRef" @finish="handleSubmit">
         <a-form-item label="新密码" name="password">
           <a-input-password
             v-model:value="formState.password"
@@ -61,9 +61,8 @@ export default defineComponent({
       ],
     };
 
-    const handleSubmit = async (e: any) => {
-      e.preventDefault();
-      const param = Object.assign({}, state.formState);
+    const handleSubmit = async (values: any) => {
+      const param = Object.assign({}, values);
       state.loading = true;
       request({
         url: UserManageApi.updatePassword.url,

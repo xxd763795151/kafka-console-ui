@@ -14,6 +14,7 @@
     <div>
       <a-spin :spinning="loading">
         <a-form
+          ref="formRef"
           :model="formState"
           :label-col="{ span: 8 }"
           :wrapper-col="{ span: 12 }"
@@ -40,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from 'vue';
+import { defineComponent, reactive, ref } from 'vue';
 import request from '@/utils/request';
 import { KafkaConsumerApi } from '@/utils/api';
 import { notification } from 'ant-design-vue';
@@ -64,10 +65,12 @@ export default defineComponent({
   },
   emits: ['closeResetOffsetByTimeDialog', 'update:visible'],
   setup() {
+    const formRef = ref();
     const formState = reactive({
       dateTime: undefined as dayjs.Dayjs | undefined,
     });
     return {
+      formRef,
       formState,
     };
   },
@@ -88,6 +91,11 @@ export default defineComponent({
       this.$emit('closeResetOffsetByTimeDialog', {});
     },
     async resetOffset() {
+      try {
+        await this.formRef.validate();
+      } catch {
+        return;
+      }
       const v = { ...this.formState };
       const dateStr = dayjs(v.dateTime).format('YYYY-MM-DD HH:mm:ss');
       const data: any = { dateStr };

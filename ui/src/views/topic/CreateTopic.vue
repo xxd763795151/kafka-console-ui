@@ -15,7 +15,7 @@
           :model="formState"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
-          @submit="handleSubmit"
+          @finish="handleSubmit"
         >
           <a-form-item
             label="Topic名称"
@@ -114,9 +114,8 @@ export default defineComponent({
       }
     );
 
-    function handleSubmit(e: Event) {
-      e.preventDefault();
-      const values = { ...formState };
+    function handleSubmit(formValues: Record<string, any>) {
+      const values = { ...formValues };
       if (values.configs) {
         const config: Record<string, string> = {};
         values.configs.split("\n").forEach((e) => {

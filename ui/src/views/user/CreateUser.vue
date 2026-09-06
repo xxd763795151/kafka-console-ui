@@ -17,7 +17,7 @@
           ref="formRef"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
-          @submit="handleSubmit"
+          @finish="handleSubmit"
         >
           <a-form-item label="用户名" name="username">
             <a-input
@@ -96,13 +96,12 @@ export default defineComponent({
       }
     );
 
-    const handleSubmit = async (e: any) => {
-      e.preventDefault();
+    const handleSubmit = async (values: any) => {
       state.loading = true;
       request({
         url: UserManageApi.addOrUpdateUser.url,
         method: UserManageApi.addOrUpdateUser.method,
-        data: state.formState,
+        data: values,
       }).then((res: any) => {
         state.loading = false;
         if (res.code == 0) {

@@ -14,6 +14,7 @@
     <div>
       <a-spin :spinning="loading">
         <a-form
+          ref="formRef"
           :model="formState"
           :label-col="{ span: 5 }"
           :wrapper-col="{ span: 12 }"
@@ -30,7 +31,12 @@
               option-filter-prop="label"
               placeholder="请选择一个broker"
             >
-              <a-select-option v-for="v in brokers" :key="v" :value="v">
+              <a-select-option
+                v-for="v in brokers"
+                :key="v"
+                :value="v"
+                :label="v == -1 ? '全部' : String(v)"
+              >
                 <span v-if="v == -1">全部</span> <span v-else>{{ v }}</span>
               </a-select-option>
             </a-select>
@@ -70,6 +76,7 @@ export default defineComponent({
     const show = ref(props.visible);
     const loading = ref(false);
     const brokers = ref<any[]>([]);
+    const formRef = ref();
 
     const formState = reactive({
       brokerList: [] as any[],
@@ -102,7 +109,12 @@ export default defineComponent({
       });
     };
 
-    const ok = () => {
+    const ok = async () => {
+      try {
+        await formRef.value?.validate();
+      } catch {
+        return;
+      }
       const data = Object.assign({}, formState);
       loading.value = true;
       request({
@@ -127,6 +139,7 @@ export default defineComponent({
       show,
       loading,
       brokers,
+      formRef,
       formState,
       handleCancel,
       getClusterInfo,

@@ -36,7 +36,12 @@
             v-model:value="selectPartition"
             placeholder="请选择一个分区"
           >
-            <a-select-option v-for="v in partitions" :key="v" :value="v">
+            <a-select-option
+              v-for="v in partitions"
+              :key="v"
+              :value="v"
+              :label="v == -1 ? '默认' : String(v)"
+            >
               <span v-if="v == -1">默认</span> <span v-else>{{ v }}</span>
             </a-select-option>
           </a-select>
@@ -129,7 +134,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs, onMounted, ref } from "vue";
+import { defineComponent, reactive, toRefs, ref } from "vue";
 import { message } from "ant-design-vue";
 import request from "@/utils/request";
 import { KafkaTopicApi, KafkaMessageApi } from "@/utils/api";
@@ -175,22 +180,6 @@ export default defineComponent({
       selectPartition: undefined as number | undefined,
       rows: [{ headerKey: "", headerValue: "" }] as HeaderRow[],
     });
-
-    const getTopicNameList = () => {
-      request({
-        url: KafkaTopicApi.getTopicNameList.url,
-        method: KafkaTopicApi.getTopicNameList.method,
-      }).then((res: any) => {
-        if (res.code == 0) {
-          state.rows = [{ headerKey: "", headerValue: "" }];
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    };
 
     const getPartitionInfo = (topic: string) => {
       state.loading = true;
@@ -249,15 +238,10 @@ export default defineComponent({
       });
     };
 
-    onMounted(() => {
-      getTopicNameList();
-    });
-
     return {
       ...toRefs(state),
       formRef,
       formState,
-      getTopicNameList,
       getPartitionInfo,
       handleTopicChange,
       addRow,

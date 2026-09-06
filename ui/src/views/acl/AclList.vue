@@ -67,7 +67,7 @@
                 href="#"
                 v-for="t in text"
                 :key="t"
-                @click="onTopicDetail(t, record.username)"
+                @click.prevent="onTopicDetail(t, record.username)"
                 ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
               </a>
             </template>
@@ -76,7 +76,7 @@
                 href="#"
                 v-for="t in text"
                 :key="t"
-                @click="onGroupDetail(t, record.username)"
+                @click.prevent="onGroupDetail(t, record.username)"
                 ><div style="border-bottom: 1px solid #e5e1e1">{{ t }}</div>
               </a>
             </template>

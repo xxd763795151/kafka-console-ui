@@ -118,6 +118,7 @@
           </template>
 
           <a-form
+            ref="resetPartitionOffsetFormRef"
             :model="resetPartitionOffsetFormState"
             :label-col="{ span: 8 }"
             :wrapper-col="{ span: 12 }"
@@ -146,7 +147,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from 'vue';
+import { defineComponent, reactive, ref } from 'vue';
 import { ReloadOutlined } from '@ant-design/icons-vue';
 import request from '@/utils/request';
 import { KafkaConsumerApi } from '@/utils/api';
@@ -168,10 +169,12 @@ export default defineComponent({
   },
   emits: ['closeConsumerDetailDialog', 'update:visible'],
   setup() {
+    const resetPartitionOffsetFormRef = ref();
     const resetPartitionOffsetFormState = reactive({
       offset: 0,
     });
     return {
+      resetPartitionOffsetFormRef,
       resetPartitionOffsetFormState,
     };
   },
@@ -259,6 +262,11 @@ export default defineComponent({
       this.showResetPartitionOffsetDialog = false;
     },
     async resetPartitionOffset() {
+      try {
+        await this.resetPartitionOffsetFormRef.validate();
+      } catch {
+        return;
+      }
       const values = { ...this.resetPartitionOffsetFormState };
       const data = Object.assign({}, values);
       Object.assign(data, this.select);
