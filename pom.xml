@@ -20,6 +20,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <ui.path>${project.basedir}/ui</ui.path>
         <frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
+        <npm.version>11.6.2</npm.version>
         <compiler.version>17</compiler.version>
         <kafka.version>3.5.0</kafka.version>
         <maven.assembly.plugin.version>3.7.1</maven.assembly.plugin.version>
@@ -208,7 +209,7 @@
                     <scalaVersion>${scala.version}</scalaVersion>
                     <recompileMode>all</recompileMode>
                     <useZincServer>false</useZincServer>
-                    <fork>false</fork>
+                    <fork>true</fork>
                     <args>
                         <arg>-deprecation</arg>
                         <arg>-feature</arg>
@@ -267,7 +268,8 @@
                         <configuration>
                             <workingDirectory>${ui.path}</workingDirectory>
                             <nodeVersion>v24.13.0</nodeVersion>
-                            <downloadRoot>https://npmmirror.com/mirrors/node/</downloadRoot>
+                            <npmVersion>${npm.version}</npmVersion>
+                            <nodeDownloadRoot>https://npmmirror.com/mirrors/node/</nodeDownloadRoot>
                         </configuration>
                         <executions>
                             <execution>

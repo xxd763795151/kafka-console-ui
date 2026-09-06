@@ -1,1 +1,3 @@
-mvn clean scala:compile compile package -Dmaven.test.skip=true -Pdeploy
+@echo off
+call mvn clean package -Dmaven.test.skip=true -Pdeploy
+exit /b %ERRORLEVEL%
