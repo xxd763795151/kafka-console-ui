@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,17 +55,12 @@ public class ContextSetFilter implements Filter {
                     headerId = specificId;
                 }
                 if (StringUtils.isBlank(headerId)) {
-//                    ResponseData failed = ResponseData.create().failed("Cluster info is null.");
-                    ResponseData failed = ResponseData.create().failed("没有集群信息，请先切换集群");
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    response.getWriter().println(ConvertUtil.toJsonString(failed));
+                    writeFailedResponse(response, "没有集群信息，请先切换集群");
                     return;
                 } else {
                     ClusterInfoDO infoDO = clusterInfoMapper.selectById(Long.valueOf(headerId));
                     if (infoDO == null) {
-                        ResponseData failed = ResponseData.create().failed("该集群找不到信息，请切换一个有效集群");
-                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                        response.getWriter().println(ConvertUtil.toJsonString(failed));
+                        writeFailedResponse(response, "该集群找不到信息，请切换一个有效集群");
                         return;
                     }
                     ContextConfig config = new ContextConfig();
@@ -83,6 +79,13 @@ public class ContextSetFilter implements Filter {
         } finally {
             ContextConfigHolder.CONTEXT_CONFIG.remove();
         }
+    }
+
+    private void writeFailedResponse(ServletResponse response, String message) throws IOException {
+        ResponseData failed = ResponseData.create().failed(message);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.getWriter().println(ConvertUtil.toJsonString(failed));
     }
 
     interface Header {
