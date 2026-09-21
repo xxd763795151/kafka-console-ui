@@ -11,6 +11,31 @@ else
     echo "Use java home: $JAVA_HOME"
 fi
 
+# 检查实际用于启动应用的 Java 版本
+if ! JAVA_VERSION_OUTPUT=$("$JAVA_CMD" -version 2>&1); then
+    echo "ERROR: Cannot run Java at [$JAVA_CMD]. JDK 17 or higher is required." >&2
+    echo "$JAVA_VERSION_OUTPUT" >&2
+    exit 1
+fi
+
+JAVA_VERSION=$(printf '%s\n' "$JAVA_VERSION_OUTPUT" | sed -n '1s/.*version "\([^"]*\)".*/\1/p')
+JAVA_MAJOR=${JAVA_VERSION%%[!0-9]*}
+if [ "$JAVA_MAJOR" = "1" ]; then
+    JAVA_LEGACY_VERSION=${JAVA_VERSION#1.}
+    JAVA_MAJOR=${JAVA_LEGACY_VERSION%%[!0-9]*}
+fi
+
+if [ -z "$JAVA_MAJOR" ]; then
+    echo "ERROR: Cannot determine Java version from [$JAVA_CMD]. JDK 17 or higher is required." >&2
+    echo "$JAVA_VERSION_OUTPUT" >&2
+    exit 1
+fi
+
+if (( 10#$JAVA_MAJOR < 17 )); then
+    echo "ERROR: Java $JAVA_VERSION is too old. JDK 17 or higher is required to start Kafka-console-ui." >&2
+    exit 1
+fi
+
 # 获取脚本真实路径（兼容Linux和macOS）
 if [ -L "$0" ]; then
     # 处理符号链接

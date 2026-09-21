@@ -20,19 +20,21 @@ import jakarta.servlet.http.HttpServletRequest;
 @ControllerAdvice(basePackages = "com.xuxd.kafka.console.controller")
 public class GlobalExceptionHandler {
 
+    private static final String INTERNAL_ERROR_MESSAGE = "操作失败，请稍后重试或联系管理员";
+
     @ResponseStatus(code = HttpStatus.FORBIDDEN)
     @ExceptionHandler(value = UnAuthorizedException.class)
     @ResponseBody
-    public Object unAuthorizedExceptionHandler(HttpServletRequest req, Exception ex) throws Exception {
+    public Object unAuthorizedExceptionHandler(HttpServletRequest req, Exception ex) {
         log.error("unAuthorized: {}", ex.getMessage());
-        return ResponseData.create().failed("UnAuthorized: " + ex.getMessage());
+        return ResponseData.create().failed("无权限执行此操作");
     }
 
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public Object exceptionHandler(HttpServletRequest req, Exception ex) throws Exception {
+    public Object exceptionHandler(HttpServletRequest req, Exception ex) {
 
         log.error("exception handle: ", ex);
-        return ResponseData.create().failed(ex.getMessage());
+        return ResponseData.create().failed(INTERNAL_ERROR_MESSAGE);
     }
 }

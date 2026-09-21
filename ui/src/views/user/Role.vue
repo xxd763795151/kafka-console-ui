@@ -274,16 +274,19 @@ export default defineComponent({
         method: UserManageApi.addOrUpdateRole.method,
         data: params,
       }).then((res: any) => {
-        state.loading = false;
         if (res.code == 0) {
           message.success(res.msg);
           getRoles();
         } else {
           notification.error({
-            message: 'error',
+            message: '保存失败',
             description: res.msg,
           });
         }
+      }).catch(() => {
+        // HTTP and network errors are displayed by the request interceptor.
+      }).finally(() => {
+        state.loading = false;
       });
     };
 

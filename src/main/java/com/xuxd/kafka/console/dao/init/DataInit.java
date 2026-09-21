@@ -13,7 +13,9 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author: xuxd
@@ -59,8 +61,7 @@ public class DataInit implements SmartInitializingSingleton {
             log.info("Disable login authentication, no longer try to initialize the data");
             return;
         }
-        try {
-            Connection connection = dataSource.getConnection();
+        try (Connection connection = dataSource.getConnection()) {
             Long userCount = userMapper.selectCount(null);
             if (userCount == null || userCount == 0) {
                 initData(connection, SqlParse.USER_TABLE);
@@ -90,7 +91,18 @@ public class DataInit implements SmartInitializingSingleton {
     private void initData(Connection connection, String table) throws SQLException {
         log.info("Init default data for {}", table);
         String sql = sqlParse.getMergeSql(table);
-        PreparedStatement statement = connection.prepareStatement(sql);
-        statement.execute();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.execute();
+        }
+        // Seed rows specify IDs explicitly, so H2's identity value must be moved past them.
+        long nextId;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT COALESCE(MAX(id), 0) + 1 FROM " + table)) {
+            resultSet.next();
+            nextId = resultSet.getLong(1);
+        }
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("ALTER TABLE " + table + " ALTER COLUMN id RESTART WITH " + nextId);
+        }
     }
 }

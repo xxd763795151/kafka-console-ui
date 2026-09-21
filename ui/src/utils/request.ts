@@ -18,18 +18,21 @@ const errorHandler = (error: any): Promise<never> => {
       });
       router.push({ path: '/login-page' });
     } else if (error.response.status === 403) {
-      const data = error.response.data;
       notification.error({
-        message: String(error.response.status),
-        description: data.msg || JSON.stringify(data),
+        message: '请求失败',
+        description: '无权限执行此操作',
       });
     } else {
-      const data = error.response.data;
       notification.error({
-        message: String(error.response.status),
-        description: JSON.stringify(data),
+        message: '请求失败',
+        description: '操作失败，请稍后重试或联系管理员',
       });
     }
+  } else {
+    notification.error({
+      message: '请求失败',
+      description: '网络连接失败，请检查网络后重试',
+    });
   }
   return Promise.reject(error);
 };
