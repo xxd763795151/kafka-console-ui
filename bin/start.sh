@@ -11,6 +11,31 @@ else
     echo "Use java home: $JAVA_HOME"
 fi
 
+# 检查实际用于启动应用的 Java 版本
+if ! JAVA_VERSION_OUTPUT=$("$JAVA_CMD" -version 2>&1); then
+    echo "ERROR: Cannot run Java at [$JAVA_CMD]. JDK 17 or higher is required." >&2
+    echo "$JAVA_VERSION_OUTPUT" >&2
+    exit 1
+fi
+
+JAVA_VERSION=$(printf '%s\n' "$JAVA_VERSION_OUTPUT" | sed -n '1s/.*version "\([^"]*\)".*/\1/p')
+JAVA_MAJOR=${JAVA_VERSION%%[!0-9]*}
+if [ "$JAVA_MAJOR" = "1" ]; then
+    JAVA_LEGACY_VERSION=${JAVA_VERSION#1.}
+    JAVA_MAJOR=${JAVA_LEGACY_VERSION%%[!0-9]*}
+fi
+
+if [ -z "$JAVA_MAJOR" ]; then
+    echo "ERROR: Cannot determine Java version from [$JAVA_CMD]. JDK 17 or higher is required." >&2
+    echo "$JAVA_VERSION_OUTPUT" >&2
+    exit 1
+fi
+
+if (( 10#$JAVA_MAJOR < 17 )); then
+    echo "ERROR: Java $JAVA_VERSION is too old. JDK 17 or higher is required to start Kafka-console-ui." >&2
+    exit 1
+fi
+
 # 获取脚本真实路径（兼容Linux和macOS）
 if [ -L "$0" ]; then
     # 处理符号链接
@@ -53,25 +78,11 @@ PROCESS_FLAG="kafka-console-ui-process-flag:${PROJECT_DIR}"
 
 JAVA_OPTS="$JAVA_OPTS $JAVA_MEM_OPTS -Dfile.encoding=utf-8"
 
-# 检测JDK版本
-JAVA_VERSION=$("$JAVA_CMD" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION" | awk -F '.' '{print $1}')
-
-# 如果是数字1，则取第二位作为主版本号（如1.8中的8）
-if [ "$JAVA_MAJOR_VERSION" = "1" ]; then
-    JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION" | awk -F '.' '{print $2}')
-fi
-
-# 只在JDK 9及以上版本添加--add-opens参数
-if [ "$JAVA_MAJOR_VERSION" -ge "9" ]; then
-    echo "Jdk version $JAVA_VERSION, add --add-opens..."
-    JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.io=ALL-UNNAMED"
-    JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.util=ALL-UNNAMED"
-    JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.lang=ALL-UNNAMED"
-    JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.net=ALL-UNNAMED"
-else
-    echo "Jdk version $JAVA_VERSION, ignore --add-opens..."
-fi
+# JDK 17+ 需要添加 --add-opens 参数
+JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.io=ALL-UNNAMED"
+JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.util=ALL-UNNAMED"
+JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.lang=ALL-UNNAMED"
+JAVA_OPTS="$JAVA_OPTS --add-opens java.base/java.net=ALL-UNNAMED"
 
 # 启动应用
 nohup "$JAVA_CMD" $JAVA_OPTS -jar "$TARGET" \

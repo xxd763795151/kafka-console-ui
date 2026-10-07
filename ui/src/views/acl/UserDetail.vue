@@ -1,15 +1,15 @@
 <template>
   <a-modal
     title="用户详情"
-    :visible="show"
+    :open="show"
     :width="800"
     :mask="false"
-    :destroyOnClose="true"
+    :destroy-on-close="true"
     :footer="null"
     @cancel="handleCancel"
   >
     <a-spin :spinning="loading">
-      <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
+      <a-form :model="formState" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
         <a-form-item label="用户名">
           <span>{{ user.username }}</span>
         </a-form-item>
@@ -27,11 +27,13 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from 'vue'
+import { message } from 'ant-design-vue'
 import { KafkaAclApi } from "@/utils/api";
 import request from "@/utils/request";
 
-export default {
+export default defineComponent({
   name: "UserDetail",
   props: {
     visible: {
@@ -42,46 +44,50 @@ export default {
       type: String,
     },
   },
-  components: {},
-  data() {
-    return {
-      formLayout: "horizontal",
-      show: this.visible,
-      form: this.$form.createForm(this, { name: "UserDetailForm" }),
-      user: {},
-      loading: false,
-    };
-  },
-  watch: {
-    visible(n, o) {
-      this.show = n;
-      if (n != o && this.show) {
-        this.getUserDetail();
+  setup(props, { emit }) {
+    const show = ref(props.visible)
+    const formState = reactive({})
+    const user = reactive<any>({})
+    const loading = ref(false)
+
+    watch(() => props.visible, (n, o) => {
+      show.value = n;
+      if (n != o && show.value) {
+        getUserDetail();
       }
-    },
-  },
-  methods: {
-    handleCancel() {
-      this.$emit("userDetailDialog", {});
-    },
-    getUserDetail() {
+    })
+
+    function handleCancel() {
+      emit("userDetailDialog", {});
+    }
+
+    function getUserDetail() {
       const api = KafkaAclApi.getKafkaUserDetail;
-      this.loading = true;
+      loading.value = true;
       request({
         url: api.url,
         method: api.method,
-        params: { username: this.username },
-      }).then((res) => {
-        this.loading = false;
+        params: { username: props.username },
+      }).then((res: any) => {
+        loading.value = false;
         if (res.code != 0) {
-          this.$message.error(res.msg);
+          message.error(res.msg);
         } else {
-          this.user = res.data;
+          Object.assign(user, res.data);
         }
       });
-    },
-  },
-};
+    }
+
+    return {
+      show,
+      formState,
+      user,
+      loading,
+      handleCancel,
+      getUserDetail,
+    }
+  }
+});
 </script>
 
 <style scoped></style>

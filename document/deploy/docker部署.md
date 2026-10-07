@@ -88,8 +88,8 @@ docker run -d -p 7766:7766 -v $PWD/data:/app/data -v $PWD/log:/app/log wdkang/ka
 **Dockerfile**
 
 ```dockerfile
-# jdk
-FROM openjdk:8-jdk-alpine
+# jdk 17+
+FROM eclipse-temurin:17-jre-alpine
 # label
 LABEL by="https://github.com/xxd763795151/kafka-console-ui"
 # root
@@ -102,8 +102,13 @@ ADD ./lib/kafka-console-ui.jar /app/lib
 ADD ./config /app/config
 # port
 EXPOSE 7766
-# start server
-CMD java -jar -Xmx512m -Xms512m -Xmn256m -Xss256k /app/lib/kafka-console-ui.jar --spring.config.location="/app/config/" --logging.home="/app/log" --data.dir="/app/data"
+# start server (jdk17+ 需要添加 --add-opens 参数)
+CMD java -jar -Xmx512m -Xms512m -Xmn256m -Xss256k \
+    --add-opens java.base/java.io=ALL-UNNAMED \
+    --add-opens java.base/java.lang=ALL-UNNAMED \
+    --add-opens java.base/java.util=ALL-UNNAMED \
+    --add-opens java.base/java.net=ALL-UNNAMED \
+    /app/lib/kafka-console-ui.jar --spring.config.location="/app/config/" --logging.home="/app/log" --data.dir="/app/data"
 
 ```
 

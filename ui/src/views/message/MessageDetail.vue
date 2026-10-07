@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="消息详情"
-    :visible="show"
+    :open="show"
     :width="800"
     :mask="false"
     :destroyOnClose="true"
@@ -49,11 +49,14 @@
                 style="width: 120px"
                 v-model="keyDeserializer"
                 @change="keyDeserializerChange"
+                :filter-option="true"
+                option-filter-prop="label"
               >
                 <a-select-option
                   v-for="v in deserializerList"
                   :key="v"
                   :value="v"
+                  :label="String(v)"
                 >
                   {{ v }}
                 </a-select-option>
@@ -70,11 +73,14 @@
                 v-model="valueDeserializer"
                 style="width: 120px"
                 @change="valueDeserializerChange"
+                :filter-option="true"
+                option-filter-prop="label"
               >
                 <a-select-option
                   v-for="v in deserializerList"
                   :key="v"
                   :value="v"
+                  :label="String(v)"
                 >
                   {{ v }}
                 </a-select-option>
@@ -101,10 +107,10 @@
             bordered
             row-key="groupId"
           >
-            <div slot="status" slot-scope="text">
+            <template #status="text">
               <span v-if="text == 'consumed'">已消费</span
               ><span v-else style="color: red">未消费</span>
-            </div>
+            </template>
           </a-table>
         </div>
         <div>
@@ -116,17 +122,18 @@
             cancel-text="取消"
             @confirm="resend"
           >
-            <a-button type="primary" icon="reload" v-action:message:resend>
+            <a-button type="primary" v-action:message:resend>
+              <template #icon><ReloadOutlined /></template>
               重新发送
             </a-button>
           </a-popconfirm>
           <a-button
             type="dashed"
             class="mar-left"
-            icon="plus"
             v-action:message:forward
             @click="openForwardDialog()"
           >
+            <template #icon><PlusOutlined /></template>
             转发消息
           </a-button>
         </div>
@@ -140,123 +147,39 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, toRefs, watch } from "vue";
+import { ReloadOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import request from "@/utils/request";
 import { KafkaMessageApi } from "@/utils/api";
 import notification from "ant-design-vue/lib/notification";
-import moment from "moment";
+import dayjs from "dayjs";
 import ForwardMessage from "@/views/message/ForwardMessage.vue";
+import { message } from "ant-design-vue";
 
-export default {
-  name: "MessageDetail",
-  components: { ForwardMessage },
-  props: {
-    record: {},
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      show: this.visible,
-      data: {},
-      loading: false,
-      deserializerList: [],
-      keyDeserializer: "String",
-      valueDeserializer: "String",
-      consumerDetail: [],
-      columns,
-      showForwardDialog: false,
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getMessageDetail();
-        this.getDeserializerList();
-      }
-    },
-  },
-  methods: {
-    getMessageDetail() {
-      this.loading = true;
-      const params = Object.assign({}, this.record, {
-        keyDeserializer: this.keyDeserializer,
-        valueDeserializer: this.valueDeserializer,
-      });
-      request({
-        url: KafkaMessageApi.searchDetail.url,
-        method: KafkaMessageApi.searchDetail.method,
-        data: params,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.data = res.data;
-        }
-      });
-    },
-    getDeserializerList() {
-      request({
-        url: KafkaMessageApi.deserializerList.url,
-        method: KafkaMessageApi.deserializerList.method,
-      }).then((res) => {
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.deserializerList = res.data;
-        }
-      });
-    },
-    handleCancel() {
-      this.data = {};
-      this.$emit("closeDetailDialog", { refresh: false });
-    },
-    formatTime(time) {
-      return time == -1 ? -1 : moment(time).format("YYYY-MM-DD HH:mm:ss:SSS");
-    },
-    keyDeserializerChange() {
-      this.getMessageDetail();
-    },
-    valueDeserializerChange() {
-      this.getMessageDetail();
-    },
-    resend() {
-      const params = Object.assign({}, this.data);
-      this.loading = true;
-      request({
-        url: KafkaMessageApi.resend.url,
-        method: KafkaMessageApi.resend.method,
-        data: params,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code != 0) {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        } else {
-          this.$message.success(res.msg);
-        }
-      });
-    },
-    openForwardDialog() {
-      this.showForwardDialog = true;
-    },
-    closeForwardDialog() {
-      this.showForwardDialog = false;
-    },
-  },
-};
+interface RecordItem {
+  [key: string]: any;
+}
+
+interface ConsumerItem {
+  groupId: string;
+  status: string;
+  [key: string]: any;
+}
+
+interface DataItem {
+  topic?: string;
+  partition?: number;
+  offset?: number;
+  headers?: string;
+  timestampType?: string;
+  timestamp?: number;
+  key?: string;
+  value?: string;
+  consumers?: ConsumerItem[];
+  [key: string]: any;
+}
+
 const columns = [
   {
     title: "消费组",
@@ -267,14 +190,149 @@ const columns = [
     title: "消费情况",
     dataIndex: "status",
     key: "status",
-    scopedSlots: { customRender: "status" },
+    customRender: ({ text }: { text: string }) => text,
   },
 ];
+
+export default defineComponent({
+  name: "MessageDetail",
+  components: { ForwardMessage, ReloadOutlined, PlusOutlined },
+  props: {
+    record: {
+      type: Object,
+      default: () => ({}),
+    },
+    visible: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup(props, { emit }) {
+    const state = reactive({
+      show: props.visible,
+      data: {} as DataItem,
+      loading: false,
+      deserializerList: [] as string[],
+      keyDeserializer: "String",
+      valueDeserializer: "String",
+      consumerDetail: [] as any[],
+      showForwardDialog: false,
+    });
+
+    watch(
+      () => props.visible,
+      (v: boolean) => {
+        state.show = v;
+        if (state.show) {
+          getMessageDetail();
+          getDeserializerList();
+        }
+      }
+    );
+
+    const getMessageDetail = () => {
+      state.loading = true;
+      const params = Object.assign({}, props.record, {
+        keyDeserializer: state.keyDeserializer,
+        valueDeserializer: state.valueDeserializer,
+      });
+      request({
+        url: KafkaMessageApi.searchDetail.url,
+        method: KafkaMessageApi.searchDetail.method,
+        data: params,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          state.data = res.data;
+        }
+      });
+    };
+
+    const getDeserializerList = () => {
+      request({
+        url: KafkaMessageApi.deserializerList.url,
+        method: KafkaMessageApi.deserializerList.method,
+      }).then((res: any) => {
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          state.deserializerList = res.data;
+        }
+      });
+    };
+
+    const handleCancel = () => {
+      state.data = {};
+      emit("closeDetailDialog", { refresh: false });
+    };
+
+    const formatTime = (time: number) => {
+      return time == -1 ? -1 : dayjs(time).format("YYYY-MM-DD HH:mm:ss:SSS");
+    };
+
+    const keyDeserializerChange = () => {
+      getMessageDetail();
+    };
+
+    const valueDeserializerChange = () => {
+      getMessageDetail();
+    };
+
+    const resend = () => {
+      const params = Object.assign({}, state.data);
+      state.loading = true;
+      request({
+        url: KafkaMessageApi.resend.url,
+        method: KafkaMessageApi.resend.method,
+        data: params,
+      }).then((res: any) => {
+        state.loading = false;
+        if (res.code != 0) {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        } else {
+          message.success(res.msg);
+        }
+      });
+    };
+
+    const openForwardDialog = () => {
+      state.showForwardDialog = true;
+    };
+
+    const closeForwardDialog = () => {
+      state.showForwardDialog = false;
+    };
+
+    return {
+      ...toRefs(state),
+      columns,
+      getMessageDetail,
+      getDeserializerList,
+      handleCancel,
+      formatTime,
+      keyDeserializerChange,
+      valueDeserializerChange,
+      resend,
+      openForwardDialog,
+      closeForwardDialog,
+    };
+  },
+});
 </script>
 
 <style scoped>
 .m-info {
-  /*text-decoration: underline;*/
 }
 .title {
   width: 15%;

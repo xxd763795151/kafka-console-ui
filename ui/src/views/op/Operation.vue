@@ -61,7 +61,6 @@
           </p>
         </a-card>
       </div>
-      <!--    隐藏数据同步相关-->
       <div class="content-module" v-show="false">
         <a-card title="数据同步" style="width: 100%; text-align: left">
           <p v-show="true">
@@ -165,22 +164,24 @@
   </div>
 </template>
 
-<script>
-import SyncConsumerOffset from "@/views/op/SyncConsumerOffset";
-import MinOffsetAlignment from "@/views/op/MinOffsetAlignment";
-import OffsetAlignmentTable from "@/views/op/OffsetAlignmentTable";
-import ElectPreferredLeader from "@/views/op/ElectPreferredLeader";
-import DataSyncScheme from "@/views/op/DataSyncScheme";
-import ConfigThrottle from "@/views/op/ConfigThrottle";
-import RemoveThrottle from "@/views/op/RemoveThrottle";
-import CurrentReassignments from "@/views/op/CurrentReassignments";
-import ClusterInfo from "@/views/op/ClusterInfo";
-import ReplicaReassign from "@/views/op/ReplicaReassign";
+<script lang="ts">
+import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
+import notification from "ant-design-vue/lib/notification";
+import SyncConsumerOffset from "@/views/op/SyncConsumerOffset.vue";
+import MinOffsetAlignment from "@/views/op/MinOffsetAlignment.vue";
+import OffsetAlignmentTable from "@/views/op/OffsetAlignmentTable.vue";
+import ElectPreferredLeader from "@/views/op/ElectPreferredLeader.vue";
+import DataSyncScheme from "@/views/op/DataSyncScheme.vue";
+import ConfigThrottle from "@/views/op/ConfigThrottle.vue";
+import RemoveThrottle from "@/views/op/RemoveThrottle.vue";
+import CurrentReassignments from "@/views/op/CurrentReassignments.vue";
+import ClusterInfo from "@/views/op/ClusterInfo.vue";
+import ReplicaReassign from "@/views/op/ReplicaReassign.vue";
 import request from "@/utils/request";
 import { KafkaOpApi } from "@/utils/api";
-import notification from "ant-design-vue/lib/notification";
-export default {
+
+export default defineComponent({
   name: "Operation",
   components: {
     SyncConsumerOffset,
@@ -194,108 +195,108 @@ export default {
     ClusterInfo,
     ReplicaReassign,
   },
-  data() {
-    return {
-      syncData: {
-        showSyncConsumerOffsetDialog: false,
-        showMinOffsetAlignmentDialog: false,
-        showOffsetAlignmentInfoDialog: false,
-        showDataSyncSchemeDialog: false,
-      },
-      replicationManager: {
-        showElectPreferredLeaderDialog: false,
-        showCurrentReassignmentsDialog: false,
-        showReplicaReassignDialog: false,
-      },
-      brokerManager: {
-        showConfigThrottleDialog: false,
-        showRemoveThrottleDialog: false,
-      },
-      clusterManager: {
-        showClusterInfoDialog: false,
-      },
-      loading: false,
-    };
-  },
-  methods: {
-    openSyncConsumerOffsetDialog() {
-      this.syncData.showSyncConsumerOffsetDialog = true;
-    },
-    closeSyncConsumerOffsetDialog() {
-      this.syncData.showSyncConsumerOffsetDialog = false;
-    },
-    openMinOffsetAlignmentDialog() {
-      this.syncData.showMinOffsetAlignmentDialog = true;
-    },
-    closeMinOffsetAlignmentDialog() {
-      this.syncData.showMinOffsetAlignmentDialog = false;
-    },
-    openOffsetAlignmentInfoDialog() {
-      this.syncData.showOffsetAlignmentInfoDialog = true;
-    },
-    closeOffsetAlignmentInfoDialog() {
-      this.syncData.showOffsetAlignmentInfoDialog = false;
-    },
-    openDataSyncSchemeDialog() {
-      this.syncData.showDataSyncSchemeDialog = true;
-    },
-    closeDataSyncSchemeDialog() {
-      this.syncData.showDataSyncSchemeDialog = false;
-    },
-    openElectPreferredLeaderDialog() {
-      this.replicationManager.showElectPreferredLeaderDialog = true;
-    },
-    closeElectPreferredLeaderDialog() {
-      this.replicationManager.showElectPreferredLeaderDialog = false;
-    },
-    openConfigThrottleDialog() {
-      this.brokerManager.showConfigThrottleDialog = true;
-    },
-    closeConfigThrottleDialog() {
-      this.brokerManager.showConfigThrottleDialog = false;
-    },
-    openRemoveThrottleDialog() {
-      this.brokerManager.showRemoveThrottleDialog = true;
-    },
-    closeRemoveThrottleDialog() {
-      this.brokerManager.showRemoveThrottleDialog = false;
-    },
-    openCurrentReassignmentsDialog() {
-      this.replicationManager.showCurrentReassignmentsDialog = true;
-    },
-    closeCurrentReassignmentsDialog() {
-      this.replicationManager.showCurrentReassignmentsDialog = false;
-    },
-    openClusterInfoDialog() {
-      this.clusterManager.showClusterInfoDialog = true;
-    },
-    closeClusterInfoDialog() {
-      this.clusterManager.showClusterInfoDialog = false;
-    },
-    openReplicaReassignDialog() {
-      this.replicationManager.showReplicaReassignDialog = true;
-    },
-    closeReplicaReassignDialog() {
-      this.replicationManager.showReplicaReassignDialog = false;
-    },
-    handleExport() {
-      try {
-        this.loading = true;
+  setup() {
+    const syncData = reactive({
+      showSyncConsumerOffsetDialog: false,
+      showMinOffsetAlignmentDialog: false,
+      showOffsetAlignmentInfoDialog: false,
+      showDataSyncSchemeDialog: false,
+    });
 
-        // 调用导出接口
+    const replicationManager = reactive({
+      showElectPreferredLeaderDialog: false,
+      showCurrentReassignmentsDialog: false,
+      showReplicaReassignDialog: false,
+    });
+
+    const brokerManager = reactive({
+      showConfigThrottleDialog: false,
+      showRemoveThrottleDialog: false,
+    });
+
+    const clusterManager = reactive({
+      showClusterInfoDialog: false,
+    });
+
+    const loading = ref(false);
+    const fileInput = ref<HTMLInputElement | null>(null);
+
+    const openSyncConsumerOffsetDialog = () => {
+      syncData.showSyncConsumerOffsetDialog = true;
+    };
+    const closeSyncConsumerOffsetDialog = () => {
+      syncData.showSyncConsumerOffsetDialog = false;
+    };
+    const openMinOffsetAlignmentDialog = () => {
+      syncData.showMinOffsetAlignmentDialog = true;
+    };
+    const closeMinOffsetAlignmentDialog = () => {
+      syncData.showMinOffsetAlignmentDialog = false;
+    };
+    const openOffsetAlignmentInfoDialog = () => {
+      syncData.showOffsetAlignmentInfoDialog = true;
+    };
+    const closeOffsetAlignmentInfoDialog = () => {
+      syncData.showOffsetAlignmentInfoDialog = false;
+    };
+    const openDataSyncSchemeDialog = () => {
+      syncData.showDataSyncSchemeDialog = true;
+    };
+    const closeDataSyncSchemeDialog = () => {
+      syncData.showDataSyncSchemeDialog = false;
+    };
+    const openElectPreferredLeaderDialog = () => {
+      replicationManager.showElectPreferredLeaderDialog = true;
+    };
+    const closeElectPreferredLeaderDialog = () => {
+      replicationManager.showElectPreferredLeaderDialog = false;
+    };
+    const openConfigThrottleDialog = () => {
+      brokerManager.showConfigThrottleDialog = true;
+    };
+    const closeConfigThrottleDialog = () => {
+      brokerManager.showConfigThrottleDialog = false;
+    };
+    const openRemoveThrottleDialog = () => {
+      brokerManager.showRemoveThrottleDialog = true;
+    };
+    const closeRemoveThrottleDialog = () => {
+      brokerManager.showRemoveThrottleDialog = false;
+    };
+    const openCurrentReassignmentsDialog = () => {
+      replicationManager.showCurrentReassignmentsDialog = true;
+    };
+    const closeCurrentReassignmentsDialog = () => {
+      replicationManager.showCurrentReassignmentsDialog = false;
+    };
+    const openClusterInfoDialog = () => {
+      clusterManager.showClusterInfoDialog = true;
+    };
+    const closeClusterInfoDialog = () => {
+      clusterManager.showClusterInfoDialog = false;
+    };
+    const openReplicaReassignDialog = () => {
+      replicationManager.showReplicaReassignDialog = true;
+    };
+    const closeReplicaReassignDialog = () => {
+      replicationManager.showReplicaReassignDialog = false;
+    };
+
+    const handleExport = () => {
+      try {
+        loading.value = true;
+
         request({
           url: KafkaOpApi.consoleExport.url,
           method: KafkaOpApi.consoleExport.method,
           responseType: "blob",
-        }).then((response) => {
-          this.loading = false;
-          // 创建下载链接
+        }).then((response: any) => {
+          loading.value = false;
           const blob = new Blob([response.data], { type: "application/json" });
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
 
-          // 从响应头获取文件名，如果没有则使用默认文件名
           const headers = response.headers || {};
           const contentDisposition = headers["content-disposition"];
           let fileName = "console_data.json";
@@ -310,7 +311,6 @@ export default {
           document.body.appendChild(link);
           link.click();
 
-          // 清理
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
 
@@ -319,30 +319,28 @@ export default {
       } catch (error) {
         message.error({ content: "数据导出失败", key: "export" });
       }
-    },
+    };
 
-    // 导入数据 - 触发文件选择
-    handleImport() {
-      this.$refs.fileInput.click();
-    },
+    const handleImport = () => {
+      fileInput.value?.click();
+    };
 
-    // 处理文件选择
-    handleFileChange(event) {
-      const file = event.target.files[0];
+    const handleFileChange = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
       if (!file) return;
 
-      // 验证文件类型
       if (!file.name.toLowerCase().endsWith(".json")) {
         message.error("请选择JSON文件");
         return;
       }
 
       try {
-        this.loading = true;
+        loading.value = true;
 
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("overwriteExisting", true);
+        formData.append("overwriteExisting", "true");
         formData.append("importType", "ALL");
 
         request({
@@ -352,10 +350,10 @@ export default {
             "Content-Type": "multipart/form-data",
           },
           data: formData,
-        }).then((response) => {
-          this.loading = false;
+        }).then((response: any) => {
+          loading.value = false;
           if (response.code == 0) {
-            this.$message.success(response.msg);
+            message.success(response.msg);
           } else {
             notification.error({
               message: "error",
@@ -369,12 +367,43 @@ export default {
           key: "import",
         });
       } finally {
-        // 清空文件输入，允许重复选择同一文件
-        event.target.value = "";
+        target.value = "";
       }
-    },
+    };
+
+    return {
+      syncData,
+      replicationManager,
+      brokerManager,
+      clusterManager,
+      loading,
+      fileInput,
+      openSyncConsumerOffsetDialog,
+      closeSyncConsumerOffsetDialog,
+      openMinOffsetAlignmentDialog,
+      closeMinOffsetAlignmentDialog,
+      openOffsetAlignmentInfoDialog,
+      closeOffsetAlignmentInfoDialog,
+      openDataSyncSchemeDialog,
+      closeDataSyncSchemeDialog,
+      openElectPreferredLeaderDialog,
+      closeElectPreferredLeaderDialog,
+      openConfigThrottleDialog,
+      closeConfigThrottleDialog,
+      openRemoveThrottleDialog,
+      closeRemoveThrottleDialog,
+      openCurrentReassignmentsDialog,
+      closeCurrentReassignmentsDialog,
+      openClusterInfoDialog,
+      closeClusterInfoDialog,
+      openReplicaReassignDialog,
+      closeReplicaReassignDialog,
+      handleExport,
+      handleImport,
+      handleFileChange,
+    };
   },
-};
+});
 </script>
 
 <style scoped>

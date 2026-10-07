@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="位移主题分区"
-    :visible="show"
+    v-model:open="show"
     :width="800"
     :mask="false"
     :destroyOnClose="true"
@@ -17,32 +17,34 @@
   </a-modal>
 </template>
 
-<script>
-import request from "@/utils/request";
-import { KafkaConsumerApi } from "@/utils/api";
-import notification from "ant-design-vue/es/notification";
+<script lang="ts">
+import { defineComponent } from 'vue';
+import request from '@/utils/request';
+import { KafkaConsumerApi } from '@/utils/api';
+import { notification } from 'ant-design-vue';
 
-export default {
-  name: "OffsetTopicPartition",
+export default defineComponent({
+  name: 'OffsetTopicPartition',
   props: {
     group: {
       type: String,
-      default: "",
+      default: '',
     },
     visible: {
       type: Boolean,
       default: false,
     },
   },
+  emits: ['closeOffsetPartitionDialog', 'update:visible'],
   data() {
     return {
       show: this.visible,
-      data: [],
+      data: [] as any[],
       loading: false,
     };
   },
   watch: {
-    visible(v) {
+    visible(v: boolean) {
       this.show = v;
       if (this.show) {
         this.getOffsetPartition();
@@ -53,13 +55,13 @@ export default {
     getOffsetPartition() {
       this.loading = true;
       request({
-        url: KafkaConsumerApi.getOffsetPartition.url + "?groupId=" + this.group,
+        url: KafkaConsumerApi.getOffsetPartition.url + '?groupId=' + this.group,
         method: KafkaConsumerApi.getOffsetPartition.method,
-      }).then((res) => {
+      }).then((res: any) => {
         this.loading = false;
         if (res.code != 0) {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         } else {
@@ -69,10 +71,11 @@ export default {
     },
     handleCancel() {
       this.data = [];
-      this.$emit("closeOffsetPartitionDialog", {});
+      this.$emit('update:visible', false);
+      this.$emit('closeOffsetPartitionDialog', {});
     },
   },
-};
+});
 </script>
 
 <style scoped></style>

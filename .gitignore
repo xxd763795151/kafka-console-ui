@@ -62,3 +62,4 @@ pnpm-debug.log*
 /LOGGING_HOME_IS_UNDEFINED
 *.log
 /data
+/ui/.npm-cache

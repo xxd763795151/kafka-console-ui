@@ -105,7 +105,7 @@ public class ClusterRoleRelationServiceImpl implements ClusterRoleRelationServic
         QueryWrapper<ClusterRoleRelationDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("role_id", relationDO.getRoleId()).
                 eq("cluster_info_id", relationDO.getClusterInfoId());
-        Integer count = mapper.selectCount(queryWrapper);
+        Long count = mapper.selectCount(queryWrapper);
         if (count > 0) {
             log.info("已存在，不再增加：{}", relationDO);
             return;

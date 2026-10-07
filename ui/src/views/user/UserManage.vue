@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <a-spin :spinning="loading">
-      <a-tabs default-active-key="1" size="large" tabPosition="top">
+      <a-tabs default-active-key="1" size="large" tab-position="top">
         <a-tab-pane
           key="1"
           tab="用户列表"
@@ -42,25 +42,30 @@
   </div>
 </template>
 
-<script>
-import Permission from "@/views/user/Permission.vue";
-import Role from "@/views/user/Role.vue";
-import User from "@/views/user/User.vue";
-import UserSetting from "@/views/user/UserSetting.vue";
-import ClusterRoleRelation from "@/views/user/ClusterRoleRelation.vue";
-import { isAuthorized } from "@/utils/auth";
-export default {
-  name: "UserManage",
+<script lang="ts">
+import { defineComponent, reactive, toRefs } from 'vue';
+import Permission from '@/views/user/Permission.vue';
+import Role from '@/views/user/Role.vue';
+import User from '@/views/user/User.vue';
+import UserSetting from '@/views/user/UserSetting.vue';
+import ClusterRoleRelation from '@/views/user/ClusterRoleRelation.vue';
+import { isAuthorized } from '@/utils/auth';
+
+export default defineComponent({
+  name: 'UserManage',
   components: { Permission, Role, User, UserSetting, ClusterRoleRelation },
-  data() {
-    return {
+  setup() {
+    const state = reactive({
       loading: false,
-      topicList: [],
+      topicList: [] as any[],
+    });
+
+    return {
+      ...toRefs(state),
+      isAuthorized,
     };
   },
-  methods: { isAuthorized },
-  created() {},
-};
+});
 </script>
 
 <style scoped></style>

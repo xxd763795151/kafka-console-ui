@@ -1,42 +1,44 @@
 <template>
   <a-modal
     title="新增/更新用户"
-    :visible.sync="show"
+    v-model:open="show"
     :confirm-loading="confirmLoading"
     :width="800"
     @ok="handleOk"
     @cancel="handleCancel"
-    okText="提交"
-    cancelText="取消"
+    ok-text="提交"
+    cancel-text="取消"
     :mask="true"
+    :destroy-on-close="true"
   >
     <div>
-      <a-form layout="vertical" :form="this.form">
-        <!--每一项元素-->
-        <a-form-item label="用户名">
+      <a-form
+        ref="formRef"
+        layout="vertical"
+        :model="formState"
+      >
+        <a-form-item
+          label="用户名"
+          name="username"
+          :rules="[{ required: true, message: '请填写用户名!' }]"
+        >
           <a-input
+            v-model:value="formState.username"
             placeholder="username"
-            :allowClear="true"
-            :maxLength="100"
-            v-decorator="[
-              'username',
-              {
-                rules: [{ required: true, message: '请填写用户名!' }],
-              },
-            ]"
+            :allow-clear="true"
+            :max-length="100"
           />
         </a-form-item>
-        <a-form-item label="密码">
+        <a-form-item
+          label="密码"
+          name="password"
+          :rules="[{ required: true, message: '请填写密码!' }]"
+        >
           <a-input
+            v-model:value="formState.password"
             placeholder="password"
-            :allowClear="true"
-            :maxLength="100"
-            v-decorator="[
-              'password',
-              {
-                rules: [{ required: true, message: '请填写密码!' }],
-              },
-            ]"
+            :allow-clear="true"
+            :max-length="100"
           />
         </a-form-item>
       </a-form>
@@ -44,12 +46,14 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from 'vue'
+import { notification } from 'ant-design-vue'
+import type { FormInstance } from 'ant-design-vue'
 import request from "@/utils/request";
-import notification from "ant-design-vue/es/notification";
 import { KafkaAclApi } from "@/utils/api";
 
-export default {
+export default defineComponent({
   name: "UpdateUser",
   props: {
     visible: {
@@ -57,55 +61,63 @@ export default {
       default: false,
     },
   },
-  beforeCreate() {
-    //创建表单
-    this.form = this.$form.createForm(this, { name: "addOrUpdateUserModal" });
-  },
-  data() {
-    return {
-      ModalText: "Content of the modal",
-      confirmLoading: false,
-      show: this.visible,
-    };
-  },
-  watch: {
-    visible(val) {
-      this.show = val;
-    },
-  },
-  methods: {
-    handleOk() {
-      const form = this.form;
-      form.validateFields((err, values) => {
-        if (err) {
-          return;
-        }
-        this.confirmLoading = true;
+  setup(props, { emit }) {
+    const formRef = ref<FormInstance>()
+    const confirmLoading = ref(false)
+    const show = ref(props.visible)
+
+    const formState = reactive({
+      username: '',
+      password: '',
+    })
+
+    watch(() => props.visible, (val) => {
+      show.value = val;
+    })
+
+    watch(show, (val) => {
+      emit('update:visible', val)
+    })
+
+    function handleOk() {
+      formRef.value?.validate().then((values: any) => {
+        confirmLoading.value = true;
         request({
           url: KafkaAclApi.addKafkaUser.url,
           method: KafkaAclApi.addKafkaUser.method,
           data: { username: values.username, password: values.password },
-        }).then((res) => {
-          this.confirmLoading = false;
+        }).then((res: any) => {
+          confirmLoading.value = false;
           if (res.code == 0) {
             notification.success({
               message: res.msg,
             });
-            form.resetFields();
-            this.$emit("updateUserDialogData", { ok: true, show: false });
+            formRef.value?.resetFields();
+            emit("updateUserDialogData", { ok: true, show: false });
           } else {
             notification.error({
               message: res.msg,
             });
           }
         });
+      }).catch(() => {
       });
-    },
-    handleCancel() {
-      this.$emit("updateUserDialogData", { ok: false, show: false });
-    },
-  },
-};
+    }
+
+    function handleCancel() {
+      emit("updateUserDialogData", { ok: false, show: false });
+    }
+
+    return {
+      formRef,
+      confirmLoading,
+      show,
+      formState,
+      handleOk,
+      handleCancel,
+    }
+  }
+});
 </script>
 
 <style scoped>

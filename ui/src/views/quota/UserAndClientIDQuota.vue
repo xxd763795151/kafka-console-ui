@@ -4,22 +4,22 @@
       <div id="search-offset-form-advanced-search">
         <a-form
           class="ant-advanced-search-form"
-          :form="form"
-          @submit="handleSearch"
+          :model="searchForm"
+          @finish="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="10">
-              <a-form-item label="用户标识">
+              <a-form-item label="用户标识" name="user">
                 <a-input
-                  v-decorator="['user']"
+                  v-model:value="searchForm.user"
                   placeholder="请输入用户标识，如：用户名!"
                 />
               </a-form-item>
             </a-col>
             <a-col :span="10">
-              <a-form-item label="客户端ID">
+              <a-form-item label="客户端ID" name="client">
                 <a-input
-                  v-decorator="['client']"
+                  v-model:value="searchForm.client"
                   placeholder="请输入客户端ID!"
                 />
               </a-form-item>
@@ -57,14 +57,15 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, reactive, onMounted } from "vue";
 import request from "@/utils/request";
 import { KafkaClientQuotaApi } from "@/utils/api";
-import notification from "ant-design-vue/lib/notification";
+import notification from "ant-design-vue/es/notification";
 import QuotaList from "@/views/quota/QuotaList.vue";
 import AddQuotaConfig from "@/views/quota/AddQuotaConfig.vue";
 
-export default {
+export default defineComponent({
   name: "UserAndClientIDQuota",
   components: { QuotaList, AddQuotaConfig },
   props: {
@@ -72,96 +73,103 @@ export default {
       type: Array,
     },
   },
-  data() {
-    return {
-      loading: false,
-      form: this.$form.createForm(this, { name: "user_client_id_quota" }),
-      data: [],
-      showAlterQuotaDialog: false,
-      showAddQuotaDialog: false,
-      columns: [
-        {
-          title: "用户标识",
-          dataIndex: "user",
-          key: "user",
-          slots: { title: "user" },
-          scopedSlots: { customRender: "user" },
-        },
-        {
-          title: "客户端ID",
-          dataIndex: "client",
-          key: "client",
-          slots: { title: "client" },
-          scopedSlots: { customRender: "client" },
-        },
-        {
-          title: "生产速率(带宽/秒)",
-          dataIndex: "producerRate",
-          key: "producerRate",
-        },
-        {
-          title: "消费速率(带宽/秒)",
-          dataIndex: "consumerRate",
-          key: "consumerRate",
-        },
-        {
-          title: "吞吐量(请求占比*100)",
-          dataIndex: "requestPercentage",
-          key: "requestPercentage",
-        },
-      ],
-    };
-  },
-  methods: {
-    handleSearch() {
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          this.loading = true;
-          const params = { types: ["user", "client-id"], names: [] };
-          if (values.user) {
-            params.names.push(values.user.trim());
-          }
-          if (values.client) {
-            if (params.names.length == 0) {
-              params.names.push("");
-            }
-            params.names.push(values.client.trim());
-          }
-          request({
-            url: KafkaClientQuotaApi.getClientQuotaConfigs.url,
-            method: KafkaClientQuotaApi.getClientQuotaConfigs.method,
-            data: params,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.data = res.data;
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
+  setup() {
+    const loading = ref<boolean>(false);
+    const data = ref<any[]>([]);
+    const showAlterQuotaDialog = ref<boolean>(false);
+    const showAddQuotaDialog = ref<boolean>(false);
+    const searchForm = reactive<any>({
+      user: undefined,
+      client: undefined,
+    });
+    const columns = ref<any[]>([
+      {
+        title: "用户标识",
+        dataIndex: "user",
+        key: "user",
+      },
+      {
+        title: "客户端ID",
+        dataIndex: "client",
+        key: "client",
+      },
+      {
+        title: "生产速率(带宽/秒)",
+        dataIndex: "producerRate",
+        key: "producerRate",
+      },
+      {
+        title: "消费速率(带宽/秒)",
+        dataIndex: "consumerRate",
+        key: "consumerRate",
+      },
+      {
+        title: "吞吐量(请求占比*100)",
+        dataIndex: "requestPercentage",
+        key: "requestPercentage",
+      },
+    ]);
+
+    const handleSearch = () => {
+      const values = { ...searchForm };
+      loading.value = true;
+      const params: any = { types: ["user", "client-id"], names: [] };
+      if (values.user) {
+        params.names.push(values.user.trim());
+      }
+      if (values.client) {
+        if (params.names.length == 0) {
+          params.names.push("");
+        }
+        params.names.push(values.client.trim());
+      }
+      request({
+        url: KafkaClientQuotaApi.getClientQuotaConfigs.url,
+        method: KafkaClientQuotaApi.getClientQuotaConfigs.method,
+        data: params,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          data.value = res.data;
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
           });
         }
       });
-    },
-    openAddQuotaDialog() {
-      this.showAddQuotaDialog = true;
-    },
-    closeAddQuotaDialog(p) {
+    };
+    const openAddQuotaDialog = () => {
+      showAddQuotaDialog.value = true;
+    };
+    const closeAddQuotaDialog = (p: any) => {
       if (p.refresh) {
-        this.handleSearch();
+        handleSearch();
       }
-      this.showAddQuotaDialog = false;
-    },
-    refresh() {
-      this.handleSearch();
-    },
+      showAddQuotaDialog.value = false;
+    };
+    const refresh = () => {
+      handleSearch();
+    };
+
+    onMounted(() => {
+      handleSearch();
+    });
+
+    return {
+      loading,
+      data,
+      showAlterQuotaDialog,
+      showAddQuotaDialog,
+      columns,
+      searchForm,
+      handleSearch,
+      openAddQuotaDialog,
+      closeAddQuotaDialog,
+      refresh,
+    };
   },
-  created() {
-    this.handleSearch();
-  },
-};
+});
 </script>
 
 <style scoped>

@@ -202,7 +202,7 @@ public class UserManageServiceImpl implements UserManageService {
     public ResponseData deleteRole(Long id) {
         QueryWrapper<SysUserDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(true, "role_ids", id);
-        Integer count = userMapper.selectCount(queryWrapper);
+        Long count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
             return ResponseData.create().failed("存在用户被分配为当前角色，不允许删除");
         }

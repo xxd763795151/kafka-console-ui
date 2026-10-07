@@ -9,7 +9,7 @@ import com.xuxd.kafka.console.beans.dto.SysUserDTO;
 import com.xuxd.kafka.console.service.UserManageService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author: xuxd

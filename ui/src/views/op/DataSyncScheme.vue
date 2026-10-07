@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="数据同步方案"
-    :visible="show"
+    :open="show"
     :width="800"
     :mask="false"
     :footer="null"
@@ -26,8 +26,10 @@
   </a-modal>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent, ref, watch } from "vue";
+
+export default defineComponent({
   name: "DataSyncScheme",
   props: {
     visible: {
@@ -35,22 +37,26 @@ export default {
       default: false,
     },
   },
-  data() {
+  setup(props, { emit }) {
+    const show = ref(props.visible);
+
+    watch(
+      () => props.visible,
+      (v) => {
+        show.value = v;
+      }
+    );
+
+    const handleCancel = () => {
+      emit("closeDataSyncSchemeDialog", { refresh: false });
+    };
+
     return {
-      show: this.visible,
+      show,
+      handleCancel,
     };
   },
-  watch: {
-    visible(v) {
-      this.show = v;
-    },
-  },
-  methods: {
-    handleCancel() {
-      this.$emit("closeDataSyncSchemeDialog", { refresh: false });
-    },
-  },
-};
+});
 </script>
 
 <style scoped></style>

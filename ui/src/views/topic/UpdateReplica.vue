@@ -1,7 +1,7 @@
 <template>
   <a-modal
     title="变更副本"
-    :visible="show"
+    :open="show"
     :width="1200"
     :mask="false"
     :destroyOnClose="true"
@@ -17,7 +17,7 @@
           <label>设置副本数：</label>
           <a-input-number
             id="inputNumber"
-            v-model="replicaNums"
+            v-model:value="replicaNums"
             :min="1"
             :max="brokerSize"
             @change="onChange"
@@ -27,7 +27,7 @@
           <label>是否要限流：</label>
           <a-input-number
             id="inputNumber"
-            v-model="data.interBrokerThrottle"
+            v-model:value="data.interBrokerThrottle"
             :min="-1"
             :max="102400"
           />
@@ -46,11 +46,15 @@
             }
           "
         >
-          <div slot="replicas" slot-scope="text">
-            <span v-for="i in text" :key="i">
-              {{ i }}
-            </span>
-          </div>
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.key === 'replicas'">
+              <div>
+                <span v-for="i in text" :key="i">
+                  {{ i }}
+                </span>
+              </div>
+            </template>
+          </template>
         </a-table>
         <p>
           *正在进行即尚未完成的副本变更的任务，可以在
@@ -66,134 +70,11 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from "vue";
+import { message, notification } from "ant-design-vue";
 import request from "@/utils/request";
 import { KafkaClusterApi, KafkaTopicApi } from "@/utils/api";
-import notification from "ant-design-vue/lib/notification";
-
-export default {
-  name: "UpdateReplica",
-  props: {
-    topic: {
-      type: String,
-      default: "",
-    },
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      columns: columns,
-      show: this.visible,
-      data: {},
-      loading: false,
-      form: this.$form.createForm(this, { name: "coordinated" }),
-      brokerSize: 0,
-      brokerIdList: [],
-      replicaNums: 0,
-      defaultReplicaNums: 0,
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-      if (this.show) {
-        this.getClusterInfo();
-        this.getCurrentReplicaAssignment();
-      }
-    },
-  },
-  methods: {
-    getCurrentReplicaAssignment() {
-      this.loading = true;
-      request({
-        url:
-          KafkaTopicApi.getCurrentReplicaAssignment.url +
-          "?topic=" +
-          this.topic,
-        method: KafkaTopicApi.getCurrentReplicaAssignment.method,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code == 0) {
-          this.data = res.data;
-          if (this.data.partitions.length > 0) {
-            this.replicaNums = this.data.partitions[0].replicas.length;
-            this.defaultReplicaNums = this.replicaNums;
-          }
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    },
-    getClusterInfo() {
-      this.loading = true;
-      request({
-        url: KafkaClusterApi.getClusterInfo.url,
-        method: KafkaClusterApi.getClusterInfo.method,
-      }).then((res) => {
-        this.brokerSize = res.data.nodes.length;
-        this.brokerIdList = res.data.nodes.map((o) => o.id);
-        this.brokerIdList.sort((a, b) => a - b);
-      });
-    },
-    handleCancel() {
-      this.data = {};
-      this.$emit("closeUpdateReplicaDialog", { refresh: false });
-    },
-    onChange(value) {
-      if (value < 1 || value > this.brokerSize) {
-        return false;
-      }
-      if (this.data.partitions.length > 0) {
-        this.data.partitions.forEach((p) => {
-          if (value > p.replicas.length) {
-            // the index of last replication in replicas
-            const index =
-              this.brokerIdList.indexOf(p.replicas[p.replicas.length - 1]) + 1;
-            const number = Math.min(
-              this.brokerIdList.length - p.replicas.length,
-              value - p.replicas.length
-            );
-            for (let i = 0; i < number; i++) {
-              p.replicas.push(
-                this.brokerIdList[(index + i) % this.brokerIdList.length]
-              );
-            }
-          }
-          if (value < p.replicas.length) {
-            for (let i = p.replicas.length; i > value; i--) {
-              p.replicas.pop();
-            }
-          }
-        });
-      }
-    },
-    handleOk() {
-      this.loading = true;
-      request({
-        url: KafkaTopicApi.updateReplicaAssignment.url,
-        method: KafkaTopicApi.updateReplicaAssignment.method,
-        data: this.data,
-      }).then((res) => {
-        this.loading = false;
-        if (res.code == 0) {
-          this.$message.success(res.msg);
-          this.$emit("closeUpdateReplicaDialog", { refresh: false });
-        } else {
-          notification.error({
-            message: "error",
-            description: res.msg,
-          });
-        }
-      });
-    },
-  },
-};
 
 const columns = [
   {
@@ -210,9 +91,149 @@ const columns = [
     title: "副本",
     dataIndex: "replicas",
     key: "replicas",
-    scopedSlots: { customRender: "replicas" },
   },
 ];
+
+export default defineComponent({
+  name: "UpdateReplica",
+  props: {
+    topic: {
+      type: String,
+      default: "",
+    },
+    open: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ["closeUpdateReplicaDialog"],
+  setup(props, { emit }) {
+    const show = ref(props.open);
+    const data = reactive<any>({});
+    const loading = ref(false);
+    const brokerSize = ref(0);
+    const brokerIdList = ref<any[]>([]);
+    const replicaNums = ref(0);
+    const defaultReplicaNums = ref(0);
+
+    watch(
+      () => props.open,
+      (v) => {
+        show.value = v;
+        if (show.value) {
+          getClusterInfo();
+          getCurrentReplicaAssignment();
+        }
+      }
+    );
+
+    function getCurrentReplicaAssignment() {
+      loading.value = true;
+      request({
+        url:
+          KafkaTopicApi.getCurrentReplicaAssignment.url +
+          "?topic=" +
+          props.topic,
+        method: KafkaTopicApi.getCurrentReplicaAssignment.method,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          Object.assign(data, res.data);
+          if (data.partitions && data.partitions.length > 0) {
+            replicaNums.value = data.partitions[0].replicas.length;
+            defaultReplicaNums.value = replicaNums.value;
+          }
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    }
+
+    function getClusterInfo() {
+      loading.value = true;
+      request({
+        url: KafkaClusterApi.getClusterInfo.url,
+        method: KafkaClusterApi.getClusterInfo.method,
+      }).then((res: any) => {
+        brokerSize.value = res.data.nodes.length;
+        brokerIdList.value = res.data.nodes.map((o: any) => o.id);
+        brokerIdList.value.sort((a, b) => a - b);
+      });
+    }
+
+    function handleCancel() {
+      Object.keys(data).forEach((key) => delete (data as any)[key]);
+      emit("closeUpdateReplicaDialog", { refresh: false });
+    }
+
+    function onChange(value: number) {
+      if (value < 1 || value > brokerSize.value) {
+        return false;
+      }
+      if (data.partitions && data.partitions.length > 0) {
+        data.partitions.forEach((p: any) => {
+          if (value > p.replicas.length) {
+            const index =
+              brokerIdList.value.indexOf(p.replicas[p.replicas.length - 1]) + 1;
+            const number = Math.min(
+              brokerIdList.value.length - p.replicas.length,
+              value - p.replicas.length
+            );
+            for (let i = 0; i < number; i++) {
+              p.replicas.push(
+                brokerIdList.value[(index + i) % brokerIdList.value.length]
+              );
+            }
+          }
+          if (value < p.replicas.length) {
+            for (let i = p.replicas.length; i > value; i--) {
+              p.replicas.pop();
+            }
+          }
+        });
+      }
+    }
+
+    function handleOk() {
+      loading.value = true;
+      request({
+        url: KafkaTopicApi.updateReplicaAssignment.url,
+        method: KafkaTopicApi.updateReplicaAssignment.method,
+        data: data,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          message.success(res.msg);
+          emit("closeUpdateReplicaDialog", { refresh: false });
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
+          });
+        }
+      });
+    }
+
+    return {
+      columns,
+      show,
+      data,
+      loading,
+      brokerSize,
+      brokerIdList,
+      replicaNums,
+      defaultReplicaNums,
+      getCurrentReplicaAssignment,
+      getClusterInfo,
+      handleCancel,
+      onChange,
+      handleOk,
+    };
+  },
+});
 </script>
 
 <style scoped>

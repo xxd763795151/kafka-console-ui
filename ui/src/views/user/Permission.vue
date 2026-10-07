@@ -4,73 +4,77 @@
       <a-table
         :columns="columns"
         :data-source="data"
-        :expanded-row-keys.sync="expandedRowKeys"
+        v-model:expandedRowKeys="expandedRowKeys"
       >
-        <div slot="type" slot-scope="text">
-          <span v-if="text == 0" style="color: darkgreen">菜单</span
-          ><span v-else>按钮</span>
-        </div>
+        <template #bodyCell="{ column, text }">
+          <template v-if="column.dataIndex === 'type'">
+            <span v-if="text == 0" style="color: darkgreen">菜单</span>
+            <span v-else>按钮</span>
+          </template>
+        </template>
       </a-table>
     </a-spin>
   </div>
 </template>
 
-<script>
-import request from "@/utils/request";
+<script lang="ts">
+import { defineComponent, reactive, toRefs, onMounted } from 'vue';
+import request from '@/utils/request';
+import { UserManageApi } from '@/utils/api';
+import notification from 'ant-design-vue/lib/notification';
 
-const columns = [
-  {
-    title: "权限名称",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "类型",
-    dataIndex: "type",
-    key: "type",
-    width: "12%",
-    slots: { title: "type" },
-    scopedSlots: { customRender: "type" },
-  },
-];
+export default defineComponent({
+  name: 'Permission',
+  setup() {
+    const columns = [
+      {
+        title: '权限名称',
+        dataIndex: 'name',
+        key: 'name',
+      },
+      {
+        title: '类型',
+        dataIndex: 'type',
+        key: 'type',
+        width: '12%',
+      },
+    ];
 
-import { UserManageApi } from "@/utils/api";
-import notification from "ant-design-vue/lib/notification";
-
-export default {
-  name: "Permission",
-  components: {},
-  data() {
-    return {
+    const state = reactive({
       loading: false,
-      data: [],
+      data: [] as any[],
       columns,
-      expandedRowKeys: [],
-    };
-  },
-  methods: {
-    getPermissions() {
-      this.loading = true;
+      expandedRowKeys: [] as any[],
+    });
+
+    const getPermissions = () => {
+      state.loading = true;
       request({
         url: UserManageApi.getPermissions.url,
         method: UserManageApi.getPermissions.method,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        state.loading = false;
         if (res.code == 0) {
-          this.data = res.data;
+          state.data = res.data;
         } else {
           notification.error({
-            message: "error",
+            message: 'error',
             description: res.msg,
           });
         }
       });
-    },
+    };
+
+    onMounted(() => {
+      getPermissions();
+    });
+
+    return {
+      ...toRefs(state),
+      getPermissions,
+    };
   },
-  created() {
-    this.getPermissions();
-  },
-};
+});
 </script>
 
 <style scoped>

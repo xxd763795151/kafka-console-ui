@@ -12,39 +12,42 @@
         "
         @change="handleChange"
       >
-        <div slot="client" slot-scope="text">
-          <span v-if="text">{{ text }}</span
-          ><span v-else style="color: red">默认配置</span>
-        </div>
-        <div slot="user" slot-scope="text">
-          <span v-if="text">{{ text }}</span
-          ><span v-else style="color: red">默认配置</span>
-        </div>
-
-        <div slot="operation" slot-scope="record">
-          <a-popconfirm
-            :title="'删除当前配置？'"
-            ok-text="确认"
-            cancel-text="取消"
-            @confirm="deleteConfig(record)"
-          >
+        <template #bodyCell="{ column, text, record }">
+          <template v-if="column.dataIndex === 'client'">
+            <span v-if="text">{{ text }}</span
+            ><span v-else style="color: red">默认配置</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'user'">
+            <span v-if="text">{{ text }}</span
+            ><span v-else style="color: red">默认配置</span>
+          </template>
+          <template v-else-if="column.key === 'operation'">
+            <a-popconfirm
+              title="删除当前配置？"
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="deleteConfig(record)"
+            >
+              <a-button
+                size="small"
+                href="javascript:;"
+                class="operation-btn"
+                type="primary"
+                danger
+                v-action:quota:del
+                >删除
+              </a-button>
+            </a-popconfirm>
             <a-button
               size="small"
               href="javascript:;"
               class="operation-btn"
-              v-action:quota:del
-              >删除
+              @click="openUpdateDialog(record)"
+              v-action:quota:edit
+              >修改
             </a-button>
-          </a-popconfirm>
-          <a-button
-            size="small"
-            href="javascript:;"
-            class="operation-btn"
-            @click="openUpdateDialog(record)"
-            v-action:quota:edit
-            >修改
-          </a-button>
-        </div>
+          </template>
+        </template>
       </a-table>
       <UpdateQuotaConfig
         :type="type"
@@ -56,13 +59,15 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, reactive, onMounted } from "vue";
+import { message } from "ant-design-vue";
 import { KafkaClientQuotaApi } from "@/utils/api";
 import request from "@/utils/request";
-import notification from "ant-design-vue/lib/notification";
+import notification from "ant-design-vue/es/notification";
 import UpdateQuotaConfig from "@/views/quota/UpdateQuotaConfig.vue";
 
-export default {
+export default defineComponent({
   name: "QuotaList",
   components: { UpdateQuotaConfig },
   props: {
@@ -77,64 +82,57 @@ export default {
       default: "",
     },
   },
-  data() {
-    return {
-      record: {},
-      sortedInfo: null,
-      loading: false,
-      selectRow: {},
-      showUpdateDialog: false,
+  setup(props, { emit }) {
+    const record = reactive<any>({});
+    const sortedInfo = ref<any>(null);
+    const loading = ref<boolean>(false);
+    const selectRow = reactive<any>({});
+    const showUpdateDialog = ref<boolean>(false);
+
+    const openDetailDialog = (rec: any) => {
+      Object.assign(record, rec);
     };
-  },
-  methods: {
-    openDetailDialog(record) {
-      this.record = record;
-      this.showDetailDialog = true;
-    },
-    closeDetailDialog() {
-      this.showDetailDialog = false;
-    },
-    handleChange() {
-      this.sortedInfo = arguments[2];
-    },
-    deleteConfig(record) {
-      this.loading = true;
-      const params = { type: this.type };
+    const handleChange = (_pagination: any, _filters: any, sorter: any) => {
+      sortedInfo.value = sorter;
+    };
+    const deleteConfig = (rec: any) => {
+      loading.value = true;
+      const params: any = { type: props.type };
       params.types = [];
       params.names = [];
-      if (this.type == "user") {
+      if (props.type == "user") {
         params.types.push("user");
-        if (record.user) {
-          params.names.push(record.user.trim());
+        if (rec.user) {
+          params.names.push(rec.user.trim());
         } else {
           params.names.push("");
         }
-      } else if (this.type == "client-id") {
+      } else if (props.type == "client-id") {
         params.types.push("client-id");
-        if (record.client) {
-          params.names.push(record.client.trim());
+        if (rec.client) {
+          params.names.push(rec.client.trim());
         } else {
           params.names.push("");
         }
       }
-      if (this.type == "ip") {
+      if (props.type == "ip") {
         params.types.push("ip");
-        if (record.ip) {
-          params.names.push(record.ip.trim());
+        if (rec.ip) {
+          params.names.push(rec.ip.trim());
         } else {
           params.names.push("");
         }
       }
-      if (this.type == "user&client-id") {
+      if (props.type == "user&client-id") {
         params.types.push("user");
         params.types.push("client-id");
-        if (record.user) {
-          params.names.push(record.user.trim());
+        if (rec.user) {
+          params.names.push(rec.user.trim());
         } else {
           params.names.push("");
         }
-        if (record.client) {
-          params.names.push(record.client.trim());
+        if (rec.client) {
+          params.names.push(rec.client.trim());
         } else {
           params.names.push("");
         }
@@ -143,11 +141,11 @@ export default {
         url: KafkaClientQuotaApi.deleteClientQuotaConfigs.url,
         method: KafkaClientQuotaApi.deleteClientQuotaConfigs.method,
         data: params,
-      }).then((res) => {
-        this.loading = false;
+      }).then((res: any) => {
+        loading.value = false;
         if (res.code == 0) {
-          this.$message.success(res.msg);
-          this.$emit("refreshQuotaList");
+          message.success(res.msg);
+          emit("refreshQuotaList");
         } else {
           notification.error({
             message: "error",
@@ -155,27 +153,42 @@ export default {
           });
         }
       });
-    },
-    openUpdateDialog(record) {
-      this.selectRow = record;
-      this.showUpdateDialog = true;
-    },
-    closeUpdateQuotaDialog(event) {
-      this.selectRow = {};
-      this.showUpdateDialog = false;
-      if (event.refresh) {
-        this.$emit("refreshQuotaList");
+    };
+    const openUpdateDialog = (rec: any) => {
+      Object.assign(selectRow, rec);
+      showUpdateDialog.value = true;
+    };
+    const closeUpdateQuotaDialog = (event: any) => {
+      for (const key in selectRow) {
+        delete selectRow[key];
       }
-    },
-  },
-  created() {
-    this.columns.push({
-      title: "操作",
-      key: "operation",
-      scopedSlots: { customRender: "operation" },
+      showUpdateDialog.value = false;
+      if (event.refresh) {
+        emit("refreshQuotaList");
+      }
+    };
+
+    onMounted(() => {
+      (props.columns as any[]).push({
+        title: "操作",
+        key: "operation",
+      });
     });
+
+    return {
+      record,
+      sortedInfo,
+      loading,
+      selectRow,
+      showUpdateDialog,
+      openDetailDialog,
+      handleChange,
+      deleteConfig,
+      openUpdateDialog,
+      closeUpdateQuotaDialog,
+    };
   },
-};
+});
 </script>
 
 <style scoped>

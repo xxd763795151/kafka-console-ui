@@ -4,13 +4,13 @@
       <div id="search-offset-form-advanced-search">
         <a-form
           class="ant-advanced-search-form"
-          :form="form"
-          @submit="handleSearch"
+          :model="searchForm"
+          @finish="handleSearch"
         >
           <a-row :gutter="24">
             <a-col :span="16">
-              <a-form-item label="IP">
-                <a-input v-decorator="['ip']" placeholder="请输入ip!" />
+              <a-form-item label="IP" name="ip">
+                <a-input v-model:value="searchForm.ip" placeholder="请输入ip!" />
               </a-form-item>
             </a-col>
             <a-col :span="2" :style="{ textAlign: 'right' }">
@@ -42,14 +42,15 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, reactive, onMounted } from "vue";
 import request from "@/utils/request";
 import { KafkaClientQuotaApi } from "@/utils/api";
-import notification from "ant-design-vue/lib/notification";
+import notification from "ant-design-vue/es/notification";
 import QuotaList from "@/views/quota/QuotaList.vue";
 import AddQuotaConfig from "@/views/quota/AddQuotaConfig.vue";
 
-export default {
+export default defineComponent({
   name: "IpQuota",
   components: { QuotaList, AddQuotaConfig },
   props: {
@@ -57,83 +58,91 @@ export default {
       type: Array,
     },
   },
-  data() {
-    return {
-      loading: false,
-      form: this.$form.createForm(this, { name: "ip_quota" }),
-      data: [],
-      showAlterQuotaDialog: false,
-      showAddQuotaDialog: false,
-      columns: [
-        {
-          title: "IP",
-          dataIndex: "ip",
-          key: "ip",
-          slots: { title: "ip" },
-          scopedSlots: { customRender: "ip" },
-        },
-        {
-          title: "生产速率(带宽/秒)",
-          dataIndex: "producerRate",
-          key: "producerRate",
-        },
-        {
-          title: "消费速率(带宽/秒)",
-          dataIndex: "consumerRate",
-          key: "consumerRate",
-        },
-        {
-          title: "吞吐量(请求占比*100)",
-          dataIndex: "requestPercentage",
-          key: "requestPercentage",
-        },
-      ],
-    };
-  },
-  methods: {
-    handleSearch() {
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          this.loading = true;
-          const params = { types: ["ip"] };
-          if (values.ip) {
-            params.names = [values.ip.trim()];
-          }
-          request({
-            url: KafkaClientQuotaApi.getClientQuotaConfigs.url,
-            method: KafkaClientQuotaApi.getClientQuotaConfigs.method,
-            data: params,
-          }).then((res) => {
-            this.loading = false;
-            if (res.code == 0) {
-              this.data = res.data;
-            } else {
-              notification.error({
-                message: "error",
-                description: res.msg,
-              });
-            }
+  setup() {
+    const loading = ref<boolean>(false);
+    const data = ref<any[]>([]);
+    const showAlterQuotaDialog = ref<boolean>(false);
+    const showAddQuotaDialog = ref<boolean>(false);
+    const searchForm = reactive<any>({
+      ip: undefined,
+    });
+    const columns = ref<any[]>([
+      {
+        title: "IP",
+        dataIndex: "ip",
+        key: "ip",
+      },
+      {
+        title: "生产速率(带宽/秒)",
+        dataIndex: "producerRate",
+        key: "producerRate",
+      },
+      {
+        title: "消费速率(带宽/秒)",
+        dataIndex: "consumerRate",
+        key: "consumerRate",
+      },
+      {
+        title: "吞吐量(请求占比*100)",
+        dataIndex: "requestPercentage",
+        key: "requestPercentage",
+      },
+    ]);
+
+    const handleSearch = () => {
+      const values = { ...searchForm };
+      loading.value = true;
+      const params: any = { types: ["ip"] };
+      if (values.ip) {
+        params.names = [values.ip.trim()];
+      }
+      request({
+        url: KafkaClientQuotaApi.getClientQuotaConfigs.url,
+        method: KafkaClientQuotaApi.getClientQuotaConfigs.method,
+        data: params,
+      }).then((res: any) => {
+        loading.value = false;
+        if (res.code == 0) {
+          data.value = res.data;
+        } else {
+          notification.error({
+            message: "error",
+            description: res.msg,
           });
         }
       });
-    },
-    openAddQuotaDialog() {
-      this.showAddQuotaDialog = true;
-    },
-    closeAddQuotaDialog(p) {
+    };
+    const openAddQuotaDialog = () => {
+      showAddQuotaDialog.value = true;
+    };
+    const closeAddQuotaDialog = (p: any) => {
       if (p.refresh) {
-        this.handleSearch();
+        handleSearch();
       }
-      this.showAddQuotaDialog = false;
-    },
-    refresh() {
-      this.handleSearch();
-    },
+      showAddQuotaDialog.value = false;
+    };
+    const refresh = () => {
+      handleSearch();
+    };
+
+    onMounted(() => {
+      handleSearch();
+    });
+
+    return {
+      loading,
+      data,
+      showAlterQuotaDialog,
+      showAddQuotaDialog,
+      columns,
+      searchForm,
+      handleSearch,
+      openAddQuotaDialog,
+      closeAddQuotaDialog,
+      refresh,
+    };
   },
-  created() {
-    this.handleSearch();
-  },
-};
+});
 </script>
 
 <style scoped>

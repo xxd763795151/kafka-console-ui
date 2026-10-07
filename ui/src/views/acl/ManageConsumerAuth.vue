@@ -1,41 +1,44 @@
 <template>
   <a-modal
     title="管理消费权限"
-    :visible="show"
+    :open="show"
     :confirm-loading="confirmLoading"
     :width="800"
     @ok="handleOk"
     @cancel="handleCancel"
-    okText="提交"
-    cancelText="取消"
+    ok-text="提交"
+    cancel-text="取消"
     :mask="false"
-    :destroyOnClose="true"
+    :destroy-on-close="true"
   >
-    <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
-      <a-form-item label="用户名">
+    <a-form
+      ref="formRef"
+      :model="formState"
+      :label-col="{ span: 5 }"
+      :wrapper-col="{ span: 12 }"
+    >
+      <a-form-item label="用户名" name="username">
         <a-input
-          v-decorator="['username', { initialValue: record.username }]"
-          disabled="disabled"
+          v-model:value="formState.username"
+          disabled
         />
       </a-form-item>
-      <a-form-item label="topic">
-        <a-input
-          v-decorator="[
-            'topic',
-            { rules: [{ required: true, message: '请输入topic!' }] },
-          ]"
-        />
+      <a-form-item
+        label="topic"
+        name="topic"
+        :rules="[{ required: true, message: '请输入topic!' }]"
+      >
+        <a-input v-model:value="formState.topic" />
       </a-form-item>
-      <a-form-item label="消费组">
-        <a-input
-          v-decorator="[
-            'groupId',
-            { rules: [{ required: true, message: '请输入消费组!' }] },
-          ]"
-        />
+      <a-form-item
+        label="消费组"
+        name="groupId"
+        :rules="[{ required: true, message: '请输入消费组!' }]"
+      >
+        <a-input v-model:value="formState.groupId" />
       </a-form-item>
-      <a-form-item label="类型">
-        <a-radio-group v-decorator="['type', { initialValue: 'grant' }]">
+      <a-form-item label="类型" name="type">
+        <a-radio-group v-model:value="formState.type">
           <a-radio value="grant"> 授予 </a-radio>
           <a-radio value="revoke"> 收回 </a-radio>
         </a-radio-group>
@@ -44,10 +47,14 @@
   </a-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, ref, watch } from 'vue'
+import { message } from 'ant-design-vue'
+import type { FormInstance } from 'ant-design-vue'
 import { KafkaAclApi } from "@/utils/api";
 import request from "@/utils/request";
-export default {
+
+export default defineComponent({
   name: "AddProducerAuth",
   props: {
     visible: {
@@ -55,36 +62,37 @@ export default {
       default: false,
     },
     record: {
-      default: {},
+      default: () => ({}),
     },
   },
-  data() {
-    return {
-      formLayout: "horizontal",
-      form: this.$form.createForm(this, { name: "AddProducerAuthForm" }),
-      confirmLoading: false,
-      show: this.visible,
-    };
-  },
-  watch: {
-    visible(v) {
-      this.show = v;
-    },
-  },
-  methods: {
-    handleOk() {
-      const form = this.form;
-      form.validateFields((e, v) => {
-        if (e) {
-          return;
-        }
+  setup(props, { emit }) {
+    const formRef = ref<FormInstance>()
+    const confirmLoading = ref(false)
+    const show = ref(props.visible)
+
+    const formState = reactive({
+      username: '',
+      topic: '',
+      groupId: '',
+      type: 'grant',
+    })
+
+    watch(() => props.visible, (v) => {
+      show.value = v;
+      if (v) {
+        formState.username = (props.record as any).username || ''
+      }
+    })
+
+    function handleOk() {
+      formRef.value?.validate().then((values: any) => {
         const param = {
-          username: v.username,
-          topic: v.topic,
-          groupId: v.groupId,
+          username: values.username,
+          topic: values.topic,
+          groupId: values.groupId,
         };
-        const api = {};
-        switch (v.type) {
+        const api: any = {};
+        switch (values.type) {
           case "grant":
             Object.assign(api, KafkaAclApi.addConsumerAuth);
             break;
@@ -92,31 +100,42 @@ export default {
             Object.assign(api, KafkaAclApi.deleteConsumerAuth);
             break;
           default:
-            this.$message.error("unknown error");
+            message.error("unknown error");
             return;
         }
 
-        this.confirmLoading = true;
+        confirmLoading.value = true;
         request({
           url: api.url,
           method: api.method,
           data: param,
-        }).then((res) => {
-          this.confirmLoading = false;
+        }).then((res: any) => {
+          confirmLoading.value = false;
           if (res.code == 0) {
-            this.$message.success(res.msg);
-            this.$emit("manageConsumerAuthDialog", v);
+            message.success(res.msg);
+            emit("manageConsumerAuthDialog", values);
           } else {
-            this.$message.error(res.msg);
+            message.error(res.msg);
           }
         });
+      }).catch(() => {
       });
-    },
-    handleCancel() {
-      this.$emit("manageConsumerAuthDialog", {});
-    },
-  },
-};
+    }
+
+    function handleCancel() {
+      emit("manageConsumerAuthDialog", {});
+    }
+
+    return {
+      formRef,
+      confirmLoading,
+      show,
+      formState,
+      handleOk,
+      handleCancel,
+    }
+  }
+});
 </script>
 
 <style scoped></style>
