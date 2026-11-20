@@ -1,5 +1,65 @@
 # Docker/DockerCompose部署
 
+## 当前项目镜像：xiaodonggg/kafka-console-ui
+
+以下命令在项目根目录执行。镜像包含前后端，使用 Java 17，监听 `7766`，以 UID/GID `10001:10001` 运行。
+
+### 拉取和启动
+
+```shell
+docker pull xiaodonggg/kafka-console-ui:1.2.0
+docker run -d --name kafka-console-ui --restart unless-stopped -p 7766:7766 -v kafka-console-ui-data:/app/data -v kafka-console-ui-logs:/app/logs xiaodonggg/kafka-console-ui:1.2.0
+```
+
+访问 `http://localhost:7766`，在页面上添加 Kafka 集群。集群地址需要能从容器内访问。
+
+`/app/data` 保存数据库，`/app/logs` 保存日志。以上使用 Docker 命名卷，容器删除后数据仍保留。如果改用宿主机目录挂载，需要让 UID `10001` 拥有目录写权限。
+
+需要自定义配置时，将配置文件只读挂载到 `/app/config/application.yml`；应用会在内置配置基础上加载它。也可以通过 Spring Boot 环境变量覆盖配置，例如 `AUTH_ENABLE=true`。默认配置未开启登录认证，可按部署需要开启。
+
+### Docker Compose
+
+```yaml
+services:
+  kafka-console-ui:
+    image: xiaodonggg/kafka-console-ui:1.2.0
+    container_name: kafka-console-ui
+    restart: unless-stopped
+    ports:
+      - "7766:7766"
+    volumes:
+      - kafka-console-ui-data:/app/data
+      - kafka-console-ui-logs:/app/logs
+
+volumes:
+  kafka-console-ui-data:
+  kafka-console-ui-logs:
+```
+
+保存为 `compose.yaml` 后执行 `docker compose up -d`。
+
+### 从源码构建和推送
+
+本机需要 JDK 17、Maven 和正在运行的 Docker Linux 引擎；Maven 的 `deploy` profile 会安装 Node/npm 并构建前端。
+
+```shell
+mvn -B -ntp clean package -Pdeploy "-Dtest=!ClientQuotaConsoleTest,!TopicServiceImplTest"
+docker build --platform linux/amd64 --build-arg APP_VERSION=1.2.0 -t xiaodonggg/kafka-console-ui:1.2.0 -t xiaodonggg/kafka-console-ui:latest .
+docker login
+docker push xiaodonggg/kafka-console-ui:1.2.0
+docker push xiaodonggg/kafka-console-ui:latest
+```
+
+`ClientQuotaConsoleTest` 需要本机 `localhost:9092` 的 Kafka；`TopicServiceImplTest` 直接调用服务，但没有设置所需的集群线程上下文，会触发空指针异常。上面的构建命令排除这两组现有测试，其余测试仍执行。准备好 Kafka 并补齐测试上下文后，可去掉 `-Dtest` 参数运行完整测试。
+
+Dockerfile 只复制 `target/kafka-console-ui.jar`；`.dockerignore` 只允许该构建产物进入上下文，本机数据库、日志和其他文件不会进入镜像。
+
+默认 JVM 参数为 `-Xms128m -Xmx512m -Dfile.encoding=UTF-8`，可通过 `JAVA_TOOL_OPTIONS` 环境变量调整。
+
+---
+
+以下保留原第三方镜像 `wdkang/kafka-console-ui` 的部署说明；其路径和构建方式与上面的当前项目镜像不同。
+
 # 1.快速上手
 
 ## 1.1 镜像拉取
